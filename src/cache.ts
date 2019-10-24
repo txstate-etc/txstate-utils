@@ -3,7 +3,7 @@ import { sleep } from './util'
 const newerThan = (dt:Date, seconds:number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
 const tostr = (key:any) => typeof key === 'string' ? key : JSON.stringify(key)
 
-type FetcherFunction<KeyType, ReturnType> = (key?:KeyType) => ReturnType
+type FetcherFunction<KeyType, ReturnType> = (key?:KeyType) => Promise<ReturnType>
 interface CacheOptions {
   freshseconds?: number
   validseconds?: number
@@ -20,12 +20,12 @@ interface Storage<ReturnType> {
 }
 
 export class Cache<KeyType, ReturnType> {
-  private fetcher:FetcherFunction<KeyType, Promise<ReturnType>>
+  private fetcher:FetcherFunction<KeyType, ReturnType>
   private options:CacheOptionsInternal
   private storage:{ [keys:string]: Storage<ReturnType> }
   private active:{ [keys:string]: Promise<ReturnType> }
 
-  constructor (fetcher:FetcherFunction<KeyType, Promise<ReturnType>>, options:CacheOptions = {}) {
+  constructor (fetcher:FetcherFunction<KeyType, ReturnType>, options:CacheOptions = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds || 5 * 60,

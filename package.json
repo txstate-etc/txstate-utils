@@ -1,6 +1,6 @@
 {
   "name": "txstate-utils",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,6 +30,6 @@
   },
   "dependencies": {},
   "files": [
-    "dist/**/*"
+    "lib/**/*"
   ]
 }
