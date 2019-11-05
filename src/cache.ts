@@ -3,47 +3,90 @@ import { sleep } from './util'
 const newerThan = (dt:Date, seconds:number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
 const tostr = (key:any) => typeof key === 'string' ? key : JSON.stringify(key)
 
-type FetcherFunction<KeyType, ReturnType> = (key?:KeyType) => Promise<ReturnType>
-interface CacheOptions {
+type FetcherFunction<KeyType, ReturnType> = (key:KeyType) => Promise<ReturnType>
+interface CacheOptions<ReturnType> {
   freshseconds?: number
   validseconds?: number
   cleanupseconds?: number
+  storageClass?: StorageEngine<any>
 }
-interface CacheOptionsInternal extends CacheOptions {
+interface CacheOptionsInternal<ReturnType> extends CacheOptions<ReturnType> {
   freshseconds: number
   validseconds: number
   cleanupseconds: number
+  storageClass: StorageEngine<any>
 }
 interface Storage<ReturnType> {
   data: ReturnType
   fetched: Date
 }
 
-export class Cache<KeyType, ReturnType> {
+interface StorageEngine<StorageType> {
+  get (keystr:string): Promise<StorageType>
+  set (keystr:string, data:StorageType): Promise<void>
+  delete (keystr:string): Promise<void>
+  clear (): Promise<void>
+  entries (): Promise<[string, StorageType][]>
+}
+class MemoryStorage<StorageType> implements StorageEngine<StorageType> {
+  private storage:{ [keys:string]: StorageType }
+
+  constructor () {
+    this.storage = {}
+  }
+
+  async get (keystr:string) {
+    return this.storage[keystr]
+  }
+
+  async set (keystr:string, data: StorageType) {
+    this.storage[keystr] = data
+  }
+
+  async delete (keystr:string) {
+    delete this.storage[keystr]
+  }
+
+  async clear () {
+    this.storage = {}
+  }
+
+  async entries () {
+    return Object.entries(this.storage)
+  }
+}
+
+export class Cache<KeyType = any, ReturnType = any> {
   private fetcher:FetcherFunction<KeyType, ReturnType>
-  private options:CacheOptionsInternal
-  private storage:{ [keys:string]: Storage<ReturnType> }
+  private options:CacheOptionsInternal<ReturnType>
+  private storage:StorageEngine<Storage<ReturnType>>
   private active:{ [keys:string]: Promise<ReturnType> }
 
-  constructor (fetcher:FetcherFunction<KeyType, ReturnType>, options:CacheOptions = {}) {
+  constructor (fetcher:FetcherFunction<KeyType, ReturnType>, options:CacheOptions<ReturnType> = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds || 5 * 60,
       validseconds: options.validseconds || 10 * 60,
-      cleanupseconds: options.cleanupseconds || 10
+      cleanupseconds: options.cleanupseconds || 10,
+      storageClass: options.storageClass || new MemoryStorage<Storage<ReturnType>>()
     }
-    this.storage = {}
+    this.storage = this.options.storageClass
     this.active = {}
     this.schedulenextcleanup()
   }
 
-  async get (key?:KeyType) {
+  async get (key:KeyType) {
     return this.fetch(key)
   }
 
-  async fetch (key?:KeyType) {
+  async set (key:KeyType, data:ReturnType) {
     const keystr = tostr(key)
-    const stored = this.storage[keystr]
+    await this.storage.set(keystr, { fetched: new Date(), data })
+  }
+
+  async fetch (key:KeyType) {
+    const keystr = tostr(key)
+    const stored = await this.storage.get(keystr)
     if (stored) {
       if (this.fresh(stored)) {
         return stored.data
@@ -62,22 +105,22 @@ export class Cache<KeyType, ReturnType> {
     return this.refresh(key)
   }
 
-  invalidate (key:KeyType|string) {
+  async invalidate (key:KeyType|string) {
     if (!key) {
-      this.storage = {}
+      await this.storage.clear()
       return
     }
     const keystr = tostr(key)
-    delete this.storage[keystr]
+    await this.storage.delete(keystr)
   }
 
-  async refresh (key?:KeyType) {
+  async refresh (key:KeyType) {
     const keystr = tostr(key)
     if (this.active[keystr]) return this.active[keystr]
     this.active[keystr] = this.fetcher(key)
     try {
       const data = await this.active[keystr]
-      this.storage[keystr] = { fetched: new Date(), data }
+      await this.storage.set(keystr, { fetched: new Date(), data })
       return data
     } finally {
       delete this.active[keystr]
@@ -94,8 +137,8 @@ export class Cache<KeyType, ReturnType> {
 
   private async schedulenextcleanup () {
     await sleep(this.options.cleanupseconds * 1000)
-    for (const [key, stored] of Object.entries(this.storage)) {
-      if (!this.valid(stored)) this.invalidate(key)
+    for (const [key, stored] of await this.storage.entries()) {
+      if (!this.valid(stored)) await this.invalidate(key)
     }
     this.schedulenextcleanup()
   }
