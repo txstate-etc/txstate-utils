@@ -1,10 +1,11 @@
 {
   "name": "txstate-utils",
-  "version": "1.0.3",
+  "version": "1.0.11",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
+    "prepublish": "npm run build",
     "build": "tsc",
     "test": "mocha -r ts-node/register test/**/*.ts"
   },
@@ -22,13 +23,14 @@
   "devDependencies": {
     "@types/chai": "4.1.3",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.11.1",
-    "mocha": "^6.2.2",
+    "@types/node": "^12.12.5",
     "chai": "^4.2.0",
+    "mocha": "^6.2.2",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
   },
   "dependencies": {},
+  "sideEffects": false,
   "files": [
     "lib/**/*"
   ]
