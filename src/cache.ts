@@ -6,13 +6,13 @@ const tostr = (key:any) => typeof key === 'string' ? key : JSON.stringify(key)
 type FetcherFunction<KeyType, ReturnType> = (key:KeyType) => Promise<ReturnType>
 interface CacheOptions<ReturnType> {
   freshseconds?: number
-  validseconds?: number
+  staleseconds?: number
   cleanupseconds?: number
   storageClass?: StorageEngine<any>
 }
 interface CacheOptionsInternal<ReturnType> extends CacheOptions<ReturnType> {
   freshseconds: number
-  validseconds: number
+  staleseconds: number
   cleanupseconds: number
   storageClass: StorageEngine<any>
 }
@@ -61,18 +61,19 @@ export class Cache<KeyType = any, ReturnType = any> {
   private options:CacheOptionsInternal<ReturnType>
   private storage:StorageEngine<Storage<ReturnType>>
   private active:{ [keys:string]: Promise<ReturnType> }
+  private cleanuptimer:NodeJS.Timeout
 
   constructor (fetcher:FetcherFunction<KeyType, ReturnType>, options:CacheOptions<ReturnType> = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds || 5 * 60,
-      validseconds: options.validseconds || 10 * 60,
+      staleseconds: options.staleseconds || 10 * 60,
       cleanupseconds: options.cleanupseconds || 10,
       storageClass: options.storageClass || new MemoryStorage<Storage<ReturnType>>()
     }
     this.storage = this.options.storageClass
     this.active = {}
-    this.schedulenextcleanup()
+    this.cleanuptimer = setTimeout(() => this.schedulenextcleanup(), this.options.cleanupseconds * 1000)
   }
 
   async get (key:KeyType) {
@@ -127,19 +128,23 @@ export class Cache<KeyType = any, ReturnType = any> {
     }
   }
 
+  async destroy() {
+    clearTimeout(this.cleanuptimer)
+    await this.storage.clear()
+  }
+
   private fresh (stored:Storage<ReturnType>) {
     return newerThan(stored.fetched, this.options.freshseconds)
   }
 
   private valid (stored:Storage<ReturnType>) {
-    return newerThan(stored.fetched, this.options.validseconds)
+    return newerThan(stored.fetched, this.options.staleseconds)
   }
 
   private async schedulenextcleanup () {
-    await sleep(this.options.cleanupseconds * 1000)
     for (const [key, stored] of await this.storage.entries()) {
       if (!this.valid(stored)) await this.invalidate(key)
     }
-    this.schedulenextcleanup()
+    this.cleanuptimer = setTimeout(() => this.schedulenextcleanup(), this.options.cleanupseconds * 1000)
   }
 }
