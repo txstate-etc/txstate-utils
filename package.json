@@ -1,12 +1,13 @@
 {
   "name": "txstate-utils",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "main": "lib/index.js",
+  "module": "lib-esm/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "tsc",
+    "build": "tsc && tsc -m es6 --outDir lib-esm",
     "test": "mocha -r ts-node/register test/**/*.ts"
   },
   "repository": {
