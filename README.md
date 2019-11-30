@@ -7,7 +7,7 @@ This cache attempts to hide long processes from users as much as possible, while
 Note that setting freshseconds === staleseconds renders this into a standard on-demand cache.
 
 ### Example Usage
-```
+```javascript
 import { Cache } from 'txstate-utils/cache'
 const userCache = new Cache(id => User.findById(id))
 
@@ -19,8 +19,9 @@ async function saveUser (userObj) {
   await userCache.invalidate(userObj.id) // invalidate cache after update
   await userCache.refresh(userObj.id) // or go ahead and get it refreshed immediately
 }
-### Options
 ```
+### Options
+```javascript
 {
   freshseconds: period cache entry is fresh (default 5 minutes)
   staleseconds: period cache entry is acceptable but needs background refreshed (default 10 minutes)
@@ -29,7 +30,7 @@ async function saveUser (userObj) {
 }
 ```
 This is the storage engine interface:
-```
+```javascript
 interface StorageEngine {
   get (keystr:string): Promise<any>
   set (keystr:string, data:any): Promise<void>
