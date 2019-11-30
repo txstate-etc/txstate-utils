@@ -1,9 +1,9 @@
 import { sleep } from './util'
 
-const newerThan = (dt:Date, seconds:number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
-const tostr = (key:any) => typeof key === 'string' ? key : JSON.stringify(key)
+const newerThan = (dt: Date, seconds: number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
+const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
-type FetcherFunction<KeyType, ReturnType> = (key:KeyType) => Promise<ReturnType>
+type FetcherFunction<KeyType, ReturnType> = (key: KeyType) => Promise<ReturnType>
 interface CacheOptions<ReturnType> {
   freshseconds?: number
   staleseconds?: number
@@ -22,28 +22,28 @@ interface Storage<ReturnType> {
 }
 
 interface StorageEngine<StorageType> {
-  get (keystr:string): Promise<StorageType>
-  set (keystr:string, data:StorageType): Promise<void>
-  delete (keystr:string): Promise<void>
+  get (keystr: string): Promise<StorageType>
+  set (keystr: string, data: StorageType): Promise<void>
+  delete (keystr: string): Promise<void>
   clear (): Promise<void>
   entries (): Promise<[string, StorageType][]>
 }
 class MemoryStorage<StorageType> implements StorageEngine<StorageType> {
-  private storage:{ [keys:string]: StorageType }
+  private storage: { [keys: string]: StorageType }
 
   constructor () {
     this.storage = {}
   }
 
-  async get (keystr:string) {
+  async get (keystr: string) {
     return this.storage[keystr]
   }
 
-  async set (keystr:string, data: StorageType) {
+  async set (keystr: string, data: StorageType) {
     this.storage[keystr] = data
   }
 
-  async delete (keystr:string) {
+  async delete (keystr: string) {
     delete this.storage[keystr]
   }
 
@@ -57,13 +57,13 @@ class MemoryStorage<StorageType> implements StorageEngine<StorageType> {
 }
 
 export class Cache<KeyType = any, ReturnType = any> {
-  private fetcher:FetcherFunction<KeyType, ReturnType>
-  private options:CacheOptionsInternal<ReturnType>
-  private storage:StorageEngine<Storage<ReturnType>>
-  private active:{ [keys:string]: Promise<ReturnType> }
-  private cleanuptimer:NodeJS.Timeout
+  private fetcher: FetcherFunction<KeyType, ReturnType>
+  private options: CacheOptionsInternal<ReturnType>
+  private storage: StorageEngine<Storage<ReturnType>>
+  private active: { [keys: string]: Promise<ReturnType> }
+  private cleanuptimer: NodeJS.Timeout
 
-  constructor (fetcher:FetcherFunction<KeyType, ReturnType>, options:CacheOptions<ReturnType> = {}) {
+  constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<ReturnType> = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds || 5 * 60,
@@ -76,16 +76,16 @@ export class Cache<KeyType = any, ReturnType = any> {
     this.cleanuptimer = setTimeout(() => this.schedulenextcleanup(), this.options.cleanupseconds * 1000)
   }
 
-  async get (key:KeyType) {
+  async get (key: KeyType) {
     return this.fetch(key)
   }
 
-  async set (key:KeyType, data:ReturnType) {
+  async set (key: KeyType, data: ReturnType) {
     const keystr = tostr(key)
     await this.storage.set(keystr, { fetched: new Date(), data })
   }
 
-  async fetch (key:KeyType) {
+  async fetch (key: KeyType) {
     const keystr = tostr(key)
     const stored = await this.storage.get(keystr)
     if (stored) {
@@ -106,7 +106,7 @@ export class Cache<KeyType = any, ReturnType = any> {
     return this.refresh(key)
   }
 
-  async invalidate (key:KeyType|string) {
+  async invalidate (key: KeyType | string) {
     if (!key) {
       await this.storage.clear()
       return
@@ -115,7 +115,7 @@ export class Cache<KeyType = any, ReturnType = any> {
     await this.storage.delete(keystr)
   }
 
-  async refresh (key:KeyType) {
+  async refresh (key: KeyType) {
     const keystr = tostr(key)
     if (this.active[keystr]) return this.active[keystr]
     this.active[keystr] = this.fetcher(key)
@@ -128,16 +128,16 @@ export class Cache<KeyType = any, ReturnType = any> {
     }
   }
 
-  async destroy() {
+  async destroy () {
     clearTimeout(this.cleanuptimer)
     await this.storage.clear()
   }
 
-  private fresh (stored:Storage<ReturnType>) {
+  private fresh (stored: Storage<ReturnType>) {
     return newerThan(stored.fetched, this.options.freshseconds)
   }
 
-  private valid (stored:Storage<ReturnType>) {
+  private valid (stored: Storage<ReturnType>) {
     return newerThan(stored.fetched, this.options.staleseconds)
   }
 
