@@ -1,5 +1,3 @@
-import { sleep } from './util'
-
 const newerThan = (dt: Date, seconds: number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
 const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
