@@ -4,6 +4,8 @@ Lightweight utility functions that can be used in a browser or in node.
 ## Cache
 This cache attempts to hide long processes from users as much as possible, while retaining on-demand characteristics. Cache entries go through multiple states after being fetched: `fresh`, `stale`, and `expired`. A fresh entry can be returned immediately. A stale entry can be returned immediately, but a new value should be fetched so that the next request might be fresh. An expired entry is not useful and the user must wait for a new value to be fetched.
 
+The value that this cache provides over others is that, so long as an entry is requested more often than `staleseconds`, the user will always see a cache hit.  Other caches must subject users to at least one cache miss per expiration interval.
+
 Note that setting freshseconds === staleseconds renders this into a standard on-demand cache.
 
 ### Example Usage
@@ -34,8 +36,8 @@ This is the storage engine interface:
 interface StorageEngine {
   get (keystr:string): Promise<any>
   set (keystr:string, data:any): Promise<void>
-  delete (keystr:string): Promise<void>
+  del (keystr:string): Promise<void>
   clear (): Promise<void>
-  entries (): Promise<[string, any][]>
 }
 ```
+`storageClass` will also accept an instance of [lru-cache](https://www.npmjs.com/package/lru-cache) or [memcached](https://www.npmjs.com/package/memcached)

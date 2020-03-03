@@ -5,52 +5,158 @@ type FetcherFunction<KeyType, ReturnType> = (key: KeyType) => Promise<ReturnType
 interface CacheOptions<ReturnType> {
   freshseconds?: number
   staleseconds?: number
-  cleanupseconds?: number
-  storageClass?: StorageEngine<any>
+  storageClass?: StorageEngine<any> | any
 }
-interface CacheOptionsInternal<ReturnType> extends CacheOptions<ReturnType> {
+interface CacheOptionsInternal<ReturnType> {
   freshseconds: number
   staleseconds: number
-  cleanupseconds: number
-  storageClass: StorageEngine<any>
 }
 interface Storage<ReturnType> {
   data: ReturnType
   fetched: Date
+  prev?: string
+  next?: string
 }
 
-interface StorageEngine<StorageType> {
+export interface StorageEngine<StorageType> {
   get (keystr: string): Promise<StorageType>
   set (keystr: string, data: StorageType): Promise<void>
-  delete (keystr: string): Promise<void>
+  del (keystr: string): Promise<void>
   clear (): Promise<void>
-  entries (): Promise<[string, StorageType][]>
 }
-class MemoryStorage<StorageType> implements StorageEngine<StorageType> {
-  private storage: { [keys: string]: StorageType }
+interface SimpleStorageNode<StorageType> {
+  data: StorageType
+  expires: Date
+  keystr: string
+  next?: SimpleStorageNode<StorageType>
+  prev?: SimpleStorageNode<StorageType>
+}
+class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
+  private storage: { [keys: string]: SimpleStorageNode<StorageType> }
+  private oldest?: SimpleStorageNode<StorageType>
+  private newest?: SimpleStorageNode<StorageType>
+  private maxAge: number
 
-  constructor () {
+  constructor (maxAge: number) {
+    this.maxAge = maxAge
     this.storage = {}
   }
 
   async get (keystr: string) {
-    return this.storage[keystr]
+    return this.storage[keystr]?.data
   }
 
   async set (keystr: string, data: StorageType) {
-    this.storage[keystr] = data
+    await this.del(keystr)
+    const expires = new Date(new Date().getTime() + (this.maxAge * 1000))
+    const curr: SimpleStorageNode<StorageType> = { keystr, data, expires }
+    if (this.newest) {
+      this.newest.next = curr
+      curr.prev = this.newest
+    } else {
+      this.oldest = curr
+    }
+    this.newest = curr
+    this.storage[keystr] = curr
+    await this.prune()
   }
 
-  async delete (keystr: string) {
-    delete this.storage[keystr]
+  async del (keystr: string) {
+    const curr = this.storage[keystr]
+    if (curr) {
+      // remove from linked list and repair list
+      if (curr.prev) curr.prev.next = curr.next
+      if (curr.next) curr.next.prev = curr.prev
+
+      // repair oldest/newest links
+      if (this.newest === curr) this.newest = curr.prev
+      if (this.oldest === curr) this.oldest = curr.next
+
+      // delete from map
+      delete this.storage[keystr]
+    }
   }
 
   async clear () {
     this.storage = {}
+    this.newest = undefined
+    this.oldest = undefined
   }
 
-  async entries () {
-    return Object.entries(this.storage)
+  private async prune () {
+    const now = new Date()
+    while (this.oldest && this.oldest.expires < now) {
+      await this.del(this.oldest.keystr)
+    }
+  }
+}
+
+class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
+  private client: any
+  private maxAge: any
+  constructor (client: any, maxAge: number) {
+    this.client = client
+    this.maxAge = maxAge
+  }
+
+  async get (keystr: string) {
+    const ret: Promise<StorageType> = new Promise((resolve, reject) => {
+      this.client.get(keystr, (err: Error, data: StorageType) => {
+        if (err) reject(err)
+        else resolve(data)
+      })
+    })
+    return ret
+  }
+
+  async set (keystr: string, data: StorageType) {
+    await new Promise((resolve, reject) => {
+      this.client.set(keystr, data, this.maxAge, (err: Error) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
+
+  async del (keystr: string) {
+    await new Promise((resolve, reject) => {
+      this.client.del(keystr, (err: Error) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
+
+  async clear () {
+    await new Promise((resolve, reject) => {
+      this.client.flush((err: Error) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
+}
+
+class LRUWrapper<StorageType> implements StorageEngine<StorageType> {
+  private client: any
+  constructor (client: any) {
+    this.client = client
+  }
+
+  async get (keystr: string) {
+    return this.client.get(keystr)
+  }
+
+  async set (keystr: string, data: StorageType) {
+    this.client.set(keystr, data)
+  }
+
+  async del (keystr: string) {
+    this.client.del(keystr)
+  }
+
+  async clear () {
+    this.client.reset()
   }
 }
 
@@ -59,31 +165,27 @@ export class Cache<KeyType = any, ReturnType = any> {
   private options: CacheOptionsInternal<ReturnType>
   private storage: StorageEngine<Storage<ReturnType>>
   private active: { [keys: string]: Promise<ReturnType> }
-  private cleanuptimer: NodeJS.Timeout
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<ReturnType> = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds || 5 * 60,
-      staleseconds: options.staleseconds || 10 * 60,
-      cleanupseconds: options.cleanupseconds || 10,
-      storageClass: options.storageClass || new MemoryStorage<Storage<ReturnType>>()
+      staleseconds: options.staleseconds || 10 * 60
     }
-    this.storage = this.options.storageClass
+    const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
+    if (storageClass.reset && storageClass.dump) {
+      // lru-cache instance
+      this.storage = new LRUWrapper(storageClass)
+    } else if (storageClass.flush) {
+      // memcached client
+      this.storage = new MemcacheWrapper(storageClass, this.options.staleseconds)
+    } else {
+      this.storage = new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
+    }
     this.active = {}
-    this.cleanuptimer = setTimeout(() => this.schedulenextcleanup(), this.options.cleanupseconds * 1000)
   }
 
   async get (key: KeyType) {
-    return this.fetch(key)
-  }
-
-  async set (key: KeyType, data: ReturnType) {
-    const keystr = tostr(key)
-    await this.storage.set(keystr, { fetched: new Date(), data })
-  }
-
-  async fetch (key: KeyType) {
     const keystr = tostr(key)
     const stored = await this.storage.get(keystr)
     if (stored) {
@@ -104,31 +206,35 @@ export class Cache<KeyType = any, ReturnType = any> {
     return this.refresh(key)
   }
 
+  async set (key: KeyType|string, data: ReturnType) {
+    const keystr = tostr(key)
+    await this.storage.set(keystr, { fetched: new Date(), data })
+  }
+
   async invalidate (key: KeyType | string) {
     if (!key) {
       await this.storage.clear()
       return
     }
     const keystr = tostr(key)
-    await this.storage.delete(keystr)
+    await this.storage.del(keystr)
   }
 
-  async refresh (key: KeyType) {
+  async clear () {
+    await this.storage.clear()
+  }
+
+  private async refresh (key: KeyType) {
     const keystr = tostr(key)
     if (this.active[keystr]) return this.active[keystr]
     this.active[keystr] = this.fetcher(key)
     try {
       const data = await this.active[keystr]
-      await this.storage.set(keystr, { fetched: new Date(), data })
+      await this.set(keystr, data)
       return data
     } finally {
       delete this.active[keystr]
     }
-  }
-
-  async destroy () {
-    clearTimeout(this.cleanuptimer)
-    await this.storage.clear()
   }
 
   private fresh (stored: Storage<ReturnType>) {
@@ -137,12 +243,5 @@ export class Cache<KeyType = any, ReturnType = any> {
 
   private valid (stored: Storage<ReturnType>) {
     return newerThan(stored.fetched, this.options.staleseconds)
-  }
-
-  private async schedulenextcleanup () {
-    for (const [key, stored] of await this.storage.entries()) {
-      if (!this.valid(stored)) await this.invalidate(key)
-    }
-    this.cleanuptimer = setTimeout(() => this.schedulenextcleanup(), this.options.cleanupseconds * 1000)
   }
 }
