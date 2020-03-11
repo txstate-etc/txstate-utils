@@ -42,4 +42,8 @@ describe('netid utils', () => {
     expect(extractNetIDFromFederated('a_b1234@tsus.edu')).to.be.undefined
     expect(extractNetIDFromFederated('abb1@gmail.com')).to.be.undefined
   })
+  it('should normalize returned netid to lower case', () => {
+    expect(extractNetIDFromFederated('AB1234@txstate.edu')).to.equal('ab1234')
+    expect(extractNetIDFromFederated('a_B1234@txstate.edu')).to.equal('a_b1234')
+  })
 })

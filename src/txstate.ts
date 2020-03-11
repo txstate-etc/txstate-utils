@@ -4,6 +4,6 @@ export function isNetID (netid: string) {
 
 export function extractNetIDFromFederated (login: string) {
   const [possiblenetid, domain] = login.trim().split('@', 2)
-  if (domain === 'txstate.edu' && isNetID(possiblenetid)) return possiblenetid
+  if (domain === 'txstate.edu' && isNetID(possiblenetid)) return possiblenetid.toLocaleLowerCase()
   return undefined
 }
