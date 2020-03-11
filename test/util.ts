@@ -1,4 +1,4 @@
-import { sleep, randomid } from '../src/util'
+import { sleep, randomid } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
