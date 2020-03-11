@@ -20,6 +20,9 @@ async function saveUser (userObj) {
   await userObj.save()
   await userCache.invalidate(userObj.id) // invalidate cache after update
   await userCache.refresh(userObj.id) // or go ahead and get it refreshed immediately
+  // if you are confident userObj is the correct object to store in cache, you may set it
+  // directly (a little risky as it avoids your fetching function and any logic it may be applying)
+  await userCache.set(userObj.id, userObj)
 }
 ```
 ### Options
@@ -27,7 +30,6 @@ async function saveUser (userObj) {
 {
   freshseconds: period cache entry is fresh (default 5 minutes)
   staleseconds: period cache entry is acceptable but needs background refreshed (default 10 minutes)
-  cleanupseconds: frequency to delete expired entries for garbage collection (default 10 seconds),
   storageClass: an instance of a class that meets storage engine interface (default simple Object cache)
 }
 ```
@@ -41,3 +43,4 @@ interface StorageEngine {
 }
 ```
 `storageClass` will also accept an instance of [lru-cache](https://www.npmjs.com/package/lru-cache) or [memcached](https://www.npmjs.com/package/memcached)
+If you wrap/implement your own storage engine, be aware that it is responsible for cleaning up expired cache entries or otherwise reducing its footprint. The default simple storage engine keeps everything in memory until expiration (it does efficiently garbage collect expired entries). LRU Cache and Memcache both have customizable storage limits. You're free to delete cache entries as aggressively as you see fit; a cache miss will not be harmful other than making the user wait for a result.
