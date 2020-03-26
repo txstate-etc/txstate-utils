@@ -53,7 +53,7 @@ describe('cache', () => {
     elapsed = await timed(async () => {
       four = await delayedDoublingCache.get(2)
     })
-    expect(elapsed).to.be.greaterThan(100)
+    expect(elapsed).to.be.gte(100)
     expect(four).to.equal(4)
   })
 
@@ -87,7 +87,7 @@ describe('cache', () => {
     elapsed = await timed(async () => {
       four = await delayedDoublingMemCache.get(2)
     })
-    expect(elapsed).to.be.greaterThan(100)
+    expect(elapsed).to.be.gte(100)
     expect(four).to.equal(4)
   })
 })
