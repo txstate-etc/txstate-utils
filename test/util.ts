@@ -4,11 +4,11 @@ import { expect } from 'chai'
 describe('sleep', () => {
   it('should sleep for the correct amount of time', async () => {
     const startTime = new Date()
-    await sleep(200)
+    await sleep(30)
     const endTime = new Date()
     const elapsed = endTime.getTime() - startTime.getTime()
-    expect(elapsed).to.be.lessThan(250)
-    expect(elapsed).to.be.greaterThan(150)
+    expect(elapsed).to.be.lessThan(45)
+    expect(elapsed).to.be.greaterThan(15)
   })
 })
 

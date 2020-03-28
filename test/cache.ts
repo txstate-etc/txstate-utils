@@ -10,16 +10,17 @@ async function timed (callback: () => Promise<void>) {
 }
 
 describe('cache', () => {
+  const sleeptime = 25
   const doublingCache = new Cache(async (n: number) => n * 2)
   const delayedDoublingCache = new Cache(async (n: number) => {
-    await sleep(100)
+    await sleep(sleeptime)
     return n * 2
   })
   const doublingMemCache = new Cache(async (n: number) => n * 2, {
     storageClass: new Memcached('localhost:11211')
   })
   const delayedDoublingMemCache = new Cache(async (n: number) => {
-    await sleep(100)
+    await sleep(sleeptime)
     return n * 2
   }, {
     storageClass: new Memcached('localhost:11211')
@@ -38,7 +39,7 @@ describe('cache', () => {
     const elapsed = await timed(async () => {
       four = await delayedDoublingCache.get(2)
     })
-    expect(elapsed).to.be.lessThan(100)
+    expect(elapsed).to.be.lessThan(sleeptime)
     expect(four).to.equal(4)
   })
   it('should clear the cache', async () => {
@@ -47,13 +48,13 @@ describe('cache', () => {
     let elapsed = await timed(async () => {
       four = await delayedDoublingCache.get(2)
     })
-    expect(elapsed).to.be.lessThan(100)
+    expect(elapsed).to.be.lessThan(sleeptime)
     expect(four).to.equal(4)
     await delayedDoublingCache.clear()
     elapsed = await timed(async () => {
       four = await delayedDoublingCache.get(2)
     })
-    expect(elapsed).to.be.gte(100)
+    expect(elapsed).to.be.gte(sleeptime)
     expect(four).to.equal(4)
   })
 
@@ -72,7 +73,7 @@ describe('cache', () => {
     const elapsed = await timed(async () => {
       four = await delayedDoublingMemCache.get(2)
     })
-    expect(elapsed).to.be.lessThan(100)
+    expect(elapsed).to.be.lessThan(sleeptime)
     expect(four).to.equal(4)
   })
   it('should clear memcached', async () => {
@@ -81,13 +82,13 @@ describe('cache', () => {
     let elapsed = await timed(async () => {
       four = await delayedDoublingMemCache.get(2)
     })
-    expect(elapsed).to.be.lessThan(100)
+    expect(elapsed).to.be.lessThan(sleeptime)
     expect(four).to.equal(4)
     await delayedDoublingMemCache.clear()
     elapsed = await timed(async () => {
       four = await delayedDoublingMemCache.get(2)
     })
-    expect(elapsed).to.be.gte(100)
+    expect(elapsed).to.be.gte(sleeptime)
     expect(four).to.equal(4)
   })
 })
