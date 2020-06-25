@@ -19,10 +19,10 @@ interface Storage<ReturnType> {
 }
 
 export interface StorageEngine<StorageType> {
-  get (keystr: string): Promise<StorageType>
-  set (keystr: string, data: StorageType): Promise<void>
-  del (keystr: string): Promise<void>
-  clear (): Promise<void>
+  get: (keystr: string) => Promise<StorageType>
+  set: (keystr: string, data: StorageType) => Promise<void>
+  del: (keystr: string) => Promise<void>
+  clear: () => Promise<void>
 }
 interface SimpleStorageNode<StorageType> {
   data: StorageType
@@ -169,8 +169,8 @@ export class Cache<KeyType = any, ReturnType = any> {
   constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<ReturnType> = {}) {
     this.fetcher = fetcher
     this.options = {
-      freshseconds: options.freshseconds || 5 * 60,
-      staleseconds: options.staleseconds || 10 * 60
+      freshseconds: options.freshseconds ?? 5 * 60,
+      staleseconds: options.staleseconds ?? 10 * 60
     }
     const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     if (storageClass.reset && storageClass.dump) {
@@ -226,7 +226,7 @@ export class Cache<KeyType = any, ReturnType = any> {
 
   private async refresh (key: KeyType) {
     const keystr = tostr(key)
-    if (this.active[keystr]) return this.active[keystr]
+    if (typeof this.active[keystr] !== 'undefined') return this.active[keystr]
     this.active[keystr] = this.fetcher(key)
     try {
       const data = await this.active[keystr]
@@ -238,10 +238,12 @@ export class Cache<KeyType = any, ReturnType = any> {
   }
 
   private fresh (stored: Storage<ReturnType>) {
+    if (!this.options.freshseconds) return true
     return newerThan(stored.fetched, this.options.freshseconds)
   }
 
   private valid (stored: Storage<ReturnType>) {
+    if (!this.options.staleseconds) return true
     return newerThan(stored.fetched, this.options.staleseconds)
   }
 }
