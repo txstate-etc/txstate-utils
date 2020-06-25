@@ -28,6 +28,11 @@ describe('netid utils', () => {
     expect(isNetID('ab_13')).to.be.false
     expect(isNetID('a13')).to.be.false
   })
+  it('should detect netids with hyphens', () => {
+    expect(isNetID('-_a12')).to.be.true
+    expect(isNetID('a_-1234')).to.be.true
+    expect(isNetID('-_-12')).to.be.false
+  })
   it('should extract a netid from a federated login', () => {
     expect(extractNetIDFromFederated('ab1234@txstate.edu')).to.equal('ab1234')
     expect(extractNetIDFromFederated('a_b1234@txstate.edu')).to.equal('a_b1234')
