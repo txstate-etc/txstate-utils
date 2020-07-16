@@ -8,22 +8,16 @@ async function timed (callback: () => Promise<void>) {
   await callback()
   return new Date().getTime() - startTime.getTime()
 }
+const sleeptime = 25
 
 describe('cache', () => {
-  const sleeptime = 25
   const doublingCache = new Cache(async (n: number) => n * 2)
   const delayedDoublingCache = new Cache(async (n: number) => {
     await sleep(sleeptime)
     return n * 2
   })
-  const doublingMemCache = new Cache(async (n: number) => n * 2, {
-    storageClass: new Memcached('localhost:11211')
-  })
-  const delayedDoublingMemCache = new Cache(async (n: number) => {
-    await sleep(sleeptime)
-    return n * 2
-  }, {
-    storageClass: new Memcached('localhost:11211')
+  const singleValueCache = new Cache(async () => {
+    return { key: 'value' }
   })
   it('should return transformed values', async () => {
     const four = await doublingCache.get(2)
@@ -57,8 +51,28 @@ describe('cache', () => {
     expect(elapsed).to.be.gte(sleeptime)
     expect(four).to.equal(4)
   })
-
-  /* Memcached tests */
+  it('should support caches that do not need multiple values stored', async () => {
+    const obj = await singleValueCache.get(undefined)
+    const obj2 = await singleValueCache.get(undefined)
+    expect(obj?.key).to.equal('value')
+    expect(obj2?.key).to.equal('value')
+  })
+})
+describe('cache w/memcache', () => {
+  const doublingMemCache = new Cache(async (n: number) => n * 2, {
+    storageClass: new Memcached('localhost:11211')
+  })
+  const delayedDoublingMemCache = new Cache(async (n: number) => {
+    await sleep(sleeptime)
+    return n * 2
+  }, {
+    storageClass: new Memcached('localhost:11211')
+  })
+  const singleValueCacheMemCache = new Cache(async () => {
+    return { key: 'value' }
+  }, {
+    storageClass: new Memcached('localhost:11211')
+  })
   it('should return transformed values from memcached', async () => {
     const four = await doublingMemCache.get(2)
     expect(four).to.equal(4)
@@ -90,5 +104,11 @@ describe('cache', () => {
     })
     expect(elapsed).to.be.gte(sleeptime)
     expect(four).to.equal(4)
+  })
+  it('should support caches that do not need multiple values stored in memcached', async () => {
+    const obj = await singleValueCacheMemCache.get(undefined)
+    const obj2 = await singleValueCacheMemCache.get(undefined)
+    expect(obj?.key).to.equal('value')
+    expect(obj2?.key).to.equal('value')
   })
 })
