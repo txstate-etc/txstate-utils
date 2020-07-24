@@ -1,6 +1,6 @@
 {
   "name": "txstate-utils",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "main": "lib/index.js",
   "module": "lib-esm/index.js",
@@ -22,24 +22,25 @@
   },
   "homepage": "https://github.com/txstate-etc/txstate-utils#readme",
   "devDependencies": {
-    "@types/chai": "^4.2.11",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^14.0.14",
-    "@typescript-eslint/eslint-plugin": "^3.4.0",
+    "@types/chai": "^4.2.12",
+    "@types/mocha": "^8.0.0",
+    "@types/node": "^14.0.26",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
     "chai": "^4.2.0",
-    "eslint": "^7.3.1",
+    "eslint": "^7.5.0",
     "eslint-config-standard-with-typescript": "^18.0.2",
-    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "memcached-mock": "^0.1.0",
     "mocha": "^8.0.1",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.7"
   },
   "dependencies": {
-    "p-limit": "^3.0.1"
+    "dot-prop": "^5.2.0",
+    "p-limit": "^3.0.2"
   },
   "sideEffects": false,
   "files": [
