@@ -73,7 +73,7 @@ describe('hashify', () => {
     { [sym]: 1, idnum: 1, idstr: 'one', name: 'One', deep: { id: 1 } },
     { [sym]: 2, idnum: 2, idstr: 'two', name: 'Two', deep: { id: 2 } },
     { [sym]: 3, idnum: 3, idstr: 'three', name: 'Three', deep: { id: 3 } },
-    { [sym]: 4, idnum: 4, idstr: 'four', name: 'Four', deep: { id: 4 } }
+    { [sym]: 4, idnum: 4, idstr: 'four', name: 'Four' }
   ]
   it('should work with a shallow string property that returns numbers', () => {
     const hashed = hashify(records, sym)
@@ -92,12 +92,12 @@ describe('hashify', () => {
   })
   it('should work with deep properties', () => {
     const hashed = hashify(records, 'deep.id')
-    expect(Object.keys(hashed)).to.have.lengthOf(4)
+    expect(Object.keys(hashed)).to.have.lengthOf(3)
     expect(hashed[1].name).to.equal('One')
   })
   it('should work with an extractor function', () => {
-    const hashed = hashify(records, record => record.deep.id)
-    expect(Object.keys(hashed)).to.have.lengthOf(4)
+    const hashed = hashify(records, record => record?.deep?.id)
+    expect(Object.keys(hashed)).to.have.lengthOf(3)
     expect(hashed[1].name).to.equal('One')
   })
 })
