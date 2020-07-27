@@ -100,4 +100,9 @@ describe('hashify', () => {
     expect(Object.keys(hashed)).to.have.lengthOf(3)
     expect(hashed[1].name).to.equal('One')
   })
+  it('should be null safe', () => {
+    const hashed = hashify(undefined, 'id')
+    expect(hashed).to.be.a('object')
+    expect(Object.keys(hashed)).to.have.lengthOf(0)
+  })
 })

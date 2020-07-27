@@ -1,9 +1,10 @@
 import dp from 'dot-prop'
 
-export function hashify <ObjectType extends object> (objArray: ObjectType[], key: keyof ObjectType): { [keys: string]: ObjectType }
-export function hashify <ObjectType> (objArray: ObjectType[], keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)): { [keys: string]: ObjectType }
-export function hashify <ObjectType> (objArray: ObjectType[], keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
+export function hashify <ObjectType extends object> (objArray: ObjectType[]|undefined, key: keyof ObjectType): { [keys: string]: ObjectType }
+export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)): { [keys: string]: ObjectType }
+export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
   const hash: Record<string|number, ObjectType> = {}
+  if (!Array.isArray(objArray)) return hash
   if (typeof keyOrExtractor === 'function') {
     for (const obj of objArray) {
       const val = keyOrExtractor(obj)
