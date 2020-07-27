@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, hashify, isEmpty, isBlank } from '../src'
+import { sleep, randomid, hashify, isEmpty, isBlank, isNotBlank } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -34,6 +34,15 @@ describe('isBlank', () => {
     expect(isBlank(' a')).to.be.false
     expect(isBlank(' b\t')).to.be.false
     expect(isBlank(' \tc')).to.be.false
+  })
+  it('should provide a typeguard on the notted version', () => {
+    let val: string|undefined = ''
+    val = 'notblank'
+    if (isNotBlank(val)) {
+      expect(val).to.equal('notblank')
+    } else {
+      expect(false)
+    }
   })
 })
 

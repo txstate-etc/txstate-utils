@@ -12,6 +12,10 @@ export function isBlank (str: string|undefined|null) {
   return !str || !str.trim || str.trim().length === 0
 }
 
+export function isNotBlank <T extends string|undefined|null> (str: T): str is Exclude<T, undefined|null> {
+  return !isBlank(str)
+}
+
 export function isEmpty (obj: any): boolean {
   if (typeof obj === 'undefined' || obj === null) return true
   if (typeof obj === 'number') return false
@@ -21,4 +25,8 @@ export function isEmpty (obj: any): boolean {
   if (typeof obj.size === 'function') return !obj.size()
   if (typeof obj === 'object') return !Object.keys(obj).length
   return !obj
+}
+
+export function isNotEmpty <T> (obj: T): obj is Exclude<T, undefined|null> {
+  return !isEmpty(obj)
 }
