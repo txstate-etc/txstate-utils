@@ -1,6 +1,6 @@
 import dp from 'dot-prop'
 
-export function hashify (objArray: (string|number)[]|undefined): { [keys: string]: boolean }
+export function hashify (objArray: (string|number|undefined|null)[]|undefined): { [keys: string]: boolean }
 export function hashify <ObjectType extends object> (objArray: ObjectType[]|undefined, key: keyof ObjectType): { [keys: string]: ObjectType }
 export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)): { [keys: string]: ObjectType }
 export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor?: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
@@ -10,7 +10,7 @@ export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExt
     for (const obj of objArray) {
       if (typeof obj === 'string' || typeof obj === 'number') {
         hash[obj] = true
-      } else {
+      } else if (typeof obj !== 'undefined' && obj !== null) {
         throw new Error('hashify called with no key extractor and an array value is too complex to be used as a hash key')
       }
     }
