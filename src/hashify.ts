@@ -1,6 +1,6 @@
 import dp from 'dot-prop'
 
-export function hashify (objArray: (string|number)[]): { [keys: string]: boolean }
+export function hashify (objArray: (string|number)[]|undefined): { [keys: string]: boolean }
 export function hashify <ObjectType extends object> (objArray: ObjectType[]|undefined, key: keyof ObjectType): { [keys: string]: ObjectType }
 export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)): { [keys: string]: ObjectType }
 export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor?: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
