@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, isEmpty, isBlank, isNotBlank } from '../src'
+import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -73,5 +73,18 @@ describe('isEmpty', () => {
   })
   it('should return false for the number 0', () => {
     expect(isEmpty(0)).to.be.false
+  })
+})
+
+describe('CSV functions', () => {
+  it('should be able to escape values for CSV', () => {
+    expect(csvEscape('hello')).to.equal('hello')
+    expect(csvEscape('"hello"')).to.equal('"""hello"""')
+    expect(csvEscape('hello\nfriend')).to.equal('"hello\nfriend"')
+    expect(csvEscape('hello, friend')).to.equal('"hello, friend"')
+    expect(csvEscape('hello, "friend"')).to.equal('"hello, ""friend"""')
+  })
+  it('should be able to construct a full CSV line', () => {
+    expect(csvLine(['apple', 'banana', 'onion, sweet'])).to.equal('apple,banana,"onion, sweet"\n')
   })
 })

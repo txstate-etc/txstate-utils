@@ -30,3 +30,12 @@ export function isEmpty (obj: any): boolean {
 export function isNotEmpty <T> (obj: T): obj is Exclude<T, undefined|null> {
   return !isEmpty(obj)
 }
+
+export function csvEscape (str: string) {
+  if (!/[,\n"]/.test(str)) return str
+  return '"' + str.replace(/"/g, '""') + '"'
+}
+
+export function csvLine (values: string[]) {
+  return values.map(csvEscape).join(',') + '\n'
+}
