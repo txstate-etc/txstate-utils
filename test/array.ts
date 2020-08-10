@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { hashify } from '../src'
+import { hashify, unique } from '../src'
 import { expect } from 'chai'
 
 describe('hashify', () => {
@@ -44,5 +44,36 @@ describe('hashify', () => {
     const hashed = hashify([1, 3, 5, 7])
     expect(hashed[3]).to.equal(true)
     expect(hashed[4]).to.equal(undefined)
+  })
+})
+
+describe('unique', () => {
+  function getarray () {
+    return [
+      { netid: 'ab01', deep: { netid: 'ab01' }, firstname: 'Nick', lastname: 'Wing' },
+      { netid: 'ab02', deep: { netid: 'ab02' }, firstname: 'Nick', lastname: 'Wing' },
+      { netid: 'ab03', deep: { netid: 'ab03' }, firstname: 'Nick', lastname: 'Wing' },
+      { netid: 'ab02', deep: { netid: 'ab02' }, lastname: 'Wing', firstname: 'Nick' }
+    ]
+  }
+  it('should remove duplicates based on a property name', () => {
+    const arr = unique(getarray(), 'netid')
+    expect(arr).to.have.lengthOf(3)
+  })
+  it('should remove duplicates based on a function', () => {
+    const arr = unique(getarray(), u => u.netid)
+    expect(arr).to.have.lengthOf(3)
+  })
+  it('should remove duplicates based on the stable stringification of an object returned by the function', () => {
+    const arr = unique(getarray(), u => u.deep)
+    expect(arr).to.have.lengthOf(3)
+  })
+  it('should remove duplicates based on a dot-separated path', () => {
+    const arr = unique(getarray(), 'deep.netid')
+    expect(arr).to.have.lengthOf(3)
+  })
+  it('should remove duplicates based on stable json stringification', () => {
+    const arr = unique(getarray())
+    expect(arr).to.have.lengthOf(3)
   })
 })

@@ -1,5 +1,5 @@
+export * from './array'
 export * from './async'
 export * from './cache'
-export * from './hashify'
 export * from './txstate'
 export * from './util'
