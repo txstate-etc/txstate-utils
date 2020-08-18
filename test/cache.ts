@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Cache } from '../src/cache'
 import { sleep } from '../src/util'
 import { expect } from 'chai'

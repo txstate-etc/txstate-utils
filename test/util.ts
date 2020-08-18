@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine } from '../src'
+import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -73,6 +73,32 @@ describe('isEmpty', () => {
   })
   it('should return false for the number 0', () => {
     expect(isEmpty(0)).to.be.false
+  })
+})
+
+describe('isEmail', () => {
+  it('should be able to detect email', () => {
+    expect(isEmail('abc123@txstate.edu')).to.be.true
+    expect(isEmail('abc123@qual.txstate.edu')).to.be.true
+    expect(isEmail('123@gmail.com')).to.be.true
+    expect(isEmail('abc@education.tx.us')).to.be.true
+  })
+  it('should reject things that are not email', () => {
+    expect(isEmail('@')).to.be.false
+    expect(isEmail('abc123@')).to.be.false
+    expect(isEmail('abc123@com')).to.be.false
+    expect(isEmail('abc123')).to.be.false
+  })
+  it('should be null safe', () => {
+    expect(isEmail(undefined)).to.be.false
+    expect(isEmail(null)).to.be.false
+    expect(isEmail('')).to.be.false
+  })
+  it('should typeguard', () => {
+    const email: string|undefined = 'test@txstate.edu'
+    if (isEmail(email)) {
+      expect(email.toLocaleLowerCase()).to.equal(email)
+    }
   })
 })
 

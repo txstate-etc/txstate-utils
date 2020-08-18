@@ -31,6 +31,10 @@ export function isNotEmpty <T> (obj: T): obj is Exclude<T, undefined|null> {
   return !isEmpty(obj)
 }
 
+export function isEmail <T extends string|undefined|null> (email: T): email is Exclude<T, undefined|null> {
+  return !!email && /^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(email as string)
+}
+
 export function csvEscape (str: string) {
   if (!/[,\n"]/.test(str)) return str
   return '"' + str.replace(/"/g, '""') + '"'

@@ -1,6 +1,6 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { isNetID, extractNetIDFromFederated } from '../src'
+import { isNetID, extractNetIDFromFederated, isTxStEmail } from '../src'
 
 describe('netid utils', () => {
   it('should detect good netids', () => {
@@ -50,5 +50,33 @@ describe('netid utils', () => {
   it('should normalize returned netid to lower case', () => {
     expect(extractNetIDFromFederated('AB1234@txstate.edu')).to.equal('ab1234')
     expect(extractNetIDFromFederated('a_B1234@txstate.edu')).to.equal('a_b1234')
+  })
+})
+
+describe('isTxStEmail', () => {
+  it('should be able to detect email', () => {
+    expect(isTxStEmail('abc123@txstate.edu')).to.be.true
+    expect(isTxStEmail('abc123@qual.txstate.edu')).to.be.true
+  })
+  it('should reject valid email that does not belong to texas state', () => {
+    expect(isTxStEmail('123@gmail.com')).to.be.false
+    expect(isTxStEmail('abc@education.tx.us')).to.be.false
+  })
+  it('should reject things that are not email', () => {
+    expect(isTxStEmail('@')).to.be.false
+    expect(isTxStEmail('abc123@')).to.be.false
+    expect(isTxStEmail('abc123@com')).to.be.false
+    expect(isTxStEmail('abc123')).to.be.false
+  })
+  it('should be null safe', () => {
+    expect(isTxStEmail(undefined)).to.be.false
+    expect(isTxStEmail(null)).to.be.false
+    expect(isTxStEmail('')).to.be.false
+  })
+  it('should typeguard', () => {
+    const email: string|undefined = 'test@txstate.edu'
+    if (isTxStEmail(email)) {
+      expect(email.toLocaleLowerCase()).to.equal(email)
+    }
   })
 })
