@@ -1,4 +1,4 @@
-import { isEmail } from '.'
+import { isEmail } from './util'
 
 export function isNetID (netid: string) {
   return /^(su-)?([a-z-][a-z_]?[a-z]|[a-z][a-z_]?[a-z-])[0-9]{1,6}$/i.test(netid)
