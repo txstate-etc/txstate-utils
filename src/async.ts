@@ -25,3 +25,15 @@ export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], callback
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
   return eachConcurrent(items, inFlightLimitOrCallback as number, callback as eachFunction<ItemType, ReturnType>)
 }
+
+export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, boolean>): Promise<ItemType[]>
+export async function filterConcurrent<ItemType> (items: ItemType[], callback: eachFunction<ItemType, boolean>): Promise<ItemType[]>
+export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, boolean>, callback?: eachFunction<ItemType, boolean>) {
+  const inFlightLimit = callback ? inFlightLimitOrCallback as number : 10
+  const each = callback ?? inFlightLimitOrCallback as eachFunction<ItemType, boolean>
+  const ret: ItemType[] = []
+  await eachConcurrent(items, inFlightLimit, async item => {
+    if (await each(item)) ret.push(item)
+  })
+  return ret
+}

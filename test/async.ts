@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { eachConcurrent, sleep, mapConcurrent } from '../src'
+import { eachConcurrent, sleep, mapConcurrent, filterConcurrent } from '../src'
 
 describe('async utils', () => {
   const items = Array.from(Array(20).keys())
@@ -29,6 +29,14 @@ describe('async utils', () => {
     expect(doubles).to.deep.equal(items.map(i => i * 2))
   })
 
+  it('filterConcurrent should filter when the return value is falsy', async () => {
+    const filtered = await filterConcurrent(items, async item => !!(item % 2))
+    expect(filtered).to.have.lengthOf(10)
+    for (const num of filtered) {
+      expect(num % 2).to.equal(1)
+    }
+  })
+
   it('eachConcurrent should properly return values with in-flight limit', async () => {
     const doubles = await eachConcurrent(items, 2, async (item) => item * 2)
     expect(doubles).to.deep.equal(items.map(i => i * 2))
@@ -37,5 +45,13 @@ describe('async utils', () => {
   it('mapConcurrent should properly return values with in-flight limit', async () => {
     const doubles = await mapConcurrent(items, 2, async (item) => item * 2)
     expect(doubles).to.deep.equal(items.map(i => i * 2))
+  })
+
+  it('filterConcurrent should filter with in-flight limit', async () => {
+    const filtered = await filterConcurrent(items, 2, async item => !!(item % 2))
+    expect(filtered).to.have.lengthOf(10)
+    for (const num of filtered) {
+      expect(num % 2).to.equal(1)
+    }
   })
 })
