@@ -65,3 +65,14 @@ export function unique<ObjectType> (arr: ObjectType[], stringify: any = stablest
   }
   return ret
 }
+
+export function shuffle<ObjectType> (shuffleArray: ObjectType[]) {
+  const copied = [...shuffleArray]
+  for (let i = copied.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * i)
+    const temp = copied[i]
+    copied[i] = copied[j]
+    copied[j] = temp
+  }
+  return copied
+}

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { hashify, unique } from '../src'
+import { hashify, unique, shuffle } from '../src'
 import { expect } from 'chai'
 
 describe('hashify', () => {
@@ -75,5 +75,19 @@ describe('unique', () => {
   it('should remove duplicates based on stable json stringification', () => {
     const arr = unique(getarray())
     expect(arr).to.have.lengthOf(3)
+  })
+})
+describe('shuffle', () => {
+  function getarray () {
+    return Array.from(Array(20).keys())
+  }
+  it('should shuffle an array without mutating it', () => {
+    const unshuffled = getarray()
+    const shuffled = shuffle(unshuffled)
+    const check = getarray()
+    expect(unshuffled).to.deep.equal(check)
+    expect(shuffled).to.not.deep.equal(check)
+    expect(shuffled).to.have.lengthOf(check.length)
+    for (const n of check) expect(shuffled).to.contain(n)
   })
 })

@@ -111,6 +111,6 @@ describe('CSV functions', () => {
     expect(csvEscape('hello, "friend"')).to.equal('"hello, ""friend"""')
   })
   it('should be able to construct a full CSV line', () => {
-    expect(csvLine(['apple', 'banana', 'onion, sweet'])).to.equal('apple,banana,"onion, sweet"\n')
+    expect(csvLine(['apple', 'banana', 'onion, sweet'])).to.equal('apple,banana,"onion, sweet"\r\n')
   })
 })

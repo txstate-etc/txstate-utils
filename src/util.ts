@@ -41,5 +41,9 @@ export function csvEscape (str: string) {
 }
 
 export function csvLine (values: string[]) {
-  return values.map(csvEscape).join(',') + '\n'
+  return values.map(csvEscape).join(',') + '\r\n'
+}
+
+export function csv (lines: string[][]) {
+  return lines.map(csvLine).join('')
 }

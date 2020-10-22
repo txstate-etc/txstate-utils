@@ -1,5 +1,6 @@
 export * from './array'
 export * from './async'
 export * from './cache'
+export * from './concurrent'
 export * from './txstate'
 export * from './util'

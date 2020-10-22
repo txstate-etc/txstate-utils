@@ -2,12 +2,12 @@ const newerThan = (dt: Date, seconds: number) => (new Date()).getTime() - dt.get
 const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
 type FetcherFunction<KeyType, ReturnType> = (key: KeyType) => Promise<ReturnType>
-interface CacheOptions<ReturnType> {
+interface CacheOptions <StorageEngineType extends StorageEngine<any>> {
   freshseconds?: number
   staleseconds?: number
-  storageClass?: StorageEngine<any> | any
+  storageClass?: StorageEngineType
 }
-interface CacheOptionsInternal<ReturnType> {
+interface CacheOptionsInternal {
   freshseconds: number
   staleseconds: number
 }
@@ -162,11 +162,11 @@ class LRUWrapper<StorageType> implements StorageEngine<StorageType> {
 
 export class Cache<KeyType = any, ReturnType = any> {
   private fetcher: FetcherFunction<KeyType, ReturnType>
-  private options: CacheOptionsInternal<ReturnType>
+  private options: CacheOptionsInternal
   private storage: StorageEngine<Storage<ReturnType>>
   private active: { [keys: string]: Promise<ReturnType> }
 
-  constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<ReturnType> = {}) {
+  constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<any> = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds ?? 5 * 60,
@@ -226,7 +226,7 @@ export class Cache<KeyType = any, ReturnType = any> {
 
   private async refresh (key: KeyType) {
     const keystr = tostr(key)
-    if (typeof this.active[keystr] !== 'undefined') return this.active[keystr]
+    if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
     this.active[keystr] = this.fetcher(key)
     try {
       const data = await this.active[keystr]
