@@ -11,6 +11,14 @@ describe('sleep', () => {
     expect(elapsed).to.be.lessThan(45)
     expect(elapsed).to.be.greaterThan(15)
   })
+  it('should just sleep for a tick if called without parameter', async () => {
+    const startTime = new Date()
+    await sleep()
+    const endTime = new Date()
+    const elapsed = endTime.getTime() - startTime.getTime()
+    expect(elapsed).to.be.lessThan(10)
+    expect(elapsed).to.be.greaterThan(0)
+  })
 })
 
 describe('randomid', () => {
