@@ -1,7 +1,6 @@
 const newerThan = (dt: Date, seconds: number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
 const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
-type FetcherFunction<KeyType, ReturnType> = (key: KeyType) => Promise<ReturnType>
 interface CacheOptions <StorageEngineType extends StorageEngine<any>> {
   freshseconds?: number
   staleseconds?: number
@@ -160,7 +159,11 @@ class LRUWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 }
 
-export class Cache<KeyType = any, ReturnType = any> {
+type OptionalArgTuple<T> = T extends undefined ? [] : [T]
+type OptionalArgWithData<T, V> = T extends undefined ? [V] : [T, V]
+type FetcherFunction<KeyType, ReturnType> = (...params: OptionalArgTuple<KeyType>) => Promise<ReturnType>
+
+export class Cache<KeyType = undefined, ReturnType = any> {
   private fetcher: FetcherFunction<KeyType, ReturnType>
   private options: CacheOptionsInternal
   private storage: StorageEngine<Storage<ReturnType>>
@@ -185,7 +188,8 @@ export class Cache<KeyType = any, ReturnType = any> {
     this.active = {}
   }
 
-  async get (key: KeyType) {
+  async get (...params: OptionalArgTuple<KeyType>) {
+    const key = params[0]
     const keystr = tostr(key)
     const stored = await this.storage.get(keystr)
     if (stored) {
@@ -193,7 +197,7 @@ export class Cache<KeyType = any, ReturnType = any> {
         return stored.data
       } else if (this.valid(stored)) {
         // background task - do NOT await the refresh
-        this.refresh(key).catch(error => {
+        this.refresh(...params).catch(error => {
           // since this is a background refresh, errors are invisible to
           // the cache client
           // client will receive errors normally on the first call or
@@ -203,10 +207,12 @@ export class Cache<KeyType = any, ReturnType = any> {
         return stored.data
       }
     }
-    return this.refresh(key)
+    return this.refresh(...params)
   }
 
-  async set (key: KeyType|string, data: ReturnType) {
+  async set (...params: OptionalArgWithData<KeyType, ReturnType>) {
+    const key = params[1] ? params[0] as KeyType : undefined
+    const data = params[1] ? params[1] : params[0] as ReturnType
     const keystr = tostr(key)
     await this.storage.set(keystr, { fetched: new Date(), data })
   }
@@ -224,13 +230,14 @@ export class Cache<KeyType = any, ReturnType = any> {
     await this.storage.clear()
   }
 
-  private async refresh (key: KeyType) {
+  private async refresh (...params: OptionalArgTuple<KeyType>) {
+    const key = params[0]
     const keystr = tostr(key)
     if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
-    this.active[keystr] = this.fetcher(key)
+    this.active[keystr] = this.fetcher(...params)
     try {
       const data = await this.active[keystr]
-      await this.set(keystr, data)
+      await this.set(...[...params, data] as any)
       return data
     } finally {
       delete this.active[keystr]

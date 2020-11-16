@@ -53,10 +53,17 @@ describe('cache', () => {
     expect(four).to.equal(4)
   })
   it('should support caches that do not need multiple values stored', async () => {
-    const obj = await singleValueCache.get(undefined)
-    const obj2 = await singleValueCache.get(undefined)
+    const obj = await singleValueCache.get()
+    const obj2 = await singleValueCache.get()
     expect(obj?.key).to.equal('value')
     expect(obj2?.key).to.equal('value')
+  })
+  it('should support set on caches that do not need multiple values stored', async () => {
+    await singleValueCache.set({ key: 'anothervalue' })
+    const obj = await singleValueCache.get()
+    const obj2 = await singleValueCache.get()
+    expect(obj?.key).to.equal('anothervalue')
+    expect(obj2?.key).to.equal('anothervalue')
   })
 })
 describe('cache w/memcache', () => {
@@ -107,8 +114,8 @@ describe('cache w/memcache', () => {
     expect(four).to.equal(4)
   })
   it('should support caches that do not need multiple values stored in memcached', async () => {
-    const obj = await singleValueCacheMemCache.get(undefined)
-    const obj2 = await singleValueCacheMemCache.get(undefined)
+    const obj = await singleValueCacheMemCache.get()
+    const obj2 = await singleValueCacheMemCache.get()
     expect(obj?.key).to.equal('value')
     expect(obj2?.key).to.equal('value')
   })
