@@ -230,7 +230,7 @@ export class Cache<KeyType = undefined, ReturnType = any> {
     await this.storage.clear()
   }
 
-  private async refresh (...params: OptionalArgTuple<KeyType>) {
+  async refresh (...params: OptionalArgTuple<KeyType>) {
     const key = params[0]
     const keystr = tostr(key)
     if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
