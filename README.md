@@ -38,6 +38,10 @@ async function saveUser (userObj) {
   staleseconds: period cache entry is stale (default 10 minutes)
   storageClass: an instance of a class that adheres to the storage engine
     interface (default is a simple in-memory cache)
+  onRefresh: a callback that will be called any time a cache value is updated
+    you could use this to implement a synchronization scheme between workers or instances
+    any errors will be caught and logged without disrupting requests; if you have a custom
+    logging scheme that does not use console.error, you should catch errors yourself
 }
 ```
 This is the storage engine interface:

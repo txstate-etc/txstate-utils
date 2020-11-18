@@ -1,10 +1,13 @@
 const newerThan = (dt: Date, seconds: number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
 const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
-interface CacheOptions <StorageEngineType extends StorageEngine<any>> {
+type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void|Promise<void>
+
+interface CacheOptions <KeyType, ReturnType, StorageEngineType extends StorageEngine<ReturnType>> {
   freshseconds?: number
   staleseconds?: number
   storageClass?: StorageEngineType
+  onRefresh?: OnRefreshFunction<KeyType, ReturnType>
 }
 interface CacheOptionsInternal {
   freshseconds: number
@@ -159,17 +162,18 @@ class LRUWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 }
 
-type OptionalArgTuple<T> = T extends undefined ? [] : [T]
-type OptionalArgWithData<T, V> = T extends undefined ? [V] : [T, V]
-type FetcherFunction<KeyType, ReturnType> = (...params: OptionalArgTuple<KeyType>) => Promise<ReturnType>
+type OptionalArg<T> = T extends undefined ? [] : [T]
+type OptionalArgPlus<T, V> = T extends undefined ? [V] : [T, V]
+type FetcherFunction<KeyType, ReturnType> = (...params: OptionalArg<KeyType>) => Promise<ReturnType>
 
 export class Cache<KeyType = undefined, ReturnType = any> {
   private fetcher: FetcherFunction<KeyType, ReturnType>
   private options: CacheOptionsInternal
   private storage: StorageEngine<Storage<ReturnType>>
   private active: { [keys: string]: Promise<ReturnType> }
+  private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
 
-  constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<any> = {}) {
+  constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds ?? 5 * 60,
@@ -185,10 +189,11 @@ export class Cache<KeyType = undefined, ReturnType = any> {
     } else {
       this.storage = new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     }
+    this.onRefresh = options.onRefresh
     this.active = {}
   }
 
-  async get (...params: OptionalArgTuple<KeyType>) {
+  async get (...params: OptionalArg<KeyType>) {
     const key = params[0]
     const keystr = tostr(key)
     const stored = await this.storage.get(keystr)
@@ -210,7 +215,7 @@ export class Cache<KeyType = undefined, ReturnType = any> {
     return this.refresh(...params)
   }
 
-  async set (...params: OptionalArgWithData<KeyType, ReturnType>) {
+  async set (...params: OptionalArgPlus<KeyType, ReturnType>) {
     const key = params[1] ? params[0] as KeyType : undefined
     const data = params[1] ? params[1] : params[0] as ReturnType
     const keystr = tostr(key)
@@ -230,13 +235,15 @@ export class Cache<KeyType = undefined, ReturnType = any> {
     await this.storage.clear()
   }
 
-  async refresh (...params: OptionalArgTuple<KeyType>) {
+  async refresh (...params: OptionalArg<KeyType>) {
     const key = params[0]
     const keystr = tostr(key)
     if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
     this.active[keystr] = this.fetcher(...params)
     try {
       const data = await this.active[keystr]
+      const refreshPromise = this.onRefresh?.(key, data)
+      if (refreshPromise) refreshPromise.catch?.(e => console.error(e))
       await this.set(...[...params, data] as any)
       return data
     } finally {

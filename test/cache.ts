@@ -119,4 +119,17 @@ describe('cache w/memcache', () => {
     expect(obj?.key).to.equal('value')
     expect(obj2?.key).to.equal('value')
   })
+  it('should call the onRefresh callback', async () => {
+    let refreshCount = 0
+    const onRefreshCache = new Cache(async () => 4, {
+      onRefresh: () => { refreshCount++ }
+    })
+    expect(refreshCount).to.equal(0)
+    await onRefreshCache.get()
+    expect(refreshCount).to.equal(1)
+    await onRefreshCache.get()
+    expect(refreshCount).to.equal(1)
+    await onRefreshCache.refresh()
+    expect(refreshCount).to.equal(2)
+  })
 })
