@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail } from '../src'
+import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -17,7 +17,7 @@ describe('sleep', () => {
     const endTime = new Date()
     const elapsed = endTime.getTime() - startTime.getTime()
     expect(elapsed).to.be.lessThan(10)
-    expect(elapsed).to.be.greaterThan(0)
+    expect(elapsed).to.be.gte(0)
   })
 })
 
@@ -81,6 +81,23 @@ describe('isEmpty', () => {
   })
   it('should return false for the number 0', () => {
     expect(isEmpty(0)).to.be.false
+  })
+})
+
+describe('typeguards', () => {
+  it('should properly typeguard when using isNotEmpty', () => {
+    // eslint-disable-next-line prefer-const
+    let obj: { hello: string }|undefined
+    if (isEmpty(obj)) expect(obj).to.be.undefined
+    obj = { hello: 'world' }
+    if (isNotEmpty(obj)) expect(obj.hello).to.equal('world')
+  })
+  it('should properly typeguard when using isTruthy', () => {
+    // eslint-disable-next-line prefer-const
+    let obj: { hello: string }|undefined
+    if (!isTruthy(obj)) expect(obj).to.be.undefined
+    obj = { hello: 'world' }
+    if (isTruthy(obj)) expect(obj.hello).to.equal('world')
   })
 })
 

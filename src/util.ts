@@ -8,12 +8,16 @@ export function randomid () {
   return String.fromCharCode(97 + Math.floor(Math.random() * 26)) + Math.random().toString(36).slice(2, 11)
 }
 
-export function isBlank (str: string|undefined|null) {
+export function isBlank (str: string|undefined|null): str is ''|undefined|null {
   return !str || !str.trim || str.trim().length === 0
 }
 
 export function isNotBlank <T extends string|undefined|null> (str: T): str is Exclude<T, undefined|null> {
   return !isBlank(str)
+}
+
+export function isTruthy <T> (str: T): str is Exclude<T, undefined|null> {
+  return Boolean(str)
 }
 
 export function isEmpty (obj: any): boolean {
