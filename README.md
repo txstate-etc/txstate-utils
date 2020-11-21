@@ -23,7 +23,7 @@ Note that setting freshseconds === staleseconds renders this into a standard on-
 
 ### Example Usage
 ```javascript
-import { Cache } from 'txstate-utils/cache'
+import { Cache } from 'txstate-utils'
 const userCache = new Cache(id => User.findById(id))
 
 function getUserWithCaching (id) {
