@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { hashify, unique, shuffle } from '../src'
+import { hashify, unique, shuffle, toArray } from '../src'
 import { expect } from 'chai'
 
 describe('hashify', () => {
@@ -89,5 +89,25 @@ describe('shuffle', () => {
     expect(shuffled).to.not.deep.equal(check)
     expect(shuffled).to.have.lengthOf(check.length)
     for (const n of check) expect(shuffled).to.contain(n)
+  })
+})
+describe('toArray', () => {
+  it('should convert undefined to empty array', () => {
+    expect(toArray(undefined)).to.deep.equal([])
+  })
+  it('should convert an object to an array with the object', () => {
+    expect(toArray({ hello: 'world' })).to.deep.equal([{ hello: 'world' }])
+  })
+  it('should convert 0 to [0]', () => {
+    expect(toArray(0)).to.deep.equal([0])
+  })
+  it('should convert "" to [""]', () => {
+    expect(toArray('')).to.deep.equal([''])
+  })
+  it('should leave an array alone', () => {
+    expect(toArray([1, 2, 3])).to.deep.equal([1, 2, 3])
+  })
+  it('should leave an empty array alone', () => {
+    expect(toArray([])).to.deep.equal([])
   })
 })
