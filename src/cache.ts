@@ -162,18 +162,58 @@ class LRUWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 }
 
-type OptionalArg<T> = T extends undefined ? [] : [T]
-type OptionalArgPlus<T, V> = T extends undefined ? [V] : [T, V]
-type FetcherFunction<KeyType, ReturnType> = (...params: OptionalArg<KeyType>) => Promise<ReturnType>
+type OptionalArgPlus<T, V> = T extends undefined
+  ? undefined extends T
+    ? [V]
+    : [T, V]
+  : [T, V]
+type OptionalArgBoth<T, V> = T extends undefined
+  // T is optional or undefined
+  ? undefined extends T
+    // T is undefined
+    ? V extends undefined
+      // V is optional or undefined
+      ? undefined extends V
+        // V is undefined
+        ? []
+        // V is optional
+        : [V]|[]
+      // V is not optional
+      : [V]
+    // T is optional
+    : V extends undefined
+      // V is optional or undefined
+      ? undefined extends V
+        // V is undefined
+        ? [T]|[]
+        // V is optional
+        : [T, V]|[T]|[]
+      // V is not optional
+      : [T, V]
+  // T is not optional
+  : V extends undefined
+    // V is optional or undefined
+    ? undefined extends V
+      // V is undefined
+      ? [T]
+      // V is optional
+      : [T, V]|[T]
+    // V is not optional
+    : [T, V]
 
-export class Cache<KeyType = undefined, ReturnType = any> {
-  private fetcher: FetcherFunction<KeyType, ReturnType>
+type FetcherFunction<KeyType, ReturnType, HelperType> =
+  ((key: KeyType) => Promise<ReturnType>) |
+  ((key: KeyType, helper: HelperType) => Promise<ReturnType>) |
+  (() => Promise<ReturnType>)
+
+export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined> {
+  private fetcher: FetcherFunction<KeyType, ReturnType, HelperType>
   private options: CacheOptionsInternal
   private storage: StorageEngine<Storage<ReturnType>>
   private active: { [keys: string]: Promise<ReturnType> }
   private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
 
-  constructor (fetcher: FetcherFunction<KeyType, ReturnType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
+  constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds ?? 5 * 60,
@@ -193,7 +233,7 @@ export class Cache<KeyType = undefined, ReturnType = any> {
     this.active = {}
   }
 
-  async get (...params: OptionalArg<KeyType>) {
+  async get (...params: OptionalArgBoth<KeyType, HelperType>) {
     const key = params[0]
     const keystr = tostr(key)
     const stored = await this.storage.get(keystr)
@@ -216,8 +256,8 @@ export class Cache<KeyType = undefined, ReturnType = any> {
   }
 
   async set (...params: OptionalArgPlus<KeyType, ReturnType>) {
-    const key = params[1] ? params[0] as KeyType : undefined
-    const data = params[1] ? params[1] : params[0] as ReturnType
+    const key = params.length > 1 ? params[0] as KeyType : undefined
+    const data = (params.length > 1 ? params[1] : params[0]) as ReturnType
     const keystr = tostr(key)
     await this.storage.set(keystr, { fetched: new Date(), data })
   }
@@ -235,16 +275,17 @@ export class Cache<KeyType = undefined, ReturnType = any> {
     await this.storage.clear()
   }
 
-  async refresh (...params: OptionalArg<KeyType>) {
-    const key = params[0]
+  async refresh (...params: OptionalArgBoth<KeyType, HelperType>) {
+    const key = params[0] as KeyType
+    const helper = params[1] as HelperType
     const keystr = tostr(key)
     if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
-    this.active[keystr] = this.fetcher(...params)
+    this.active[keystr] = this.fetcher(key, helper)
     try {
       const data = await this.active[keystr]
       const refreshPromise = this.onRefresh?.(key, data)
       if (refreshPromise) refreshPromise.catch?.(e => console.error(e))
-      await this.set(...[...params, data] as any)
+      await this.set(...[key, data] as any)
       return data
     } finally {
       delete this.active[keystr]

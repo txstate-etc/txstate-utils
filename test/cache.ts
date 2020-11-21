@@ -65,6 +65,33 @@ describe('cache', () => {
     expect(obj?.key).to.equal('anothervalue')
     expect(obj2?.key).to.equal('anothervalue')
   })
+  it('should call the onRefresh callback', async () => {
+    let refreshCount = 0
+    const onRefreshCache = new Cache(async () => 4, {
+      onRefresh: () => { refreshCount++ }
+    })
+    expect(refreshCount).to.equal(0)
+    await onRefreshCache.get()
+    expect(refreshCount).to.equal(1)
+    await onRefreshCache.get()
+    expect(refreshCount).to.equal(1)
+    await onRefreshCache.refresh()
+    expect(refreshCount).to.equal(2)
+  })
+  it('should be able to use a helper object to fetch, without adding the helper to the key', async () => {
+    const helperCache = new Cache(async (n: number, helper?: boolean) => {
+      if (helper) return 2 * n
+      else return 0
+    })
+    expect(await helperCache.get(2, true)).to.equal(4)
+    expect(await helperCache.get(2, false)).to.equal(4)
+    expect(await helperCache.get(2)).to.equal(4)
+    await helperCache.clear()
+    expect(await helperCache.get(2, false)).to.equal(0)
+    await helperCache.clear()
+    expect(await helperCache.get(2)).to.equal(0)
+    expect(Object.keys((helperCache as any).storage.storage)).to.deep.equal(['2'])
+  })
 })
 describe('cache w/memcache', () => {
   const doublingMemCache = new Cache(async (n: number) => n * 2, {
@@ -118,18 +145,5 @@ describe('cache w/memcache', () => {
     const obj2 = await singleValueCacheMemCache.get()
     expect(obj?.key).to.equal('value')
     expect(obj2?.key).to.equal('value')
-  })
-  it('should call the onRefresh callback', async () => {
-    let refreshCount = 0
-    const onRefreshCache = new Cache(async () => 4, {
-      onRefresh: () => { refreshCount++ }
-    })
-    expect(refreshCount).to.equal(0)
-    await onRefreshCache.get()
-    expect(refreshCount).to.equal(1)
-    await onRefreshCache.get()
-    expect(refreshCount).to.equal(1)
-    await onRefreshCache.refresh()
-    expect(refreshCount).to.equal(2)
   })
 })
