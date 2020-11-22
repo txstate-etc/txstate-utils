@@ -73,7 +73,7 @@ const personCache = new Cache(async ({ lastname, firstname }) => {
 })
 const person = await personCache.get({ lastname: 'Smith', firstname: 'John' })
 ```
-Note that you cannot use extra parameters on `get` and your fetcher function, as the second parameter is reserved for fetch helpers (see above).
+Note that you cannot use extra parameters on `get` and your fetcher function, as the second parameter is reserved for fetch helpers (see below).
 #### Fetch Helpers
 If your fetcher function requires some sort of context-sensitive helper to do its work (e.g. a request-scoped service), you may pass it in as a second parameter without affecting the lookup key:
 ```javascript
