@@ -95,6 +95,9 @@ describe('toArray', () => {
   it('should convert undefined to empty array', () => {
     expect(toArray(undefined)).to.deep.equal([])
   })
+  it('should convert null to empty array', () => {
+    expect(toArray(null)).to.deep.equal([])
+  })
   it('should convert an object to an array with the object', () => {
     expect(toArray({ hello: 'world' })).to.deep.equal([{ hello: 'world' }])
   })

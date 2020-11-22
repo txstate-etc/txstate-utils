@@ -78,7 +78,7 @@ export function shuffle<ObjectType> (shuffleArray: ObjectType[]) {
 }
 
 export function toArray <T> (val: T | T[] | undefined | null) {
-  if (typeof val === 'undefined') return []
+  val ??= []
   if (Array.isArray(val)) return val
   return [val]
 }
