@@ -1,4 +1,4 @@
-const newerThan = (dt: Date, seconds: number) => (new Date()).getTime() - dt.getTime() < seconds * 1000
+const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
 const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
 type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void|Promise<void>
@@ -177,9 +177,9 @@ type OptionalArgBoth<T, V> = T extends undefined
         // V is undefined
         ? []
         // V is optional
-        : [V]|[]
+        : [T, V]|[]
       // V is not optional
-      : [V]
+      : [T, V]
     // T is optional
     : V extends undefined
       // V is optional or undefined
@@ -217,7 +217,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     this.fetcher = fetcher
     this.options = {
       freshseconds: options.freshseconds ?? 5 * 60,
-      staleseconds: options.staleseconds ?? 10 * 60
+      staleseconds: (options.staleseconds ?? 10 * 60) || Infinity
     }
     const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     if (storageClass.reset && storageClass.dump) {
@@ -293,12 +293,10 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   }
 
   private fresh (stored: Storage<ReturnType>) {
-    if (!this.options.freshseconds) return true
     return newerThan(stored.fetched, this.options.freshseconds)
   }
 
   private valid (stored: Storage<ReturnType>) {
-    if (!this.options.staleseconds) return true
     return newerThan(stored.fetched, this.options.staleseconds)
   }
 }
