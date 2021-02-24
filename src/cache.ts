@@ -112,7 +112,7 @@ class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 
   async set (keystr: string, data: StorageType) {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       this.client.set(keystr, data, this.maxAge, (err: Error) => {
         if (err) reject(err)
         else resolve()
@@ -121,7 +121,7 @@ class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 
   async del (keystr: string) {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       this.client.del(keystr, (err: Error) => {
         if (err) reject(err)
         else resolve()
@@ -130,7 +130,7 @@ class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 
   async clear () {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       this.client.flush((err: Error) => {
         if (err) reject(err)
         else resolve()
