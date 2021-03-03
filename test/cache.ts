@@ -17,6 +17,11 @@ describe('cache', () => {
     await sleep(sleeptime)
     return n * 2
   })
+  let expiringCount = 0
+  const expiringCache = new Cache(async (n: number) => {
+    expiringCount++
+    return n * 2
+  }, { freshseconds: 0.05, staleseconds: 0.05 })
   const singleValueCache = new Cache(async () => {
     return { key: 'value' }
   })
@@ -91,6 +96,22 @@ describe('cache', () => {
     await helperCache.clear()
     expect(await helperCache.get(2)).to.equal(0)
     expect(Object.keys((helperCache as any).storage.storage)).to.deep.equal(['2'])
+  })
+  it('should properly remove objects that have expired', async () => {
+    expiringCount = 0
+    const ten = await expiringCache.get(5)
+    expect(ten).to.equal(10)
+    const eight = await expiringCache.get(4)
+    expect(eight).to.equal(8)
+    expect(expiringCount).to.equal(2)
+    await expiringCache.get(5)
+    expect(expiringCount).to.equal(2)
+    await sleep(100)
+    await expiringCache.set(2, 4) // it only prunes after each set
+    expect((expiringCache as any).storage.storage).not.to.have.keys(['5'])
+    expect((expiringCache as any).storage.oldest.keystr).to.equal('2')
+    await expiringCache.get(5)
+    expect(expiringCount).to.equal(3)
   })
 })
 describe('cache w/memcache', () => {
