@@ -25,6 +25,10 @@ describe('cache', () => {
   const singleValueCache = new Cache(async () => {
     return { key: 'value' }
   })
+  const throwingCache = new Cache(async () => {
+    await sleep(10)
+    throw new Error('testing throws')
+  })
   it('should return transformed values', async () => {
     const four = await doublingCache.get(2)
     expect(four).to.equal(4)
@@ -112,6 +116,30 @@ describe('cache', () => {
     expect((expiringCache as any).storage.oldest.keystr).to.equal('2')
     await expiringCache.get(5)
     expect(expiringCount).to.equal(3)
+  })
+  it('should throw when the cached function throws', async () => {
+    try {
+      await throwingCache.get()
+      expect(false).to.be.true('boolean', 'throwingCache did not throw on get()')
+    } catch (e) {
+      expect(true).to.be.true
+    }
+  })
+  it('should reject all simultaneous gets when cached function throws', async () => {
+    const p1 = throwingCache.get()
+    const p2 = throwingCache.get()
+    try {
+      await p1
+      expect(false).to.be.true('boolean', 'throwingCache did not throw on the first get()')
+    } catch {
+      expect(true).to.be.true
+    }
+    try {
+      await p2
+      expect(false).to.be.true('boolean', 'throwingCache did not throw on the second get()')
+    } catch {
+      expect(true).to.be.true
+    }
   })
 })
 describe('cache w/memcache', () => {
