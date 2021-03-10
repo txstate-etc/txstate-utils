@@ -1,3 +1,4 @@
+/* eslint-disable no-var */
 /*
  * adapted from https://github.com/mafintosh/sorted-intersect
  * removed options and added types
@@ -38,6 +39,13 @@ function gallop (list: Comparable[], val: Comparable, offset: number) {
   return low + 1
 }
 
+/**
+ * fast non-mutating intersection of multiple sorted arrays
+ *
+ * only works with array elements that can be compared with < and >
+ *
+ * returns incorrect result if any input array is out of order
+ */
 export function intersectSorted <T extends Comparable> (lists: T[][]) {
   const result: T[] = []
   const offsets: number[] = []

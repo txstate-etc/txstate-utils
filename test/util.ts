@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy } from '../src'
+import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -84,6 +84,29 @@ describe('isEmpty', () => {
   })
 })
 
+describe('isNull', () => {
+  it('should return not null for strings, numbers, objects, arrays and functions', () => {
+    expect(isNull('string')).to.be.false
+    expect(isNull(4)).to.be.false
+    expect(isNull([])).to.be.false
+    expect(isNull({})).to.be.false
+    expect(isNull(() => {})).to.be.false
+    expect(isNotNull('string')).to.be.true
+    expect(isNotNull(4)).to.be.true
+    expect(isNotNull([])).to.be.true
+    expect(isNotNull({})).to.be.true
+    expect(isNotNull(() => {})).to.be.true
+  })
+  it('should treat 0 as not null', () => {
+    expect(isNull(0)).to.be.false
+    expect(isNotNull(0)).to.be.true
+  })
+  it('should treat null and undefined the same', () => {
+    expect(isNull(undefined)).to.equal(isNull(null))
+    expect(isNotNull(undefined)).to.equal(isNotNull(null))
+  })
+})
+
 describe('typeguards', () => {
   it('should properly typeguard when using isNotEmpty', () => {
     // eslint-disable-next-line prefer-const
@@ -98,6 +121,13 @@ describe('typeguards', () => {
     if (!isTruthy(obj)) expect(obj).to.be.undefined
     obj = { hello: 'world' }
     if (isTruthy(obj)) expect(obj.hello).to.equal('world')
+  })
+  it('should properly typeguard when using isNull', () => {
+    // eslint-disable-next-line prefer-const
+    let obj: { hello: string }|undefined
+    if (isNull(obj)) expect(obj).to.be.undefined
+    obj = { hello: 'world' }
+    if (isNotNull(obj)) expect(obj.hello).to.equal('world')
   })
 })
 

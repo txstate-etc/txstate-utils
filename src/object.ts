@@ -6,15 +6,19 @@ const clone = (objectOrArray: ObjectOrArray): ObjectOrArray =>
 
 const pathSeperatorRegex = /\[\s*(['"])(.*?)\1\s*\]|(?:^|\.)\s*(\w+)\s*(?=\.|\[|$)|\[\s*(-?\d+)\s*\]/g
 
+/**
+ * tiny alternative to dot-prop or lodash.get that only works with
+ * JSON-compatible objects
+ */
 export function get<ReturnType = any> (root: any, path: string | number | (string|number)[], defaultValue?: ReturnType) {
   try {
     if (isArray(path)) path = "['" + path.join("']['") + "']"
     if (path in root || typeof path === 'number') return root[path as string]
-    var obj = root
+    let obj = root
     path.replace(
       pathSeperatorRegex,
       // @ts-expect-error
-      (wholeMatch, _quotationMark, quotedProp, namedProp, index) => {
+      (_whole, _quotationMark, quotedProp, namedProp, index) => {
         obj = obj[quotedProp || namedProp || index]
       }
     )
@@ -24,6 +28,10 @@ export function get<ReturnType = any> (root: any, path: string | number | (strin
   }
 }
 
+/**
+ * tiny non-mutating alternative to dot-prop or lodash.set that only
+ * works with JSON-compatible objects
+ */
 export function set<T = ObjectOrArray> (
   root: T,
   path: string | number | Array<string | number>,

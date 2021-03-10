@@ -20,12 +20,28 @@ export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFligh
   return Promise.all(qitems)
 }
 
+/**
+ * Works like Array.map() except runs things concurrently / in parallel.
+ * Limits operations to a configurable in-flight maximum.
+ *
+ * Callback should return a promise
+ *
+ * Returns a promise containing the array of results
+ */
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
   return eachConcurrent(items, inFlightLimitOrCallback as number, callback as eachFunction<ItemType, ReturnType>)
 }
 
+/**
+ * Works like Array.filter() except runs things concurrently / in parallel.
+ * Limits operations to a configurable in-flight maximum.
+ *
+ * Callback should return a promise
+ *
+ * Returns a promise containing the array of items that returned true
+ */
 export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, boolean>): Promise<ItemType[]>
 export async function filterConcurrent<ItemType> (items: ItemType[], callback: eachFunction<ItemType, boolean>): Promise<ItemType[]>
 export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, boolean>, callback?: eachFunction<ItemType, boolean>) {
