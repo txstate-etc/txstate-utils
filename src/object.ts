@@ -1,6 +1,6 @@
 const { isArray } = Array
 
-type ObjectOrArray = Record<string, any> | Array<any>
+type ObjectOrArray = Record<string, any> | Array<any> | null | undefined
 const clone = (objectOrArray: ObjectOrArray): ObjectOrArray =>
   isArray(objectOrArray) ? Array.from(objectOrArray) : Object.assign({}, objectOrArray)
 
@@ -31,12 +31,15 @@ export function get<ReturnType = any> (root: any, path: string | number | (strin
 /**
  * tiny non-mutating alternative to dot-prop or lodash.set that only
  * works with JSON-compatible objects
+ *
+ * accepts a generic to optionally set the output type, otherwise assumes
+ * your mutation will not alter the object's type
  */
-export function set<T = ObjectOrArray> (
+export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
   root: T,
   path: string | number | Array<string | number>,
   newValue: unknown
-): T {
+): (O extends undefined ? T : O) {
   if (isArray(path)) path = "['" + path.join("']['") + "']"
   const newRoot: any = clone(root)
 
