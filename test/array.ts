@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { hashify, unique, shuffle, toArray } from '../src'
+import { hashify, unique, shuffle, toArray, groupby } from '../src'
 import { expect } from 'chai'
 
 describe('hashify', () => {
@@ -112,5 +112,36 @@ describe('toArray', () => {
   })
   it('should leave an empty array alone', () => {
     expect(toArray([])).to.deep.equal([])
+  })
+})
+describe('groupby', () => {
+  const rows = [
+    { id: 1, fruit: 'apple', vegetable: 'cucumber', deep: { fruit: 'apple' } },
+    { id: 2, fruit: 'orange', vegetable: 'green bean', deep: { fruit: 'orange' } },
+    { id: 3, fruit: 'apple', vegetable: 'lima bean', deep: { fruit: 'apple' } },
+    { id: 4, fruit: 'apple', vegetable: 'artichoke', deep: { fruit: 'apple' } },
+    { id: 5, fruit: 'banana', vegetable: 'artichoke', deep: { fruit: 'banana' } },
+    { id: 6, fruit: 'banana', vegetable: 'lettuce', deep: { fruit: 'banana' } }
+  ]
+  it('should group rows with matching keys into the same array', () => {
+    const grouped = groupby(rows, 'fruit')
+    expect(Object.keys(grouped)).to.have.lengthOf(3)
+    expect(grouped.apple).to.have.lengthOf(3)
+    expect(grouped.banana).to.have.lengthOf(2)
+    expect(grouped.orange).to.have.lengthOf(1)
+  })
+  it('should group rows with matching keys into the same array, function extractor', () => {
+    const grouped = groupby(rows, r => r.fruit)
+    expect(Object.keys(grouped)).to.have.lengthOf(3)
+    expect(grouped.apple).to.have.lengthOf(3)
+    expect(grouped.banana).to.have.lengthOf(2)
+    expect(grouped.orange).to.have.lengthOf(1)
+  })
+  it('should group rows with matching keys into the same array, dotprop extractor', () => {
+    const grouped = groupby(rows, 'deep.fruit')
+    expect(Object.keys(grouped)).to.have.lengthOf(3)
+    expect(grouped.apple).to.have.lengthOf(3)
+    expect(grouped.banana).to.have.lengthOf(2)
+    expect(grouped.orange).to.have.lengthOf(1)
   })
 })
