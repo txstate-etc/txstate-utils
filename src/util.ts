@@ -18,7 +18,7 @@ export function randomid (length = 10) {
 
 /**
  * useful for checking for empty strings, though in modern javascript
- * optional chaining may be easier: if (!str?.length) ...
+ * optional chaining may be easier: if (!str?.trim().length) ...
  */
 export function isBlank (str: string|undefined|null): str is ''|undefined|null {
   return !str || !str.trim || str.trim().length === 0
@@ -26,7 +26,7 @@ export function isBlank (str: string|undefined|null): str is ''|undefined|null {
 
 /**
  * useful for checking for empty strings, though in modern javascript
- * optional chaining may be easier: if (str?.length) ...
+ * optional chaining may be easier: if (str?.trim().length) ...
  */
 export function isNotBlank <T extends string|undefined|null> (str: T): str is Exclude<T, undefined|null> {
   return !isBlank(str)
@@ -47,7 +47,7 @@ export function isTruthy <T> (str: T): str is Exclude<T, undefined|null> {
  * undefined, or null
  */
 export function isEmpty (obj: any): boolean {
-  if (typeof obj === 'undefined' || obj === null) return true
+  if (obj == null) return true
   if (typeof obj === 'number') return false
   if (typeof obj === 'string') return isBlank(obj)
   if (typeof obj.length === 'number') return !obj.length
