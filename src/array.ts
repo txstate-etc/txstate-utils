@@ -1,16 +1,5 @@
-import dp from 'dot-prop'
 import stablestringify from 'fast-json-stable-stringify'
-
-/**
- * A wrapper around dot-prop library that works properly on mongoose
- * objects (for which you must call .toObject() before traversing)
- */
-export function dotprop<ObjectType, Key extends keyof ObjectType> (obj: ObjectType, key: Key): ObjectType[Key]
-export function dotprop<ObjectType> (obj: ObjectType, key: string): any
-export function dotprop<ObjectType> (obj: ObjectType, key: string) {
-  const usableObject = (obj as any).toObject ? (obj as any).toObject() : obj
-  return dp.get(usableObject, key)
-}
+import { dotprop } from './object'
 
 /**
  * fast O(n) non-mutating convert an array to an object with keys

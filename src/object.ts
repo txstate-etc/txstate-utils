@@ -17,9 +17,9 @@ export function get<ReturnType = any> (root: any, path: string | number | (strin
     let obj = root
     path.replace(
       pathSeperatorRegex,
-      // @ts-expect-error
-      (_whole, _quotationMark, quotedProp, namedProp, index) => {
+      (whole, _quotationMark, quotedProp, namedProp, index) => {
         obj = obj[quotedProp || namedProp || index]
+        return whole
       }
     )
     return obj ?? defaultValue
@@ -51,29 +51,37 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
 
   let currentParent: any = newRoot
   let previousKey: string
-  let previousKeyIsArrayIndex: boolean = false
   path.replace(
     pathSeperatorRegex,
-    // @ts-expect-error
-    (wholeMatch, _quotationMark, quotedProp, namedProp, index) => {
+    (whole, _quotationMark, quotedProp, namedProp, index) => {
       if (previousKey) {
         // Clone (or create) the object/array that we were just at: this lets us keep it attached to its parent.
         const previousValue = currentParent[previousKey]
         currentParent[previousKey] = previousValue
           ? clone(previousValue)
-          : previousKeyIsArrayIndex
+          : index
             ? []
             : {}
 
         // Now advance
         currentParent = currentParent[previousKey]
       }
-
       previousKey = namedProp || quotedProp || index
-      previousKeyIsArrayIndex = !!index
+      return whole
     }
   )
 
   currentParent[previousKey!] = newValue
   return newRoot
+}
+
+/**
+ * A wrapper around get that works properly on mongoose
+ * objects (for which you must call .toObject() before traversing)
+ */
+export function dotprop<ObjectType, Key extends keyof ObjectType> (obj: ObjectType, key: Key): ObjectType[Key]
+export function dotprop<ObjectType> (obj: ObjectType, key: string): any
+export function dotprop<ObjectType> (obj: ObjectType, key: string) {
+  const usableObject = (obj as any).toObject ? (obj as any).toObject() : obj
+  return get(usableObject, key)
 }
