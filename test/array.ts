@@ -11,12 +11,12 @@ describe('hashify', () => {
     { [sym]: 4, idnum: 4, idstr: 'four', name: 'Four' }
   ]
   it('should work with a shallow string property that returns numbers', () => {
-    const hashed = hashify(records, sym)
+    const hashed = hashify(records, 'idnum')
     expect(Object.keys(hashed)).to.have.lengthOf(4)
     expect(hashed[1].name).to.equal('One')
   })
   it('should work with a shallow symbol property that returns numbers', () => {
-    const hashed = hashify(records, 'idnum')
+    const hashed = hashify(records, sym)
     expect(Object.keys(hashed)).to.have.lengthOf(4)
     expect(hashed[1].name).to.equal('One')
   })
