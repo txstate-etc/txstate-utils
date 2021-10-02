@@ -41,7 +41,7 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
 
   constructor (maxAge: number) {
     this.maxAge = maxAge
-    this.storage = {}
+    this.storage = Object.create(null)
   }
 
   async get (keystr: string) {
@@ -80,7 +80,7 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
   }
 
   async clear () {
-    this.storage = {}
+    this.storage = Object.create(null)
     this.newest = undefined
     this.oldest = undefined
   }
@@ -102,13 +102,12 @@ class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 
   async get (keystr: string) {
-    const ret: Promise<StorageType> = new Promise((resolve, reject) => {
+    return await new Promise<StorageType>((resolve, reject) => {
       this.client.get(keystr, (err: Error, data: StorageType) => {
         if (err) reject(err)
         else resolve(data)
       })
     })
-    return ret
   }
 
   async set (keystr: string, data: StorageType) {
@@ -230,7 +229,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       this.storage = new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     }
     this.onRefresh = options.onRefresh
-    this.active = {}
+    this.active = Object.create(null)
   }
 
   async get (...params: OptionalArgBoth<KeyType, HelperType>) {
@@ -252,7 +251,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
         return stored.data
       }
     }
-    return this.refresh(...params)
+    return await this.refresh(...params)
   }
 
   async set (...params: OptionalArgPlus<KeyType, ReturnType>) {

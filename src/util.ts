@@ -83,7 +83,7 @@ export function isNotNull <T> (obj: T): obj is Exclude<T, undefined|null> {
  * only checks for valid syntax
  */
 export function isEmail <T extends string|undefined|null> (email: T): email is Exclude<T, undefined|null> {
-  return !!email && /^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(email as string)
+  return !!email && /^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(email)
 }
 
 /**

@@ -1,7 +1,7 @@
 import { ObjectOrArray, pathSeperatorRegex } from './common'
 
 const clone = (objectOrArray: ObjectOrArray): ObjectOrArray =>
-  Array.isArray(objectOrArray) ? Array.from(objectOrArray) : Object.assign({}, objectOrArray)
+  Array.isArray(objectOrArray) ? Array.from(objectOrArray) : Object.assign(Object.create(null), objectOrArray)
 
 /**
  * tiny non-mutating alternative to dot-prop or lodash.set that only
@@ -36,7 +36,7 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
           ? clone(previousValue)
           : index
             ? []
-            : {}
+            : Object.create(null)
 
         // Now advance
         currentParent = currentParent[previousKey]

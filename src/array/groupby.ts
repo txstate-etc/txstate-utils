@@ -19,7 +19,7 @@ function vivifyadd (hash: any, key: any, val: any) {
 export function groupby <ObjectType extends object> (objArray: ObjectType[]|undefined, key: keyof ObjectType): { [keys: string]: ObjectType[] }
 export function groupby <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)): { [keys: string]: ObjectType[] }
 export function groupby <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
-  const hash: Record<string|number, ObjectType[]> = {}
+  const hash: Record<string|number, ObjectType[]> = Object.create(null)
   if (!Array.isArray(objArray)) return hash
   if (typeof keyOrExtractor === 'function') {
     for (const obj of objArray) {
