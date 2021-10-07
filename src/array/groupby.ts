@@ -1,8 +1,6 @@
 import { dotprop } from '../object'
-import { disallowedKeys } from '../prototypepollution'
 
 function vivifyadd (hash: any, key: any, val: any) {
-  if (disallowedKeys.has(key)) return
   hash[key] ??= []
   hash[key].push(val)
 }

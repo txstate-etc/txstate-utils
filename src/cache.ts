@@ -1,5 +1,3 @@
-import { disallowedKeys } from './prototypepollution'
-
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
 const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
@@ -51,7 +49,6 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
   }
 
   async set (keystr: string, data: StorageType) {
-    if (disallowedKeys.has(keystr)) return
     await this.del(keystr)
     const expires = new Date(new Date().getTime() + (this.maxAge * 1000))
     const curr: SimpleStorageNode<StorageType> = { keystr, data, expires }
@@ -282,7 +279,6 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const helper = params[1] as HelperType
     const keystr = tostr(key)
     if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
-    if (disallowedKeys.has(keystr)) return
     this.active[keystr] = this.fetcher(key, helper)
     try {
       const data = await this.active[keystr]
