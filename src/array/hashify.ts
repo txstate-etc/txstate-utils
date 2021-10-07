@@ -1,4 +1,5 @@
 import { dotprop } from '../object'
+import { disallowedKeys } from '../prototypepollution'
 
 /**
  * fast O(n) non-mutating convert an array to an object with keys
@@ -12,12 +13,12 @@ export function hashify (objArray: (string|number|undefined|null)[]|undefined): 
 export function hashify <ObjectType extends object> (objArray: ObjectType[]|undefined, key: keyof ObjectType): { [keys: string]: ObjectType }
 export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)): { [keys: string]: ObjectType }
 export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor?: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
-  const hash: Record<string|number, ObjectType|boolean> = Object.create(null)
+  const hash: Record<string|number, ObjectType|boolean> = {}
   if (!Array.isArray(objArray)) return hash
   if (typeof keyOrExtractor === 'undefined') {
     for (const obj of objArray) {
       if (typeof obj === 'string' || typeof obj === 'number') {
-        hash[obj] = true
+        if (!disallowedKeys.has(obj)) hash[obj] = true
       } else if (typeof obj !== 'undefined' && obj !== null) {
         throw new Error('hashify called with no key extractor and an array value is too complex to be used as a hash key')
       }
@@ -25,17 +26,17 @@ export function hashify <ObjectType> (objArray: ObjectType[]|undefined, keyOrExt
   } else if (typeof keyOrExtractor === 'function') {
     for (const obj of objArray) {
       const val = keyOrExtractor(obj)
-      if (val) hash[val] = obj
+      if (val && !disallowedKeys.has(val)) hash[val] = obj
     }
   } else if (typeof keyOrExtractor === 'number' || typeof keyOrExtractor === 'symbol') {
     for (const obj of objArray) {
       const potentialkey = (obj as any)[keyOrExtractor]
-      if (potentialkey && ['string', 'number'].includes(typeof potentialkey)) hash[potentialkey] = obj
+      if (potentialkey && ['string', 'number'].includes(typeof potentialkey) && !disallowedKeys.has(potentialkey)) hash[potentialkey] = obj
     }
   } else {
     for (const obj of objArray) {
       const potentialkey: string|number|undefined = dotprop(obj, keyOrExtractor)
-      if (potentialkey && ['string', 'number'].includes(typeof potentialkey)) hash[potentialkey] = obj
+      if (potentialkey && ['string', 'number'].includes(typeof potentialkey) && !disallowedKeys.has(potentialkey)) hash[potentialkey] = obj
     }
   }
   return hash

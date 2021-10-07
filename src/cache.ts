@@ -1,3 +1,5 @@
+import { disallowedKeys } from './prototypepollution'
+
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
 const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
@@ -41,7 +43,7 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
 
   constructor (maxAge: number) {
     this.maxAge = maxAge
-    this.storage = Object.create(null)
+    this.storage = {}
   }
 
   async get (keystr: string) {
@@ -49,6 +51,7 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
   }
 
   async set (keystr: string, data: StorageType) {
+    if (disallowedKeys.has(keystr)) return
     await this.del(keystr)
     const expires = new Date(new Date().getTime() + (this.maxAge * 1000))
     const curr: SimpleStorageNode<StorageType> = { keystr, data, expires }
@@ -80,7 +83,7 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
   }
 
   async clear () {
-    this.storage = Object.create(null)
+    this.storage = {}
     this.newest = undefined
     this.oldest = undefined
   }
@@ -229,7 +232,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       this.storage = new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     }
     this.onRefresh = options.onRefresh
-    this.active = Object.create(null)
+    this.active = {}
   }
 
   async get (...params: OptionalArgBoth<KeyType, HelperType>) {
@@ -279,6 +282,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const helper = params[1] as HelperType
     const keystr = tostr(key)
     if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
+    if (disallowedKeys.has(keystr)) return
     this.active[keystr] = this.fetcher(key, helper)
     try {
       const data = await this.active[keystr]

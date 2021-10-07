@@ -1,7 +1,8 @@
+import { disallowedKeys } from '../prototypepollution'
 import { ObjectOrArray, pathSeperatorRegex } from './common'
 
 const clone = (objectOrArray: ObjectOrArray): ObjectOrArray =>
-  Array.isArray(objectOrArray) ? Array.from(objectOrArray) : Object.assign(Object.create(null), objectOrArray)
+  Array.isArray(objectOrArray) ? Array.from(objectOrArray) : Object.assign({}, objectOrArray)
 
 /**
  * tiny non-mutating alternative to dot-prop or lodash.set that only
@@ -20,7 +21,7 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
 
   if (path in newRoot || typeof path === 'number') {
     // Just set it directly: no need to loop
-    newRoot[path as string] = newValue
+    if (!disallowedKeys.has(path)) newRoot[path as string] = newValue
     return newRoot
   }
 
@@ -32,11 +33,12 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
       if (previousKey) {
         // Clone (or create) the object/array that we were just at: this lets us keep it attached to its parent.
         const previousValue = currentParent[previousKey]
+        if (disallowedKeys.has(previousKey)) return newRoot
         currentParent[previousKey] = previousValue
           ? clone(previousValue)
           : index
             ? []
-            : Object.create(null)
+            : {}
 
         // Now advance
         currentParent = currentParent[previousKey]
@@ -45,7 +47,6 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
       return whole
     }
   )
-
-  currentParent[previousKey!] = newValue
+  if (!disallowedKeys.has(previousKey!)) currentParent[previousKey!] = newValue
   return newRoot
 }
