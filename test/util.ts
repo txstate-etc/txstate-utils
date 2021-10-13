@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull } from '../src'
+import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -167,5 +167,24 @@ describe('CSV functions', () => {
   })
   it('should be able to construct a full CSV line', () => {
     expect(csvLine(['apple', 'banana', 'onion, sweet'])).to.equal('apple,banana,"onion, sweet"\r\n')
+  })
+})
+
+let couldBeNull: string|null
+describe('optionalString', () => {
+  it('should work for primitive types', () => {
+    expect(optionalString(2)).to.equal('2')
+    const now = new Date()
+    expect(optionalString(now)).to.equal(now.toString())
+    expect(optionalString(true)).to.equal('true')
+    expect(optionalString('3')).to.equal('3')
+  })
+  it('should return undefined for undefined and null', () => {
+    expect(optionalString(null)).to.be.undefined
+    expect(optionalString(undefined)).to.be.undefined
+    expect(optionalString(couldBeNull)).to.be.undefined
+  })
+  it('should follow behavior of String() constructor for non-stringable input', () => {
+    expect(optionalString({})).to.equal(String({}))
   })
 })

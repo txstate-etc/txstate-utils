@@ -109,3 +109,17 @@ export function csvLine (values: string[]) {
 export function csv (lines: string[][]) {
   return lines.map(csvLine).join('')
 }
+
+/**
+ * Convert something to a string but convert null|undefined to undefined instead of creating
+ * 'undefined' and 'null' strings
+ */
+interface Stringable {
+  toString: (...args: any) => string
+}
+export function optionalString (str: number|string|boolean|Stringable): string
+export function optionalString (str: undefined|null): undefined
+export function optionalString (str: any): string|undefined
+export function optionalString (str: any): string|undefined|null {
+  return str == null ? undefined : String(str)
+}
