@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString } from '../src'
+import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString, roundTo } from '../src'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -186,5 +186,27 @@ describe('optionalString', () => {
   })
   it('should follow behavior of String() constructor for non-stringable input', () => {
     expect(optionalString({})).to.equal(String({}))
+  })
+})
+
+describe('roundTo', () => {
+  it('should round 1.005 to 1.01', () => {
+    expect(roundTo(1.005, 2)).to.equal(1.01)
+  })
+  it('should default to integer rounding', () => {
+    expect(roundTo(1234)).to.equal(1234)
+    expect(roundTo(1234.0004)).to.equal(1234)
+    expect(roundTo(1234.5004)).to.equal(1235)
+    expect(roundTo(1234.4004)).to.equal(1234)
+  })
+  it('should work for positive digits', () => {
+    expect(roundTo(1234.94, 1)).to.equal(1234.9)
+    expect(roundTo(1234.94698, 2)).to.equal(1234.95)
+    expect(roundTo(1234.0987, 3)).to.equal(1234.099)
+  })
+  it('should work for negative digits', () => {
+    expect(roundTo(1234.90, -1)).to.equal(1230)
+    expect(roundTo(1234, -2)).to.equal(1200)
+    expect(roundTo(1234.0987, -3)).to.equal(1000)
   })
 })

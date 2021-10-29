@@ -3,9 +3,7 @@
  * milliseconds
  */
 export function sleep (milliseconds = 0) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, milliseconds)
-  })
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
 /**
@@ -87,30 +85,6 @@ export function isEmail <T extends string|undefined|null> (email: T): email is E
 }
 
 /**
- * escape a string to put inside a csv cell, adds quotes around it only
- * when necessary
- */
-export function csvEscape (str: string) {
-  if (!/[,\n"]/.test(str)) return str
-  return '"' + str.replace(/"/g, '""') + '"'
-}
-
-/**
- * encode a full line of csv with properly escaped strings, adds an
- * appropriate line break at the end
- */
-export function csvLine (values: string[]) {
-  return values.map(csvEscape).join(',') + '\r\n'
-}
-
-/**
- * encode a full csv file with proper line breaks and escaped strings
- */
-export function csv (lines: string[][]) {
-  return lines.map(csvLine).join('')
-}
-
-/**
  * Convert something to a string but convert null|undefined to undefined instead of creating
  * 'undefined' and 'null' strings
  */
@@ -122,4 +96,9 @@ export function optionalString (str: undefined|null): undefined
 export function optionalString (str: any): string|undefined
 export function optionalString (str: any): string|undefined|null {
   return str == null ? undefined : String(str)
+}
+
+export function roundTo (num: number, digits = 0) {
+  const conversion = Math.pow(10, digits)
+  return Math.round((num + Number.EPSILON) * conversion) / conversion
 }
