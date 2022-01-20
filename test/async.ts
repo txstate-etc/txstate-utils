@@ -29,4 +29,18 @@ describe('async utils', () => {
     const a = await rescue(new Promise<number>((resolve, reject) => reject(new Error('rejected!'))), 5)
     expect(a).to.equal(5)
   })
+  it('rescue returns a default value when passed an options object', async () => {
+    const a = await rescue(new Promise<number>((resolve, reject) => reject(new Error('rejected!'))), { defaultValue: 5 })
+    expect(a).to.equal(5)
+  })
+  it('rescue returns a default value only when the error passes a condition', async () => {
+    const a = await rescue(new Promise<number>((resolve, reject) => reject(new Error('rejected!'))), { defaultValue: 5, condition: e => e.message?.startsWith('rej') })
+    expect(a).to.equal(5)
+    try {
+      await rescue(new Promise<number>((resolve, reject) => reject(new Error('denied!'))), { defaultValue: 5, condition: e => e.message?.startsWith('rej') })
+      expect.fail('should have thrown since error did not start with "rej"')
+    } catch (e: any) {
+      expect(e.message).to.equal('denied!')
+    }
+  })
 })
