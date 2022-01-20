@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { hashify, unique, shuffle, toArray, groupby } from '../src'
+import { hashify, unique, shuffle, toArray, groupby } from '../lib'
 import { expect } from 'chai'
 
 describe('hashify', () => {

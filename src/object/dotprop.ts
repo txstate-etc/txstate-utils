@@ -1,4 +1,4 @@
-import { get } from './get'
+import { get } from './get.js'
 
 /**
  * A wrapper around get that works properly on mongoose

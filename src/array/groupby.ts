@@ -1,4 +1,4 @@
-import { dotprop } from '../object'
+import { dotprop } from '../object/index.js'
 
 function vivifyadd (hash: any, key: any, val: any) {
   hash[key] ??= []

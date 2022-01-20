@@ -1,3 +1,3 @@
-export * from './dotprop'
-export * from './get'
-export * from './set'
+export * from './dotprop.js'
+export * from './get.js'
+export * from './set.js'

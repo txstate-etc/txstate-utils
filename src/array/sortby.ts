@@ -1,4 +1,4 @@
-import { get } from '../object'
+import { get } from '../object/index.js'
 
 const comparators: Record<string, any> = {
   string: (a: string, b: string) => a.localeCompare(b),

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { filterAsync, rescue } from '../src'
+import { filterAsync, rescue } from '../lib'
 
 describe('async utils', () => {
   const items = Array.from(Array(20).keys())

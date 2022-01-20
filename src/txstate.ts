@@ -1,4 +1,4 @@
-import { isEmail } from './util'
+import { isEmail } from './util.js'
 
 /**
  * Detect whether a whole string matches a Texas State Net ID

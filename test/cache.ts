@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { Cache } from '../src/cache'
-import { sleep } from '../src/util'
+import { Cache, sleep } from '../lib'
 import { expect } from 'chai'
 import Memcached from 'memcached-mock'
 

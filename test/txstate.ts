@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { isNetID, extractNetIDFromFederated, isTxStEmail } from '../src'
+import { isNetID, extractNetIDFromFederated, isTxStEmail } from '../lib'
 
 describe('netid utils', () => {
   it('should detect good netids', () => {

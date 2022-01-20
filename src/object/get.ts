@@ -1,4 +1,4 @@
-import { pathSeperatorRegex } from './common'
+import { pathSeperatorRegex } from './common.js'
 
 /**
  * tiny alternative to dot-prop or lodash.get that only works with

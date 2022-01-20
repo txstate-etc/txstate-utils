@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sortby } from '../src'
+import { sortby } from '../lib'
 import { expect } from 'chai'
 
 describe('sortby', () => {

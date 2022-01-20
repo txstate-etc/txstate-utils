@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { eachConcurrent, sleep, mapConcurrent, filterConcurrent } from '../src'
+import { eachConcurrent, sleep, mapConcurrent, filterConcurrent } from '../lib'
 
 describe('concurrent utils', () => {
   const items = Array.from(Array(20).keys())

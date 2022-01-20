@@ -1,5 +1,5 @@
 import stablestringify from 'fast-json-stable-stringify'
-import { dotprop } from '../object'
+import { dotprop } from '../object/index.js'
 
 /**
  * fast O(n) non-mutating array de-duplication based on a property,

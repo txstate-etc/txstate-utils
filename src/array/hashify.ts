@@ -1,4 +1,4 @@
-import { dotprop } from '../object'
+import { dotprop } from '../object/index.js'
 
 /**
  * fast O(n) non-mutating convert an array to an object with keys

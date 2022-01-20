@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { get, set } from '../src'
+import { get, set } from '../lib'
 
 describe('object', () => {
   const complexobject = {

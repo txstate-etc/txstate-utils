@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { intersect } from '../src'
+import { intersect } from '../lib'
 
 describe('intersect', function () {
   it('should compute intersections correctly', () => {

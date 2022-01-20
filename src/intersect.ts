@@ -1,6 +1,6 @@
 import stringify from 'fast-json-stable-stringify'
-import { isNotNull } from './util'
-import { toArray } from './array'
+import { isNotNull } from './util.js'
+import { toArray } from './array/index.js'
 
 /**
  * Return the intersection of all given arrays. Output array will never contain undefined.
