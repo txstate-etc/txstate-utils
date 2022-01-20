@@ -1,9 +1,13 @@
 {
   "name": "txstate-utils",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
-  "main": "lib/index.js",
-  "module": "lib-esm/index.js",
+  "exports": {
+    ".": {
+      "require": "./lib/index.js",
+      "import": "./lib-esm/index.js"
+    }
+  },
   "types": "lib/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
@@ -24,13 +28,8 @@
   "devDependencies": {
     "@types/chai": "^4.2.12",
     "@types/mocha": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.1.1",
     "chai": "^4.2.0",
-    "eslint": "^7.9.0",
     "eslint-config-standard-with-typescript": "^21.0.1",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0",
     "memcached-mock": "^0.1.0",
     "mocha": "^9.1.0",
     "ts-node": "^10.2.1",
