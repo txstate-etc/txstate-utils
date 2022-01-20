@@ -1,6 +1,6 @@
 {
   "name": "txstate-utils",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "exports": {
     ".": {
@@ -11,7 +11,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rm -rf lib lib-esm && tsc && tsc -m es6 --outDir lib-esm --moduleResolution node",
+    "build": "rm -rf lib lib-esm && tsc && tsc -m es6 --outDir lib-esm --moduleResolution node && cp package-esm.json lib-esm/package.json",
     "test": "TS_NODE_PROJECT=test/tsconfig.json mocha -r ts-node/register test/**/*.ts"
   },
   "repository": {
