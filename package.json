@@ -1,12 +1,13 @@
 {
   "name": "txstate-utils",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "exports": {
     ".": {
       "require": "./lib/index.js",
       "import": "./lib-esm/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "types": "lib/index.d.ts",
   "scripts": {
