@@ -102,3 +102,7 @@ export function roundTo (num: number, digits = 0) {
   const conversion = Math.pow(10, digits)
   return Math.round((num + Number.EPSILON) * conversion) / conversion
 }
+
+export function ucfirst (str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
