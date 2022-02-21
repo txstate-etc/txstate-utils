@@ -1,3 +1,4 @@
+export * from './findindex.js'
 export * from './groupby.js'
 export * from './hashify.js'
 export * from './shuffle.js'

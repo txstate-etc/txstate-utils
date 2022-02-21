@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { hashify, unique, shuffle, toArray, groupby } from '../lib'
+import { hashify, unique, shuffle, toArray, groupby, findIndex } from '../lib'
 import { expect } from 'chai'
 
 describe('hashify', () => {
@@ -143,5 +143,21 @@ describe('groupby', () => {
     expect(grouped.apple).to.have.lengthOf(3)
     expect(grouped.banana).to.have.lengthOf(2)
     expect(grouped.orange).to.have.lengthOf(1)
+  })
+})
+
+describe('findIndex', () => {
+  const arr = [1, 2, 3, 4]
+  it('should return an index when callback returns true', () => {
+    expect(findIndex(arr, n => n === 2)).to.equal(1)
+  })
+  it('should return the proper index when callback returns true and default was specified', () => {
+    expect(findIndex(arr, n => n === 3, -3)).to.equal(2)
+  })
+  it('should return undefined when callback never returns true', () => {
+    expect(findIndex(arr, n => n === 6)).to.be.undefined
+  })
+  it('should return a default when not found and default was specified', () => {
+    expect(findIndex(arr, n => n === 7, -3)).to.equal(-3)
   })
 })
