@@ -1,6 +1,6 @@
 {
   "name": "txstate-utils",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "main": "lib/index.js",
   "module": "lib-esm/index.js",

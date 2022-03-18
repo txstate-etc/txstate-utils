@@ -1,4 +1,4 @@
-import { get } from '../object'
+import { get } from '../object/index.js'
 
 export const extractors: Record<string, Function> = {
   undefined: () => {
