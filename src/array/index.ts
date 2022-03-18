@@ -1,6 +1,6 @@
 export * from './findindex.js'
 export * from './groupby.js'
-export * from './hashify.js'
+export * from './keyby.js'
 export * from './shuffle.js'
 export * from './sortby.js'
 export * from './toarray.js'

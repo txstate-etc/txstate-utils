@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { hashify, unique, shuffle, toArray, groupby, findIndex } from '../lib'
+import { keyby, unique, shuffle, toArray, groupby, findIndex } from '../lib'
 import { expect } from 'chai'
 
-describe('hashify', () => {
+describe('keyby', () => {
   const sym = Symbol('id')
   const records = [
     { [sym]: 1, idnum: 1, idstr: 'one', name: 'One', deep: { id: 1 } },
@@ -11,37 +11,37 @@ describe('hashify', () => {
     { [sym]: 4, idnum: 4, idstr: 'four', name: 'Four' }
   ]
   it('should work with a shallow string property that returns numbers', () => {
-    const hashed = hashify(records, 'idnum')
+    const hashed = keyby(records, 'idnum')
     expect(Object.keys(hashed)).to.have.lengthOf(4)
     expect(hashed[1].name).to.equal('One')
   })
   it('should work with a shallow symbol property that returns numbers', () => {
-    const hashed = hashify(records, sym)
+    const hashed = keyby(records, sym)
     expect(Object.keys(hashed)).to.have.lengthOf(4)
     expect(hashed[1].name).to.equal('One')
   })
   it('should work with a shallow string properties that returns strings', () => {
-    const hashed = hashify(records, 'idstr')
+    const hashed = keyby(records, 'idstr')
     expect(Object.keys(hashed)).to.have.lengthOf(4)
     expect(hashed.one.name).to.equal('One')
   })
   it('should work with deep properties', () => {
-    const hashed = hashify(records, 'deep.id')
+    const hashed = keyby(records, 'deep.id')
     expect(Object.keys(hashed)).to.have.lengthOf(3)
     expect(hashed[1].name).to.equal('One')
   })
   it('should work with an extractor function', () => {
-    const hashed = hashify(records, record => record?.deep?.id)
+    const hashed = keyby(records, record => record?.deep?.id)
     expect(Object.keys(hashed)).to.have.lengthOf(3)
     expect(hashed[1].name).to.equal('One')
   })
   it('should be null safe', () => {
-    const hashed = hashify(undefined, 'id')
+    const hashed = keyby(undefined, 'id')
     expect(hashed).to.be.a('object')
     expect(Object.keys(hashed)).to.have.lengthOf(0)
   })
   it('should map to booleans when given an array of numbers or strings', () => {
-    const hashed = hashify([1, 3, 5, 7])
+    const hashed = keyby([1, 3, 5, 7])
     expect(hashed[3]).to.equal(true)
     expect(hashed[4]).to.equal(undefined)
   })

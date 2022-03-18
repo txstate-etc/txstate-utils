@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString, roundTo } from '../lib'
+import { sleep, hashid, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString, roundTo } from '../lib'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -26,6 +26,24 @@ describe('randomid', () => {
     const id = randomid()
     expect(id).to.match(/^[a-z]/)
     expect(id.length).to.be.gte(4)
+  })
+})
+
+describe('hashid', () => {
+  it('should always begin with a lowercase letter and be greater than 4 characters', () => {
+    const id = hashid('test')
+    expect(id).to.match(/^[a-z]/)
+    expect(id.length).to.be.gte(4)
+  })
+  it('should produce different output for different input', () => {
+    const id1 = hashid('test my input string')
+    const id2 = hashid('test my input string again')
+    expect(id1).not.to.equal(id2)
+  })
+  it('should produce the same output for the same input', () => {
+    const id1 = hashid('test my input string')
+    const id2 = hashid('test my input string')
+    expect(id1).to.equal(id2)
   })
 })
 

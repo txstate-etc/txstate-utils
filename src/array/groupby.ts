@@ -1,9 +1,4 @@
-import { dotprop } from '../object/index.js'
-
-function vivifyadd (hash: any, key: any, val: any) {
-  hash[key] ??= []
-  hash[key].push(val)
-}
+import { extractors } from './extractors.js'
 
 /**
  * A function to group array rows by property value (or result of a function)
@@ -21,20 +16,13 @@ export function groupby <ObjectType> (objArray: ObjectType[]|undefined, keyOrExt
 export function groupby <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
   const hash: Record<string|number, ObjectType[]> = {}
   if (!Array.isArray(objArray)) return hash
-  if (typeof keyOrExtractor === 'function') {
-    for (const obj of objArray) {
-      const key = keyOrExtractor(obj)
-      if (key != null) vivifyadd(hash, key, obj)
-    }
-  } else if (typeof keyOrExtractor === 'number' || typeof keyOrExtractor === 'symbol') {
-    for (const obj of objArray) {
-      const potentialkey = (obj as any)[keyOrExtractor]
-      if (['string', 'number'].includes(typeof potentialkey)) vivifyadd(hash, potentialkey, obj)
-    }
-  } else {
-    for (const obj of objArray) {
-      const potentialkey: string|number|undefined = dotprop(obj, keyOrExtractor)
-      if (['string', 'number'].includes(typeof potentialkey)) vivifyadd(hash, potentialkey, obj)
+  const extractor = extractors[typeof keyOrExtractor](keyOrExtractor)
+  for (const obj of objArray) {
+    const key = extractor(obj)
+    const keytype = typeof key
+    if (key != null && (keytype === 'string' || keytype === 'number')) {
+      hash[key] ??= []
+      hash[key].push(obj)
     }
   }
   return hash
