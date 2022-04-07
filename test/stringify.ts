@@ -20,4 +20,8 @@ describe('intersect', function () {
     const obj = { array: [5, 4, 3, 2, 1] }
     expect(stringify(obj)).to.equal(JSON.stringify(obj))
   })
+  it('should match JSON.stringify on null and undefined inputs', () => {
+    expect(stringify(null)).to.equal(JSON.stringify(null))
+    expect(stringify(undefined)).to.equal(JSON.stringify(undefined))
+  })
 })

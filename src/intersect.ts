@@ -1,4 +1,4 @@
-import stringify from 'fast-json-stable-stringify'
+import { stringify } from './stringify.js'
 import { isNotNull } from './util.js'
 import { toArray } from './array/index.js'
 

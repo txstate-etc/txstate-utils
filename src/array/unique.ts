@@ -1,5 +1,5 @@
-import stablestringify from 'fast-json-stable-stringify'
-import { dotprop } from '../object/index.js'
+import { stringify as stablestringify } from '../stringify.js'
+import { get } from '../object/index.js'
 
 /**
  * fast O(n) non-mutating array de-duplication based on a property,
@@ -12,7 +12,7 @@ export function unique<ObjectType> (arr: readonly ObjectType[]): ObjectType[]
 export function unique<ObjectType> (arr: readonly ObjectType[], stringify: any = stablestringify) {
   if (typeof stringify !== 'function') {
     const key = stringify
-    stringify = (obj: ObjectType) => dotprop(obj, key)
+    stringify = (obj: ObjectType) => get(obj, key)
   }
   const seen: Set<string> = new Set()
   const ret: ObjectType[] = []

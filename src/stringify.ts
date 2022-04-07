@@ -6,6 +6,8 @@
  * If the object being stringified contains cycles, the deeper appearance
  * of the cycled object will be replaced with the string '__cycle__'
  */
+export function stringify (data: undefined): undefined
+export function stringify (data: any): string
 export function stringify (data: any) {
   const seen: any[] = []
   return (function stringify (node: any) {
@@ -48,4 +50,4 @@ export function stringify (data: any) {
     seen.splice(seenIndex, 1)
     return '{' + out + '}'
   })(data)
-};
+}
