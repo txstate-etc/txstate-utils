@@ -1,4 +1,4 @@
-import pLimit from 'p-limit'
+import Queue from './queue'
 /** Functions for helping deal with promises */
 
 type eachFunction<ItemType, ReturnType> = (item: ItemType) => Promise<ReturnType>
@@ -13,7 +13,7 @@ type eachFunction<ItemType, ReturnType> = (item: ItemType) => Promise<ReturnType
 export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
-  const inFlightLimit = callback ? inFlightLimitOrCallback as number : 10
+  const inFlightLimit = callback ? inFlightLimitOrCallback as number || 10 : 10
   const each = callback ?? inFlightLimitOrCallback as eachFunction<ItemType, ReturnType>
   const limit = pLimit(inFlightLimit)
   const qitems = items.map(item => limit(() => each(item)))
@@ -51,4 +51,58 @@ export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLim
     return !!(await each(item))
   })
   return items.filter((item, index) => bools[index])
+}
+
+function pLimit (concurrency: number) {
+  const queue = new Queue<Function>()
+  let activeCount = 0
+
+  const next = () => {
+    activeCount--
+    queue.dequeue()?.()
+  }
+
+  const run = async (fn: Function, resolve: Function, args: any) => {
+    activeCount++
+    const result = (async () => fn(...args))()
+    resolve(result)
+
+    try {
+      await result
+    } catch {}
+
+    next()
+  }
+
+  const enqueue = (fn: Function, resolve: Function, args: any) => {
+    queue.enqueue(run.bind(undefined, fn, resolve, args));
+
+    (async () => {
+      await Promise.resolve()
+
+      if (activeCount < concurrency) {
+        queue.dequeue()?.()
+      }
+    })().catch(console.error)
+  }
+
+  const generator = (fn: Function, ...args: any[]) => new Promise(resolve => {
+    enqueue(fn, resolve, args)
+  })
+
+  Object.defineProperties(generator, {
+    activeCount: {
+      get: () => activeCount
+    },
+    pendingCount: {
+      get: () => queue.size
+    },
+    clearQueue: {
+      value: () => {
+        queue.clear()
+      }
+    }
+  })
+
+  return generator
 }
