@@ -1,4 +1,4 @@
-import Queue from './queue'
+import Queue from './queue.js'
 /** Functions for helping deal with promises */
 
 type eachFunction<ItemType, ReturnType> = (item: ItemType) => Promise<ReturnType>
