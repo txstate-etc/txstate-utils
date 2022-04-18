@@ -235,4 +235,83 @@ describe('deep equal', () => {
       expect(equal(value1, value2)).to.be.false
     })
   })
+  describe('cycles', () => {
+    interface Node {
+      id: number
+      parentId?: number
+      parent?: this
+      children?: this[]
+    }
+    function treeify (nodes: Node[]) {
+      const roots: Node[] = []
+      for (const node of nodes) {
+        if (!node.parentId) roots.push(node)
+        else {
+          node.parent = nodes.find(n => n.id === node.parentId)!
+          node.parent.children ??= []
+          node.parent.children.push(node)
+        }
+      }
+      return roots
+    }
+    it('should not error out on two objects with cycles', () => {
+      const nodes1 = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3, parentId: 1 },
+        { id: 4, parentId: 3 },
+        { id: 5, parentId: 3 },
+        { id: 6, parentId: 4 }
+      ]
+      const nodes2 = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3, parentId: 1 },
+        { id: 4, parentId: 3 },
+        { id: 5, parentId: 3 },
+        { id: 6, parentId: 4 },
+        { id: 7 }
+      ]
+      const roots1 = treeify(nodes1)
+      const roots2 = treeify(nodes2)
+      expect(roots1).to.have.lengthOf(2)
+      expect(roots2).to.have.lengthOf(3)
+      expect(equal(roots1, roots2)).to.be.false
+    })
+    it('should not error out on one object with cycles', () => {
+      const nodes1 = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3, parentId: 1 },
+        { id: 4, parentId: 3 },
+        { id: 5, parentId: 3 },
+        { id: 6, parentId: 4 }
+      ]
+      const nodes2 = [
+        { id: 1 },
+        { id: 2 },
+        { id: 7 }
+      ]
+      expect(equal(treeify(nodes1), treeify(nodes2))).to.be.false
+    })
+    it('should not error out on identical objects with cycles', () => {
+      const nodes1 = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3, parentId: 1 },
+        { id: 4, parentId: 3 },
+        { id: 5, parentId: 3 },
+        { id: 6, parentId: 4 }
+      ]
+      const nodes2 = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3, parentId: 1 },
+        { id: 4, parentId: 3 },
+        { id: 5, parentId: 3 },
+        { id: 6, parentId: 4 }
+      ]
+      expect(equal(treeify(nodes1), treeify(nodes2))).to.be.true
+    })
+  })
 })
