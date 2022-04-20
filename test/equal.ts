@@ -2,6 +2,26 @@
 import { expect } from 'chai'
 import { equal } from '../lib'
 
+export interface Node {
+  id: number
+  parentId?: number
+  parent?: this
+  children?: this[]
+}
+
+export function treeify (nodes: Node[]) {
+  const roots: Node[] = []
+  for (const node of nodes) {
+    if (!node.parentId) roots.push(node)
+    else {
+      node.parent = nodes.find(n => n.id === node.parentId)!
+      node.parent.children ??= []
+      node.parent.children.push(node)
+    }
+  }
+  return roots
+}
+
 describe('deep equal', () => {
   describe('scalars', () => {
     it('equal numbers', () => {
@@ -236,24 +256,6 @@ describe('deep equal', () => {
     })
   })
   describe('cycles', () => {
-    interface Node {
-      id: number
-      parentId?: number
-      parent?: this
-      children?: this[]
-    }
-    function treeify (nodes: Node[]) {
-      const roots: Node[] = []
-      for (const node of nodes) {
-        if (!node.parentId) roots.push(node)
-        else {
-          node.parent = nodes.find(n => n.id === node.parentId)!
-          node.parent.children ??= []
-          node.parent.children.push(node)
-        }
-      }
-      return roots
-    }
     it('should not error out on two objects with cycles', () => {
       const nodes1 = [
         { id: 1 },

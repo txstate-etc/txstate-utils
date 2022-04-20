@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { clone } from '../lib'
+import { clone, equal } from '../lib'
+import { treeify } from './equal'
 
 function rnd (max: number) { return Math.round(Math.random() * max) }
 describe('clone', () => {
@@ -180,5 +181,19 @@ describe('clone', () => {
     const data = { s: new Set([1]) }
     expect(Array.from(clone(data).s)).to.deep.equal([1])
     expect((clone(data).s)).to.not.equal(data.s)
+  })
+  it('handles cycles properly', () => {
+    const nodes = [
+      { id: 1 },
+      { id: 2 },
+      { id: 3, parentId: 1 },
+      { id: 4, parentId: 3 },
+      { id: 5, parentId: 3 },
+      { id: 6, parentId: 4 }
+    ]
+    const tree = treeify(nodes)
+    const cloned = clone(tree)
+    expect(equal(tree, cloned)).to.be.true
+    expect(cloned[0].children![0].parent).to.equal(cloned[0])
   })
 })
