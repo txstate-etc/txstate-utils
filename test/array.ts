@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { keyby, unique, shuffle, toArray, groupby, findIndex } from '../lib'
+import { keyby, unique, shuffle, toArray, groupby, findIndex, splice } from '../lib'
 import { expect } from 'chai'
 
 describe('keyby', () => {
@@ -159,5 +159,26 @@ describe('findIndex', () => {
   })
   it('should return a default when not found and default was specified', () => {
     expect(findIndex(arr, n => n === 7, -3)).to.equal(-3)
+  })
+})
+
+describe('splice', () => {
+  it('should not mutate the original array', () => {
+    const arr = [1, 2, 3, 4]
+    const spliced = splice(arr, 1, 1)
+    expect(spliced).to.deep.equal([1, 3, 4])
+    expect(arr).to.deep.equal([1, 2, 3, 4])
+  })
+  it('should work the same as splice with only a start parameter', () => {
+    const arr = [1, 2, 3, 4]
+    const spliced = splice(arr, 1)
+    arr.splice(1)
+    expect(spliced).to.deep.equal(arr)
+  })
+  it('should work the same as splice when inserting and not deleting', () => {
+    const arr = [1, 2, 3, 4]
+    const spliced = splice(arr, 1, 0, 5)
+    arr.splice(1, 0, 5)
+    expect(spliced).to.deep.equal(arr)
   })
 })

@@ -50,7 +50,26 @@ export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLim
   const bools = await eachConcurrent(items, inFlightLimit, async item => {
     return !!(await each(item))
   })
-  return items.filter((item, index) => bools[index])
+  return items.filter((_, index) => bools[index])
+}
+
+/**
+ * Works like Array.some() except runs things concurrently / in parallel.
+ * Limits operations to a configurable in-flight maximum.
+ *
+ * Callback should return a promise
+ *
+ * Returns a promise containing the array of items that returned true
+ */
+export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, boolean>): Promise<boolean>
+export async function someConcurrent<ItemType> (items: ItemType[], callback: eachFunction<ItemType, boolean>): Promise<boolean>
+export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, boolean>, callback?: eachFunction<ItemType, boolean>) {
+  const inFlightLimit = callback ? inFlightLimitOrCallback as number : 10
+  const each = callback ?? inFlightLimitOrCallback as eachFunction<ItemType, boolean>
+  const bools = await eachConcurrent(items, inFlightLimit, async item => {
+    return !!(await each(item))
+  })
+  return items.some((_, index) => bools[index])
 }
 
 function pLimit (concurrency: number) {

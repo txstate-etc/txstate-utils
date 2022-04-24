@@ -11,6 +11,18 @@ export async function filterAsync<ItemType> (items: ItemType[], callback: (item:
 }
 
 /**
+ * works like Array.some but expects a Promise<boolean> from each element
+ * instead of a synchronous boolean
+ *
+ * Uses Promise.all; if you need an in-flight limit, use someConcurrent
+ * instead
+ */
+export async function someAsync<ItemType> (items: ItemType[], callback: (item: ItemType) => boolean|Promise<boolean>) {
+  const bools = await Promise.all(items.map(callback))
+  return items.some((_, index) => bools[index])
+}
+
+/**
  * modeled after rescue keyword from Ruby
  *
  * Provide a promise - if it successfully resolves the value is passed

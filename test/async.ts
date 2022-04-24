@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { filterAsync, rescue } from '../lib'
+import { filterAsync, someAsync, rescue } from '../lib'
 
 describe('async utils', () => {
   const items = Array.from(Array(20).keys())
@@ -11,6 +11,16 @@ describe('async utils', () => {
     for (const num of filtered) {
       expect(num % 2).to.equal(1)
     }
+  })
+
+  it('someAsync should return true when any return value is truthy', async () => {
+    const result = await someAsync(items, async item => !!(item % 2))
+    expect(result).to.be.true
+  })
+
+  it('someAsync should return false when no return value is truthy', async () => {
+    const result = await someAsync(items, async item => false)
+    expect(result).to.be.false
   })
 
   it('rescue returns the value when the promise is resolved', async () => {
