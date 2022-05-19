@@ -37,6 +37,10 @@ describe('netid utils', () => {
     expect(extractNetIDFromFederated('ab1234@txstate.edu')).to.equal('ab1234')
     expect(extractNetIDFromFederated('a_b1234@txstate.edu')).to.equal('a_b1234')
   })
+  it('should extract a netid from a txst.edu federated login', () => {
+    expect(extractNetIDFromFederated('ab1234@txst.edu')).to.equal('ab1234')
+    expect(extractNetIDFromFederated('a_b1234@txst.edu')).to.equal('a_b1234')
+  })
   it('should trim before extracting a netid from a federated login', () => {
     expect(extractNetIDFromFederated('ab1234@txstate.edu \n')).to.equal('ab1234')
     expect(extractNetIDFromFederated(' \nab1234@txstate.edu')).to.equal('ab1234')
@@ -51,12 +55,20 @@ describe('netid utils', () => {
     expect(extractNetIDFromFederated('AB1234@txstate.edu')).to.equal('ab1234')
     expect(extractNetIDFromFederated('a_B1234@txstate.edu')).to.equal('a_b1234')
   })
+  it('should normalize returned netid to lower case when it receives a bare netid', () => {
+    expect(extractNetIDFromFederated('AB1234')).to.equal('ab1234')
+    expect(extractNetIDFromFederated('a_B1234')).to.equal('a_b1234')
+  })
 })
 
 describe('isTxStEmail', () => {
   it('should be able to detect email', () => {
     expect(isTxStEmail('abc123@txstate.edu')).to.be.true
     expect(isTxStEmail('abc123@qual.txstate.edu')).to.be.true
+  })
+  it('should be able to detect email from txst.edu', () => {
+    expect(isTxStEmail('abc123@txst.edu')).to.be.true
+    expect(isTxStEmail('abc123@qual.txst.edu')).to.be.true
   })
   it('should reject valid email that does not belong to texas state', () => {
     expect(isTxStEmail('123@gmail.com')).to.be.false

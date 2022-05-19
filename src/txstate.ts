@@ -15,10 +15,15 @@ export function isNetID (netid: string) {
  * If it does not look like either one, returns undefined
  */
 export function extractNetIDFromFederated (login: string) {
-  if (isNetID(login)) return login
-  const [possiblenetid, domain] = login.trim().split('@', 2)
-  if (domain === 'txstate.edu' && isNetID(possiblenetid)) return possiblenetid.toLocaleLowerCase()
+  const lclogin = login.trim().toLocaleLowerCase()
+  if (isNetID(lclogin)) return lclogin
+  const [possiblenetid, domain] = lclogin.split('@')
+  if (['txstate.edu', 'txst.edu'].includes(domain) && isNetID(possiblenetid)) return possiblenetid
   return undefined
+}
+
+export function federatedFromNetID (netid: string) {
+  return `${netid}@txstate.edu`
 }
 
 /**
@@ -26,5 +31,7 @@ export function extractNetIDFromFederated (login: string) {
  * txstate.edu domain
  */
 export function isTxStEmail <T extends string|undefined|null> (email: T): email is Exclude<T, undefined|null> {
-  return !!email && isEmail(email) && email.toLocaleLowerCase().endsWith('txstate.edu')
+  if (!email) return false
+  if (!isEmail(email)) return false
+  return /@[^@]*?txst(ate)?.edu$/i.test(email)
 }
