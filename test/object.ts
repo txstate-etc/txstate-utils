@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { get, set } from '../lib'
+import { get, omit, pick, set } from '../lib'
 
 describe('object', () => {
   const complexobject = {
@@ -148,6 +148,46 @@ describe('object', () => {
       expect(newobject.anotherobject).to.deep.equal([undefined, { hello: 'world' }])
       expect(newobject).to.haveOwnProperty('anotherobject')
       expect(complexobject).to.not.haveOwnProperty('anotherobject')
+    })
+  })
+  describe('pick', () => {
+    it('should pick properties without mutating', () => {
+      const obj = { one: 1, two: 2, three: 3 }
+      expect(pick(obj, 'one')).to.deep.equal({ one: 1 })
+      expect(pick(obj, 'one', 'three')).to.deep.equal({ one: 1, three: 3 })
+      expect(obj).to.deep.equal({ one: 1, two: 2, three: 3 })
+    })
+    it('should pick symbol properties', () => {
+      const sym = Symbol('test symbol')
+      const obj = { one: 1, two: 2, three: 3, [sym]: 4 }
+      expect(pick(obj, sym)).to.deep.equal({ [sym]: 4 })
+      // typescript Pick doesn't seem to support mixed string and symbol for now
+      // expect(pick(obj, 'one', sym)).to.deep.equal({ one: 1, [sym]: 4 })
+      expect(obj).to.deep.equal({ one: 1, two: 2, three: 3, [sym]: 4 })
+    })
+    it('should return empty object when no props given', () => {
+      expect(pick({ one: 1 })).to.deep.equal({})
+    })
+  })
+  describe('omit', () => {
+    it('should omit properties without mutating', () => {
+      const obj = { one: 1, two: 2, three: 3 }
+      expect(omit(obj, 'one')).to.deep.equal({ two: 2, three: 3 })
+      expect(omit(obj, 'one', 'three')).to.deep.equal({ two: 2 })
+      expect(obj).to.deep.equal({ one: 1, two: 2, three: 3 })
+    })
+    it('should omit symbol properties', () => {
+      const sym = Symbol('test symbol')
+      const obj = { one: 1, two: 2, three: 3, [sym]: 4 }
+      expect(omit(obj, sym)).to.deep.equal({ one: 1, two: 2, three: 3 })
+      // typescript Omit doesn't seem to support mixed string and symbol for now
+      // expect(pick(obj, 'one', sym)).to.deep.equal({ two: 2, three: 3 })
+      expect(obj).to.deep.equal({ one: 1, two: 2, three: 3, [sym]: 4 })
+    })
+    it('should return a clone when no props given', () => {
+      const obj = { one: 1 }
+      expect(omit(obj)).to.deep.equal(obj)
+      expect(omit(obj)).not.to.equal(obj)
     })
   })
 })
