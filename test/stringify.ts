@@ -1,7 +1,7 @@
 import { expect } from 'chai'
-import { stringify } from '../lib'
+import { ensureString, stringify } from '../lib'
 
-describe('intersect', function () {
+describe('stringify', function () {
   it('should work for a scalar', () => {
     expect(stringify('test')).to.equal(JSON.stringify('test'))
     expect(stringify(2)).to.equal(JSON.stringify(2))
@@ -23,5 +23,13 @@ describe('intersect', function () {
   it('should match JSON.stringify on null and undefined inputs', () => {
     expect(stringify(null)).to.equal(JSON.stringify(null))
     expect(stringify(undefined)).to.equal(JSON.stringify(undefined))
+  })
+  it('should match JSON.stringify when given a quoted string', () => {
+    expect(stringify('"test"')).to.equal(JSON.stringify('"test"'))
+  })
+})
+describe('ensureString', () => {
+  it('should not add quotes to a string', () => {
+    expect(ensureString('test')).to.equal('test')
   })
 })

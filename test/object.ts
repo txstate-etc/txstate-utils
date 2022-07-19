@@ -149,6 +149,10 @@ describe('object', () => {
       expect(newobject).to.haveOwnProperty('anotherobject')
       expect(complexobject).to.not.haveOwnProperty('anotherobject')
     })
+    it.skip('should work when given a path with slashes in it', () => {
+      const newobject = set(complexobject, '//main', 'world')
+      expect(newobject).to.deep.equal({ ...complexobject, '//main': 'world' })
+    })
   })
   describe('pick', () => {
     it('should pick properties without mutating', () => {

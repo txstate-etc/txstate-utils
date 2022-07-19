@@ -51,3 +51,17 @@ export function stringify (data: any) {
     return '{' + out + '}'
   })(data)
 }
+
+/**
+ * Frequently you just want to make sure you have a string in order
+ * to key an object, but it's not technically for JSON purposes and
+ * you don't want to add quotes around an existing string.
+ *
+ * stringify('mystring') === '"mystring"'
+ * ensureString('mystring') === 'mystring'
+ */
+export function ensureString (data: undefined): undefined
+export function ensureString (data: any): string
+export function ensureString (data: any): string|undefined {
+  return typeof data === 'string' ? data : stringify(data)
+}

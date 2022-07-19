@@ -1,5 +1,5 @@
+import { ensureString } from './stringify.js'
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
-const tostr = (key: any) => typeof key === 'string' ? key : JSON.stringify(key)
 
 type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void|Promise<void>
 
@@ -234,7 +234,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
 
   async get (...params: OptionalArgBoth<KeyType, HelperType>) {
     const key = params[0]
-    const keystr = tostr(key)
+    const keystr = ensureString(key)
     const stored = await this.storage.get(keystr)
     if (stored) {
       if (this.fresh(stored)) {
@@ -257,7 +257,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   async set (...params: OptionalArgPlus<KeyType, ReturnType>) {
     const key = params.length > 1 ? params[0] as KeyType : undefined
     const data = (params.length > 1 ? params[1] : params[0]) as ReturnType
-    const keystr = tostr(key)
+    const keystr = ensureString(key)
     await this.storage.set(keystr, { fetched: new Date(), data })
   }
 
@@ -266,7 +266,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       await this.storage.clear()
       return
     }
-    const keystr = tostr(key)
+    const keystr = ensureString(key)
     await this.storage.del(keystr)
   }
 
@@ -277,7 +277,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   async refresh (...params: OptionalArgBoth<KeyType, HelperType>) {
     const key = params[0] as KeyType
     const helper = params[1] as HelperType
-    const keystr = tostr(key)
+    const keystr = ensureString(key)
     if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
     this.active[keystr] = this.fetcher(key, helper)
     try {
