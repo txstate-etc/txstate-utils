@@ -172,6 +172,11 @@ describe('object', () => {
     it('should return empty object when no props given', () => {
       expect(pick({ one: 1 })).to.deep.equal({})
     })
+    it('should pick multiple properties', () => {
+      const obj = { one: 1, two: 2, three: 3 }
+      const newobj = pick(obj, 'two', 'three')
+      expect(newobj).to.deep.equal({ two: 2, three: 3 })
+    })
   })
   describe('omit', () => {
     it('should omit properties without mutating', () => {
@@ -192,6 +197,11 @@ describe('object', () => {
       const obj = { one: 1 }
       expect(omit(obj)).to.deep.equal(obj)
       expect(omit(obj)).not.to.equal(obj)
+    })
+    it('should omit multiple properties', () => {
+      const obj = { one: 1, two: 2, three: 3 }
+      const newobj = omit(obj, 'two', 'three')
+      expect(newobj).to.deep.equal({ one: 1 })
     })
   })
 })
