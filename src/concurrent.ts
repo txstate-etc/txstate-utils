@@ -72,7 +72,7 @@ export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimit
   return items.some((_, index) => bools[index])
 }
 
-function pLimit (concurrency: number) {
+export function pLimit (concurrency: number) {
   const queue = new Queue<Function>()
   let activeCount = 0
 

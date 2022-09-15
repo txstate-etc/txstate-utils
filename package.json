@@ -1,17 +1,18 @@
 {
   "name": "txstate-utils",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "main": "lib/index.js",
   "module": "lib-esm/index.js",
   "exports": {
     ".": {
+      "types": "./lib-esm/index.d.ts",
       "require": "./lib/index.js",
       "import": "./lib-esm/index.js"
     },
     "./package.json": "./package.json"
   },
-  "types": "lib/index.d.ts",
+  "types": "./lib-esm/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "rm -rf lib lib-esm && tsc && tsc -m es6 --outDir lib-esm --moduleResolution node && cp package-esm.json lib-esm/package.json",
