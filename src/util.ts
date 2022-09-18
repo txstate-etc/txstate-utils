@@ -18,7 +18,7 @@ export function randomid (length = 10) {
  * useful for checking for empty strings, though in modern javascript
  * optional chaining may be easier: if (!str?.trim().length) ...
  */
-export function isBlank (str: string|undefined|null): str is ''|undefined|null {
+export function isBlank (str: string | undefined | null): str is '' | undefined | null {
   return !str || !str.trim || str.trim().length === 0
 }
 
@@ -26,7 +26,7 @@ export function isBlank (str: string|undefined|null): str is ''|undefined|null {
  * useful for checking for empty strings, though in modern javascript
  * optional chaining may be easier: if (str?.trim().length) ...
  */
-export function isNotBlank <T extends string|undefined|null> (str: T): str is Exclude<T, undefined|null> {
+export function isNotBlank <T extends string | undefined | null> (str: T): str is Exclude<T, undefined | null> {
   return !isBlank(str)
 }
 
@@ -36,7 +36,7 @@ export function isNotBlank <T extends string|undefined|null> (str: T): str is Ex
  *
  * also see: isNotNull
  */
-export function isTruthy <T> (str: T): str is Exclude<T, undefined|null> {
+export function isTruthy <T> (str: T): str is Exclude<T, undefined | null> {
   return Boolean(str)
 }
 
@@ -59,28 +59,28 @@ export function isEmpty (obj: any): boolean {
  * useful for checking if an object, string, or array is empty,
  * undefined, or null
  */
-export function isNotEmpty <T> (obj: T): obj is Exclude<T, undefined|null> {
+export function isNotEmpty <T> (obj: T): obj is Exclude<T, undefined | null> {
   return !isEmpty(obj)
 }
 
 /**
  * undefined and null both treated as null
  */
-export function isNull (obj: any): obj is undefined|null {
+export function isNull (obj: any): obj is undefined | null {
   return obj == null
 }
 
 /**
  * undefined and null both treated as null
  */
-export function isNotNull <T> (obj: T): obj is Exclude<T, undefined|null> {
+export function isNotNull <T> (obj: T): obj is Exclude<T, undefined | null> {
   return obj != null
 }
 
 /**
  * only checks for valid syntax
  */
-export function isEmail <T extends string|undefined|null> (email: T): email is Exclude<T, undefined|null> {
+export function isEmail <T extends string | undefined | null> (email: T): email is Exclude<T, undefined | null> {
   return !!email && /^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(email)
 }
 
@@ -91,10 +91,10 @@ export function isEmail <T extends string|undefined|null> (email: T): email is E
 interface Stringable {
   toString: (...args: any) => string
 }
-export function optionalString (str: number|string|boolean|Stringable): string
-export function optionalString (str: undefined|null): undefined
-export function optionalString (str: any): string|undefined
-export function optionalString (str: any): string|undefined|null {
+export function optionalString (str: number | string | boolean | Stringable): string
+export function optionalString (str: undefined | null): undefined
+export function optionalString (str: any): string | undefined
+export function optionalString (str: any): string | undefined | null {
   return str == null ? undefined : String(str)
 }
 

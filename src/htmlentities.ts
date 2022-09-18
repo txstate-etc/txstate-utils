@@ -10,7 +10,7 @@ const escapes: Record<string, string> = {
 const badChars = /[&<>"'`=]/g
 function escapeChar (c: string) { return escapes[c] }
 
-export function htmlEncode (str: string|undefined|null) {
+export function htmlEncode (str: string | undefined | null) {
   if (str == null) return ''
   return str.replace(badChars, escapeChar)
 }

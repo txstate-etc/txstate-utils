@@ -1,7 +1,7 @@
 import { ensureString } from './stringify.js'
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
 
-type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void|Promise<void>
+type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void | Promise<void>
 
 interface CacheOptions <KeyType, ReturnType, StorageEngineType extends StorageEngine<ReturnType>> {
   freshseconds?: number
@@ -176,7 +176,7 @@ type OptionalArgBoth<T, V> = T extends undefined
         // V is undefined
         ? []
         // V is optional
-        : [T, V]|[]
+        : [T, V] | []
       // V is not optional
       : [T, V]
     // T is optional
@@ -184,9 +184,9 @@ type OptionalArgBoth<T, V> = T extends undefined
       // V is optional or undefined
       ? undefined extends V
         // V is undefined
-        ? [T]|[]
+        ? [T] | []
         // V is optional
-        : [T, V]|[T]|[]
+        : [T, V] | [T] | []
       // V is not optional
       : [T, V]
   // T is not optional
@@ -196,7 +196,7 @@ type OptionalArgBoth<T, V> = T extends undefined
       // V is undefined
       ? [T]
       // V is optional
-      : [T, V]|[T]
+      : [T, V] | [T]
     // V is not optional
     : [T, V]
 

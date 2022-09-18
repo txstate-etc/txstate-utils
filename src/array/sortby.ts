@@ -6,7 +6,7 @@ const comparators: Record<string, any> = {
   number: (a: number, b: number) => a - b,
   object: (a: Date, b: Date) => a.getTime() - b.getTime()
 }
-type SortableTypes = boolean|string|number|Date
+type SortableTypes = boolean | string | number | Date
 
 /**
  * Sort array by a specific property or transformation
@@ -39,8 +39,8 @@ type SortableTypes = boolean|string|number|Date
  * sort with a transformation
  * sortby(myarray, itm => itm.count - 100)
  */
-export function sortby <T> (collection: T[], ...args: (boolean|keyof T|string|((obj: T) => SortableTypes|undefined|null))[]) {
-  const extractors: (keyof T|string|((obj: T) => SortableTypes|undefined|null))[] = []
+export function sortby <T> (collection: T[], ...args: (boolean | keyof T | string | ((obj: T) => SortableTypes | undefined | null))[]) {
+  const extractors: (keyof T | string | ((obj: T) => SortableTypes | undefined | null))[] = []
   const descending: boolean[] = []
   for (const arg of args) {
     if (arg === true) {
@@ -50,17 +50,17 @@ export function sortby <T> (collection: T[], ...args: (boolean|keyof T|string|((
       descending.push(false)
     }
   }
-  const sortMap = new Map<T, (SortableTypes|undefined)[]>()
+  const sortMap = new Map<T, (SortableTypes | undefined)[]>()
   for (const itm of collection) sortMap.set(itm, [])
   const compares: ((a: SortableTypes, b: SortableTypes) => number)[] = []
   for (const extract of extractors) {
-    let comparechosen: undefined|'string'|'number'|'object'|'boolean'
-    const handleval = function (val: SortableTypes|undefined, itm: T) {
+    let comparechosen: undefined | 'string' | 'number' | 'object' | 'boolean'
+    const handleval = function (val: SortableTypes | undefined, itm: T) {
       const t = typeof val
       if (t !== 'undefined') {
         if (!comparechosen) {
           compares.push(comparators[t])
-          comparechosen = t as 'string'|'number'|'object'|'boolean'
+          comparechosen = t as 'string' | 'number' | 'object' | 'boolean'
         } else if (comparechosen !== t) {
           compares[compares.length - 1] = comparators.number
         }
@@ -73,7 +73,7 @@ export function sortby <T> (collection: T[], ...args: (boolean|keyof T|string|((
       }
     } else {
       for (const itm of collection) {
-        handleval((get(itm, extract as any) ?? undefined) as SortableTypes|undefined, itm)
+        handleval((get(itm, extract as any) ?? undefined) as SortableTypes | undefined, itm)
       }
     }
   }

@@ -30,7 +30,7 @@ export function federatedFromNetID (netid: string) {
  * Detect whether a string is a valid email address on the
  * txstate.edu domain
  */
-export function isTxStEmail <T extends string|undefined|null> (email: T): email is Exclude<T, undefined|null> {
+export function isTxStEmail <T extends string | undefined | null> (email: T): email is Exclude<T, undefined | null> {
   if (!email) return false
   if (!isEmail(email)) return false
   return /@[^@]*?txst(ate)?.edu$/i.test(email)

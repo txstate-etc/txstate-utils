@@ -4,7 +4,7 @@ export const extractors: Record<string, Function> = {
   undefined: () => {
     return (obj: any) => obj
   },
-  function: (extractor: (obj: any) => string|number|undefined) => {
+  function: (extractor: (obj: any) => string | number | undefined) => {
     return (obj: any) => extractor(obj)
   },
   number: directKey,
@@ -14,6 +14,6 @@ export const extractors: Record<string, Function> = {
   }
 }
 
-function directKey (key: number|symbol) {
+function directKey (key: number | symbol) {
   return (obj: any) => obj[key]
 }

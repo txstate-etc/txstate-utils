@@ -11,10 +11,10 @@ import { extractors } from './extractors.js'
  * const alsoBooksByGenre = groupby(books, 'genre')
  * console.log(booksByGenre) // { mystery: [ ... mystery books ... ], adventure: [ ... adventure books ... ] }
  */
-export function groupby <ObjectType extends object> (objArray: ObjectType[]|undefined, key: keyof ObjectType): { [keys: string]: ObjectType[] }
-export function groupby <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)): { [keys: string]: ObjectType[] }
-export function groupby <ObjectType> (objArray: ObjectType[]|undefined, keyOrExtractor: string|number|symbol|((obj: ObjectType) => string|number|undefined)) {
-  const hash: Record<string|number, ObjectType[]> = {}
+export function groupby <ObjectType extends object> (objArray: ObjectType[] | undefined, key: keyof ObjectType): { [keys: string]: ObjectType[] }
+export function groupby <ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor: string | number | symbol | ((obj: ObjectType) => string | number | undefined)): { [keys: string]: ObjectType[] }
+export function groupby <ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor: string | number | symbol | ((obj: ObjectType) => string | number | undefined)) {
+  const hash: Record<string | number, ObjectType[]> = {}
   if (!Array.isArray(objArray)) return hash
   const extractor = extractors[typeof keyOrExtractor](keyOrExtractor)
   for (const obj of objArray) {

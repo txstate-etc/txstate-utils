@@ -62,6 +62,6 @@ export function stringify (data: any) {
  */
 export function ensureString (data: undefined): undefined
 export function ensureString (data: any): string
-export function ensureString (data: any): string|undefined {
+export function ensureString (data: any): string | undefined {
   return typeof data === 'string' ? data : stringify(data)
 }

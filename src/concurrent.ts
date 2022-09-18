@@ -12,7 +12,7 @@ type eachFunction<ItemType, ReturnType> = (item: ItemType) => Promise<ReturnType
  */
 export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
-export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
+export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
   const inFlightLimit = callback ? inFlightLimitOrCallback as number || 10 : 10
   const each = callback ?? inFlightLimitOrCallback as eachFunction<ItemType, ReturnType>
   const limit = pLimit(inFlightLimit)
@@ -30,7 +30,7 @@ export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFligh
  */
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
-export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
+export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
   return eachConcurrent(items, inFlightLimitOrCallback as number, callback as eachFunction<ItemType, ReturnType>)
 }
 
@@ -44,7 +44,7 @@ export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlight
  */
 export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, boolean>): Promise<ItemType[]>
 export async function filterConcurrent<ItemType> (items: ItemType[], callback: eachFunction<ItemType, boolean>): Promise<ItemType[]>
-export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, boolean>, callback?: eachFunction<ItemType, boolean>) {
+export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, boolean>, callback?: eachFunction<ItemType, boolean>) {
   const inFlightLimit = callback ? inFlightLimitOrCallback as number : 10
   const each = callback ?? inFlightLimitOrCallback as eachFunction<ItemType, boolean>
   const bools = await eachConcurrent(items, inFlightLimit, async item => {
@@ -63,7 +63,7 @@ export async function filterConcurrent<ItemType> (items: ItemType[], inFlightLim
  */
 export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, boolean>): Promise<boolean>
 export async function someConcurrent<ItemType> (items: ItemType[], callback: eachFunction<ItemType, boolean>): Promise<boolean>
-export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimitOrCallback: number|eachFunction<ItemType, boolean>, callback?: eachFunction<ItemType, boolean>) {
+export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, boolean>, callback?: eachFunction<ItemType, boolean>) {
   const inFlightLimit = callback ? inFlightLimitOrCallback as number : 10
   const each = callback ?? inFlightLimitOrCallback as eachFunction<ItemType, boolean>
   const bools = await eachConcurrent(items, inFlightLimit, async item => {

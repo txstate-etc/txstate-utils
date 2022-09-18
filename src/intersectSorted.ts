@@ -3,7 +3,7 @@
  * adapted from https://github.com/mafintosh/sorted-intersect
  * removed options and added types
  */
-type Comparable = string|number|Date
+type Comparable = string | number | Date
 
 function gallop (list: Comparable[], val: Comparable, offset: number) {
   if (offset >= list.length) return list.length

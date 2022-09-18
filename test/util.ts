@@ -62,7 +62,7 @@ describe('isBlank', () => {
     expect(isBlank(' \tc')).to.be.false
   })
   it('should provide a typeguard on the notted version', () => {
-    let val: string|undefined = ''
+    let val: string | undefined = ''
     val = 'notblank'
     if (isNotBlank(val)) {
       expect(val).to.equal('notblank')
@@ -128,21 +128,21 @@ describe('isNull', () => {
 describe('typeguards', () => {
   it('should properly typeguard when using isNotEmpty', () => {
     // eslint-disable-next-line prefer-const
-    let obj: { hello: string }|undefined
+    let obj: { hello: string } | undefined
     if (isEmpty(obj)) expect(obj).to.be.undefined
     obj = { hello: 'world' }
     if (isNotEmpty(obj)) expect(obj.hello).to.equal('world')
   })
   it('should properly typeguard when using isTruthy', () => {
     // eslint-disable-next-line prefer-const
-    let obj: { hello: string }|undefined
+    let obj: { hello: string } | undefined
     if (!isTruthy(obj)) expect(obj).to.be.undefined
     obj = { hello: 'world' }
     if (isTruthy(obj)) expect(obj.hello).to.equal('world')
   })
   it('should properly typeguard when using isNull', () => {
     // eslint-disable-next-line prefer-const
-    let obj: { hello: string }|undefined
+    let obj: { hello: string } | undefined
     if (isNull(obj)) expect(obj).to.be.undefined
     obj = { hello: 'world' }
     if (isNotNull(obj)) expect(obj.hello).to.equal('world')
@@ -168,7 +168,7 @@ describe('isEmail', () => {
     expect(isEmail('')).to.be.false
   })
   it('should typeguard', () => {
-    const email: string|undefined = 'test@txstate.edu'
+    const email: string | undefined = 'test@txstate.edu'
     if (isEmail(email)) {
       expect(email.toLocaleLowerCase()).to.equal(email)
     }
@@ -188,7 +188,7 @@ describe('CSV functions', () => {
   })
 })
 
-let couldBeNull: string|null
+let couldBeNull: string | null
 describe('optionalString', () => {
   it('should work for primitive types', () => {
     expect(optionalString(2)).to.equal('2')

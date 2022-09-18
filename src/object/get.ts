@@ -8,8 +8,8 @@ import { pathSeperatorRegex } from './common.js'
  * a JSON-compatible object
  */
 export function get<InputType, Accessor extends keyof InputType> (root: InputType, path: Accessor, defaultValue?: InputType[Accessor]): InputType[Accessor]
-export function get<ReturnType = any> (root: any, path: string | number | (string|number)[], defaultValue?: ReturnType): ReturnType
-export function get<ReturnType = any> (root: any, path: string | number | (string|number)[], defaultValue?: ReturnType) {
+export function get<ReturnType = any> (root: any, path: string | number | (string | number)[], defaultValue?: ReturnType): ReturnType
+export function get<ReturnType = any> (root: any, path: string | number | (string | number)[], defaultValue?: ReturnType) {
   try {
     if (root.toObject) root = root.toObject()
     if (Array.isArray(path)) path = "['" + path.join("']['") + "']"

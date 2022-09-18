@@ -86,7 +86,7 @@ describe('isTxStEmail', () => {
     expect(isTxStEmail('')).to.be.false
   })
   it('should typeguard', () => {
-    const email: string|undefined = 'test@txstate.edu'
+    const email: string | undefined = 'test@txstate.edu'
     if (isTxStEmail(email)) {
       expect(email.toLocaleLowerCase()).to.equal(email)
     }
