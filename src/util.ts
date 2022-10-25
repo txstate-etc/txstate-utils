@@ -110,7 +110,7 @@ export function optionalString (str: any): string | undefined | null {
  *
  * Generally shorter/easier than (mystate.showcontent && mystate.content != null ? mystate.content : '')
  */
-export function printIf (condition: number | string | boolean | undefined | null, str: number | string | boolean | Stringable | undefined | null): string
+export function printIf (condition: any, str: number | string | boolean | Stringable | undefined | null): string
 export function printIf (str: number | string | boolean | Stringable | undefined | null): string
 export function printIf (...args: any[]): string {
   if (args.length === 1) return args[0] == null ? '' : String(args[0])
