@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, hashid, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString, roundTo } from '../lib'
+import { sleep, hashid, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf } from '../lib'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -204,6 +204,24 @@ describe('optionalString', () => {
   })
   it('should follow behavior of String() constructor for non-stringable input', () => {
     expect(optionalString({})).to.equal(String({}))
+  })
+})
+
+describe('printIf', () => {
+  it('should work for primitive types', () => {
+    expect(printIf(2)).to.equal('2')
+    const now = new Date()
+    expect(printIf(now)).to.equal(now.toString())
+    expect(printIf(true)).to.equal('true')
+    expect(printIf('3')).to.equal('3')
+  })
+  it('should return undefined for undefined and null', () => {
+    expect(printIf(null)).to.equal('')
+    expect(printIf(undefined)).to.equal('')
+    expect(printIf(couldBeNull)).to.equal('')
+  })
+  it('should follow behavior of String() constructor for non-stringable input', () => {
+    expect(printIf({})).to.equal(String({}))
   })
 })
 
