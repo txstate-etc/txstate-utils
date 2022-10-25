@@ -99,14 +99,22 @@ export function optionalString (str: any): string | undefined | null {
 }
 
 /**
- * Print a variable that could be undefined
+ * Print a variable if a condition is met
  *
- * Use this to output an empty string instead of 'undefined' or 'null'
+ * Optionally provide a boolean as the first parameter to control whether to print anything.
+ * For example, `printIf(mystate.showcontent, mystate.content)` will print the contents of
+ * mystate.content only if mystate.showcontent is truthy.
  *
- * Generally shorter/easier than (myvar != null ? myvar : '')
+ * Always outputs an empty string instead of 'undefined' or 'null', so you do not have to
+ * explicitly check mystate.content against null.
+ *
+ * Generally shorter/easier than (mystate.showcontent && mystate.content != null ? mystate.content : '')
  */
-export function printIf (str: number | string | boolean | Stringable | undefined | null): string {
-  return str == null ? '' : String(str)
+export function printIf (condition: number | boolean | undefined | null, str: number | string | boolean | Stringable | undefined | null): string
+export function printIf (str: number | string | boolean | Stringable | undefined | null): string
+export function printIf (...args: any[]): string {
+  if (args.length === 1) return args[0] == null ? '' : String(args[0])
+  return args[0] && args[1] != null ? String(args[1]) : ''
 }
 
 export function roundTo (num: number, digits = 0) {

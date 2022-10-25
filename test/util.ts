@@ -215,13 +215,25 @@ describe('printIf', () => {
     expect(printIf(true)).to.equal('true')
     expect(printIf('3')).to.equal('3')
   })
-  it('should return undefined for undefined and null', () => {
+  it('should return empty string for undefined and null', () => {
     expect(printIf(null)).to.equal('')
     expect(printIf(undefined)).to.equal('')
     expect(printIf(couldBeNull)).to.equal('')
   })
   it('should follow behavior of String() constructor for non-stringable input', () => {
     expect(printIf({})).to.equal(String({}))
+  })
+  it('should return empty string when provided a false condition', () => {
+    expect(printIf(false, 4)).to.equal('')
+  })
+  it('should return the string when provided a true condition', () => {
+    expect(printIf(true, 4)).to.equal('4')
+  })
+  it('should return empty string when provided a true condition but undefined value', () => {
+    expect(printIf(true, undefined)).to.equal('')
+  })
+  it('should follow behavior of String() constructor for non-stringable input when provided a condition', () => {
+    expect(printIf(true, {})).to.equal(String({}))
   })
 })
 
