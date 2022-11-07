@@ -214,9 +214,10 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
     this.fetcher = fetcher
+    const freshseconds = options.freshseconds ?? 5 * 60
     this.options = {
-      freshseconds: options.freshseconds ?? 5 * 60,
-      staleseconds: (options.staleseconds ?? 10 * 60) || Infinity
+      freshseconds,
+      staleseconds: (options.staleseconds ?? (freshseconds * 2)) || Infinity
     }
     const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     if (storageClass.reset && storageClass.dump) {
