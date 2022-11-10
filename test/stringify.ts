@@ -5,6 +5,18 @@ describe('stringify', function () {
   it('should work for a scalar', () => {
     expect(stringify('test')).to.equal(JSON.stringify('test'))
     expect(stringify(2)).to.equal(JSON.stringify(2))
+    expect(stringify(true)).to.equal(JSON.stringify(true))
+  })
+  it('should support bigint if a replacer is provided', () => {
+    function bigintReplacer (key: string, value: any) {
+      return typeof value === 'bigint'
+        ? value.toString()
+        : value
+    }
+    expect(stringify(BigInt(5), bigintReplacer)).to.equal(JSON.stringify(BigInt(5), bigintReplacer))
+  })
+  it('should work for an array', () => {
+    expect(stringify([1, 2, 3])).to.equal(JSON.stringify([1, 2, 3]))
   })
   it('should work for a deep object', () => {
     const obj = { should: { be: 'deep' } }
@@ -26,6 +38,25 @@ describe('stringify', function () {
   })
   it('should match JSON.stringify when given a quoted string', () => {
     expect(stringify('"test"')).to.equal(JSON.stringify('"test"'))
+  })
+  it('should match JSON.stringify when given a symbol as a key', () => {
+    const obj = { [Symbol.for('key')]: 'hello' }
+    expect(stringify(obj)).to.equal(JSON.stringify(obj))
+  })
+  it('should match JSON.stringify when given a symbol as a value', () => {
+    const obj = { key: Symbol.for('hello') }
+    expect(stringify(obj)).to.equal(JSON.stringify(obj))
+  })
+  it('should not change when symbols have different order', () => {
+    const obj1 = { [Symbol.for('key1')]: 'hello', [Symbol.for('key2')]: 'world' }
+    const obj2 = { [Symbol.for('key2')]: 'world', [Symbol.for('key1')]: 'hello' }
+    expect(stringify(obj1)).to.equal(stringify(obj2))
+  })
+  it('should detect a cycle instead of throwing an error, this is a departure from JSON.stringify', () => {
+    const obj1 = { obj2: {} }
+    const obj2 = { obj1 }
+    obj1.obj2 = obj2
+    expect(stringify(obj1)).to.equal('{"obj2":{"obj1":"__cycle__"}}')
   })
 })
 describe('ensureString', () => {

@@ -40,8 +40,8 @@ interface RescueOptions <DefaultType> {
   logRescue?: (e: Error) => void | Promise<void>
 }
 export async function rescue<ItemType> (promise: Promise<ItemType>): Promise<ItemType | undefined>
-export async function rescue<ItemType, DefaultType> (promise: Promise<ItemType>, options: RescueOptions<DefaultType>): Promise<ItemType | DefaultType>
-export async function rescue<ItemType, DefaultType> (promise: Promise<ItemType>, defaultValue: DefaultType): Promise<ItemType | DefaultType>
+export async function rescue<ItemType, DefaultType = undefined> (promise: Promise<ItemType>, options: RescueOptions<DefaultType>): Promise<ItemType | DefaultType>
+export async function rescue<ItemType, DefaultType = undefined> (promise: Promise<ItemType>, defaultValue: DefaultType): Promise<ItemType | DefaultType>
 export async function rescue (promise: Promise<any>, defaultValueOrOptions?: any) {
   if (typeof defaultValueOrOptions !== 'object' || (!defaultValueOrOptions.condition && !defaultValueOrOptions.defaultValue)) {
     defaultValueOrOptions = { defaultValue: defaultValueOrOptions }

@@ -1,3 +1,5 @@
+type StringifyReplacer = (this: any, key: string, value: any) => any
+
 /**
  * A stable stringify function that sorts object keys before stringifying
  * so that identical objects with different key ordering will stringify to identical
@@ -6,9 +8,9 @@
  * If the object being stringified contains cycles, the deeper appearance
  * of the cycled object will be replaced with the string '__cycle__'
  */
-export function stringify (data: undefined): undefined
-export function stringify (data: any): string
-export function stringify (data: any) {
+export function stringify (data: string | number | boolean | symbol | bigint | object, replacer?: StringifyReplacer): string
+export function stringify (data: undefined | null, replacer?: StringifyReplacer): undefined
+export function stringify (data: any, replacer?: StringifyReplacer) {
   const seen: any[] = []
   return (function stringify (node: any) {
     if (typeof node?.toJSON === 'function') {
@@ -18,7 +20,7 @@ export function stringify (data: any) {
     if (node === undefined) return
     // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
     if (typeof node === 'number') return isFinite(node) ? '' + node : 'null'
-    if (typeof node !== 'object') return JSON.stringify(node)
+    if (typeof node !== 'object') return JSON.stringify(node, replacer)
 
     let i, out
     if (Array.isArray(node)) {
