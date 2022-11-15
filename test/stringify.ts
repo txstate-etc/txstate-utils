@@ -32,9 +32,11 @@ describe('stringify', function () {
     const obj = { array: [5, 4, 3, 2, 1] }
     expect(stringify(obj)).to.equal(JSON.stringify(obj))
   })
-  it('should match JSON.stringify on null and undefined inputs', () => {
+  it('should match JSON.stringify on null input', () => {
     expect(stringify(null)).to.equal(JSON.stringify(null))
-    expect(stringify(undefined)).to.equal(JSON.stringify(undefined))
+  })
+  it('should always return a string even though JSON.stringify returns undefined for undefined', () => {
+    expect(stringify(undefined)).to.equal('undefined')
   })
   it('should match JSON.stringify when given a quoted string', () => {
     expect(stringify('"test"')).to.equal(JSON.stringify('"test"'))
@@ -57,13 +59,6 @@ describe('stringify', function () {
     const obj2 = { obj1 }
     obj1.obj2 = obj2
     expect(stringify(obj1)).to.equal('{"obj2":{"obj1":"__cycle__"}}')
-  })
-  it('should accept optional objects without throwing typescript errors', () => {
-    interface MyObj {
-      hello: string
-    }
-    const o: MyObj | undefined = undefined as MyObj | undefined
-    expect(stringify(o)).to.equal(JSON.stringify(o))
   })
 })
 describe('ensureString', () => {

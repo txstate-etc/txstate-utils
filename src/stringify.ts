@@ -8,9 +8,6 @@ type StringifyReplacer = (this: any, key: string, value: any) => any
  * If the object being stringified contains cycles, the deeper appearance
  * of the cycled object will be replaced with the string '__cycle__'
  */
-export function stringify (data: string | number | boolean | symbol | bigint | object, replacer?: StringifyReplacer): string
-export function stringify (data: undefined | null, replacer?: StringifyReplacer): undefined
-export function stringify (data: string | number | boolean | symbol | bigint | object | undefined | null, replacer?: StringifyReplacer): string | undefined
 export function stringify (data: any, replacer?: StringifyReplacer) {
   const seen: any[] = []
   return (function stringify (node: any) {
@@ -18,7 +15,7 @@ export function stringify (data: any, replacer?: StringifyReplacer) {
       node = node.toJSON()
     }
 
-    if (node === undefined) return
+    if (node === undefined) return 'undefined'
     // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
     if (typeof node === 'number') return isFinite(node) ? '' + node : 'null'
     if (typeof node !== 'object') return JSON.stringify(node, replacer)
