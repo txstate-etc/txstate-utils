@@ -10,6 +10,7 @@ type StringifyReplacer = (this: any, key: string, value: any) => any
  */
 export function stringify (data: string | number | boolean | symbol | bigint | object, replacer?: StringifyReplacer): string
 export function stringify (data: undefined | null, replacer?: StringifyReplacer): undefined
+export function stringify (data: string | number | boolean | symbol | bigint | object | undefined | null, replacer?: StringifyReplacer): string | undefined
 export function stringify (data: any, replacer?: StringifyReplacer) {
   const seen: any[] = []
   return (function stringify (node: any) {

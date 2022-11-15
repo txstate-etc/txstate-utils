@@ -58,6 +58,13 @@ describe('stringify', function () {
     obj1.obj2 = obj2
     expect(stringify(obj1)).to.equal('{"obj2":{"obj1":"__cycle__"}}')
   })
+  it('should accept optional objects without throwing typescript errors', () => {
+    interface MyObj {
+      hello: string
+    }
+    const o: MyObj | undefined = undefined as MyObj | undefined
+    expect(stringify(o)).to.equal(JSON.stringify(o))
+  })
 })
 describe('ensureString', () => {
   it('should not add quotes to a string', () => {
