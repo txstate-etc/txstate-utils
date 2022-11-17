@@ -9,13 +9,14 @@ type StringifyReplacer = (this: any, key: string, value: any) => any
  * of the cycled object will be replaced with the string '__cycle__'
  */
 export function stringify (data: any, replacer?: StringifyReplacer) {
+  if (typeof data === 'undefined') return 'null'
   const seen: any[] = []
   return (function stringify (node: any) {
     if (typeof node?.toJSON === 'function') {
       node = node.toJSON()
     }
 
-    if (node === undefined) return 'undefined'
+    if (node === undefined) return
     // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
     if (typeof node === 'number') return isFinite(node) ? '' + node : 'null'
     if (typeof node !== 'object') return JSON.stringify(node, replacer)
@@ -49,7 +50,7 @@ export function stringify (data: any, replacer?: StringifyReplacer) {
     }
     seen.splice(seenIndex, 1)
     return '{' + out + '}'
-  })(data)
+  })(data)!
 }
 
 /**

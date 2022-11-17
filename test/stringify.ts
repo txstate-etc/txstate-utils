@@ -36,7 +36,14 @@ describe('stringify', function () {
     expect(stringify(null)).to.equal(JSON.stringify(null))
   })
   it('should always return a string even though JSON.stringify returns undefined for undefined', () => {
-    expect(stringify(undefined)).to.equal('undefined')
+    expect(stringify(undefined)).to.equal(JSON.stringify(null))
+  })
+  it('should match JSON.stringify when a property value is undefined or null', () => {
+    const o = {
+      hello: undefined,
+      world: null
+    }
+    expect(stringify(o)).to.equal(JSON.stringify(o))
   })
   it('should match JSON.stringify when given a quoted string', () => {
     expect(stringify('"test"')).to.equal(JSON.stringify('"test"'))
