@@ -1,6 +1,7 @@
 export * from './array/index.js'
 export * from './async.js'
 export * from './cache.js'
+export * from './color.js'
 export * from './concurrent.js'
 export * from './csv.js'
 export * from './date.js'
