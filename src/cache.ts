@@ -247,7 +247,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
           // the cache client
           // client will receive errors normally on the first call or
           // after the stored value goes invalid
-          console.log(error)
+          console.error(error)
         })
         return stored.data
       }
