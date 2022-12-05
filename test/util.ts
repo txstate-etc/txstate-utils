@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, hashid, randomid, isEmpty, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isNotEmpty, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf } from '../lib'
+import { sleep, hashid, randomid, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf } from '../lib'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -72,36 +72,6 @@ describe('isBlank', () => {
   })
 })
 
-describe('isEmpty', () => {
-  class ComplexObj {
-    protected list: any[]
-    constructor (list: any[]) {
-      this.list = list
-    }
-
-    public isEmpty () {
-      return !this.list.length
-    }
-  }
-  const emptyObj = new ComplexObj([])
-  const notEmptyObj = new ComplexObj([1, 2])
-  it('should work for plain objects', () => {
-    expect(isEmpty({})).to.be.true
-    expect(isEmpty({ hi: 'there' })).to.be.false
-  })
-  it('should work for arrays', () => {
-    expect(isEmpty([])).to.be.true
-    expect(isEmpty([1, 2])).to.be.false
-  })
-  it('should work for complex objects with an isEmpty method', () => {
-    expect(isEmpty(emptyObj)).to.be.true
-    expect(isEmpty(notEmptyObj)).to.be.false
-  })
-  it('should return false for the number 0', () => {
-    expect(isEmpty(0)).to.be.false
-  })
-})
-
 describe('isNull', () => {
   it('should return not null for strings, numbers, objects, arrays and functions', () => {
     expect(isNull('string')).to.be.false
@@ -126,13 +96,6 @@ describe('isNull', () => {
 })
 
 describe('typeguards', () => {
-  it('should properly typeguard when using isNotEmpty', () => {
-    // eslint-disable-next-line prefer-const
-    let obj: { hello: string } | undefined
-    if (isEmpty(obj)) expect(obj).to.be.undefined
-    obj = { hello: 'world' }
-    if (isNotEmpty(obj)) expect(obj.hello).to.equal('world')
-  })
   it('should properly typeguard when using isTruthy', () => {
     // eslint-disable-next-line prefer-const
     let obj: { hello: string } | undefined
