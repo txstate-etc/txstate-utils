@@ -138,29 +138,6 @@ class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 }
 
-class LRUWrapper<StorageType> implements StorageEngine<StorageType> {
-  private client: any
-  constructor (client: any) {
-    this.client = client
-  }
-
-  async get (keystr: string) {
-    return this.client.get(keystr)
-  }
-
-  async set (keystr: string, data: StorageType) {
-    this.client.set(keystr, data)
-  }
-
-  async del (keystr: string) {
-    this.client.del(keystr)
-  }
-
-  async clear () {
-    this.client.clear()
-  }
-}
-
 type OptionalArgPlus<T, V> = T extends undefined
   ? undefined extends T
     ? [V]
@@ -222,7 +199,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
-      this.storage = new LRUWrapper(storageClass)
+      this.storage = storageClass
     } else if (storageClass.flush) {
       // memcached client
       this.storage = new MemcacheWrapper(storageClass, this.options.staleseconds)

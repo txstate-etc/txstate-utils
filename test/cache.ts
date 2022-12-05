@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Cache, sleep } from '../lib'
 import { expect } from 'chai'
+import LRU from 'lru-cache'
 import Memcached from 'memcached-mock'
 
 async function timed (callback: () => Promise<void>) {
@@ -193,5 +194,69 @@ describe('cache w/memcache', () => {
     const obj2 = await singleValueCacheMemCache.get()
     expect(obj?.key).to.equal('value')
     expect(obj2?.key).to.equal('value')
+  })
+})
+
+describe('cache w/LRU', () => {
+  const doublingLRUCache = new Cache(async (n: number) => n * 2, {
+    storageClass: new LRU({ max: 3 })
+  })
+  const delayedDoublingLRUCache = new Cache(async (n: number) => {
+    await sleep(sleeptime)
+    return n * 2
+  }, {
+    storageClass: new LRU({ max: 3 })
+  })
+  const singleValueCacheLRUCache = new Cache(async () => {
+    return { key: 'value' }
+  }, {
+    storageClass: new LRU({ max: 3 })
+  })
+  it('should return transformed values from LRU', async () => {
+    const four = await doublingLRUCache.get(2)
+    expect(four).to.equal(4)
+  })
+  it('should support multiple keys from LRU', async () => {
+    const eight = await doublingLRUCache.get(4)
+    expect(eight).to.equal(8)
+  })
+  it('should return a cache hit quickly from LRU', async () => {
+    await delayedDoublingLRUCache.set(2, 4)
+    let four
+    const elapsed = await timed(async () => {
+      four = await delayedDoublingLRUCache.get(2)
+    })
+    expect(elapsed).to.be.lessThan(sleeptime)
+    expect(four).to.equal(4)
+  })
+  it('should clear LRU', async () => {
+    await delayedDoublingLRUCache.set(2, 4)
+    let four
+    let elapsed = await timed(async () => {
+      four = await delayedDoublingLRUCache.get(2)
+    })
+    expect(elapsed).to.be.lessThan(sleeptime)
+    expect(four).to.equal(4)
+    await delayedDoublingLRUCache.clear()
+    elapsed = await timed(async () => {
+      four = await delayedDoublingLRUCache.get(2)
+    })
+    expect(elapsed).to.be.gte(sleeptime)
+    expect(four).to.equal(4)
+  })
+  it('should support caches that do not need multiple values stored in LRU', async () => {
+    const obj = await singleValueCacheLRUCache.get()
+    const obj2 = await singleValueCacheLRUCache.get()
+    expect(obj?.key).to.equal('value')
+    expect(obj2?.key).to.equal('value')
+  })
+  it('should only store 3 values in the LRU', async () => {
+    for (let i = 0; i < 5; i++) {
+      await delayedDoublingLRUCache.get(i)
+    }
+    const elapsed = await timed(async () => {
+      await delayedDoublingLRUCache.get(0)
+    })
+    expect(elapsed).to.be.gte(sleeptime)
   })
 })
