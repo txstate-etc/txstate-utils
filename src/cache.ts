@@ -220,7 +220,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       staleseconds: (options.staleseconds ?? (freshseconds * 2)) || Infinity
     }
     const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
-    if (storageClass.reset && storageClass.dump) {
+    if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
       this.storage = new LRUWrapper(storageClass)
     } else if (storageClass.flush) {
