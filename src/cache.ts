@@ -157,7 +157,7 @@ class LRUWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 
   async clear () {
-    this.client.reset()
+    this.client.clear()
   }
 }
 
