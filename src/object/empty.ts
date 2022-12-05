@@ -1,4 +1,4 @@
-import { isBlank, isNotBlank, isNotNull } from '../util'
+import { isBlank, isNotBlank, isNotNull } from '../util.js'
 
 function isEmptyWithUncertainty (obj: any): boolean | undefined {
   if (obj == null) return true
