@@ -4,7 +4,7 @@ const comparators: Record<string, any> = {
   boolean: (a: boolean, b: boolean) => Number(a) - Number(b),
   string: (a: string, b: string) => a.localeCompare(b),
   number: (a: number, b: number) => a - b,
-  object: (a: Date, b: Date) => a.getTime() - b.getTime()
+  object: (a: any, b: any) => a - b
 }
 type SortableTypes = boolean | string | number | Date
 
