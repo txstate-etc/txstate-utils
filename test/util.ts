@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, hashid, randomid, isBlank, isNotBlank, csvEscape, csvLine, isEmail, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf } from '../lib'
+import { sleep, hashid, randomid, isBlank, isNotBlank, isEmail, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf } from '../lib'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -135,19 +136,6 @@ describe('isEmail', () => {
     if (isEmail(email)) {
       expect(email.toLocaleLowerCase()).to.equal(email)
     }
-  })
-})
-
-describe('CSV functions', () => {
-  it('should be able to escape values for CSV', () => {
-    expect(csvEscape('hello')).to.equal('hello')
-    expect(csvEscape('"hello"')).to.equal('"""hello"""')
-    expect(csvEscape('hello\nfriend')).to.equal('"hello\nfriend"')
-    expect(csvEscape('hello, friend')).to.equal('"hello, friend"')
-    expect(csvEscape('hello, "friend"')).to.equal('"hello, ""friend"""')
-  })
-  it('should be able to construct a full CSV line', () => {
-    expect(csvLine(['apple', 'banana', 'onion, sweet'])).to.equal('apple,banana,"onion, sweet"\r\n')
   })
 })
 

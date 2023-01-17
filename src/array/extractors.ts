@@ -1,6 +1,6 @@
 import { get } from '../object/index.js'
 
-export const extractors: Record<string, Function> = {
+export const extractors: Record<string, (arg: any) => ((obj: any) => any)> = {
   undefined: () => {
     return (obj: any) => obj
   },

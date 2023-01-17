@@ -24,30 +24,30 @@ describe('async utils', () => {
   })
 
   it('rescue returns the value when the promise is resolved', async () => {
-    const a = await rescue(new Promise<number>(resolve => resolve(2)))
+    const a = await rescue(new Promise<number>(resolve => { resolve(2) }))
     expect(a).to.equal(2)
   })
   it('rescue returns the value when the promise is resolved, even if there is a default', async () => {
-    const a = await rescue(new Promise<number>(resolve => resolve(2)), 5)
+    const a = await rescue(new Promise<number>(resolve => { resolve(2) }), 5)
     expect(a).to.equal(2)
   })
   it('rescue returns undefined when the promise is rejected', async () => {
-    const a = await rescue(new Promise<number>((resolve, reject) => reject(new Error('rejected!'))))
+    const a = await rescue(new Promise<number>((resolve, reject) => { reject(new Error('rejected!')) }))
     expect(a).to.be.undefined
   })
   it('rescue returns a default value when the promise is rejected', async () => {
-    const a = await rescue(new Promise<number>((resolve, reject) => reject(new Error('rejected!'))), 5)
+    const a = await rescue(new Promise<number>((resolve, reject) => { reject(new Error('rejected!')) }), 5)
     expect(a).to.equal(5)
   })
   it('rescue returns a default value when passed an options object', async () => {
-    const a = await rescue(new Promise<number>((resolve, reject) => reject(new Error('rejected!'))), { defaultValue: 5 })
+    const a = await rescue(new Promise<number>((resolve, reject) => { reject(new Error('rejected!')) }), { defaultValue: 5 })
     expect(a).to.equal(5)
   })
   it('rescue returns a default value only when the error passes a condition', async () => {
-    const a = await rescue(new Promise<number>((resolve, reject) => reject(new Error('rejected!'))), { defaultValue: 5, condition: e => e.message?.startsWith('rej') })
+    const a = await rescue(new Promise<number>((resolve, reject) => { reject(new Error('rejected!')) }), { defaultValue: 5, condition: e => e.message?.startsWith('rej') })
     expect(a).to.equal(5)
     try {
-      await rescue(new Promise<number>((resolve, reject) => reject(new Error('denied!'))), { defaultValue: 5, condition: e => e.message?.startsWith('rej') })
+      await rescue(new Promise<number>((resolve, reject) => { reject(new Error('denied!')) }), { defaultValue: 5, condition: e => e.message?.startsWith('rej') })
       expect.fail('should have thrown since error did not start with "rej"')
     } catch (e: any) {
       expect(e.message).to.equal('denied!')
