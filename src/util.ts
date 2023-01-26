@@ -19,6 +19,7 @@ export function randomid (length = 10) {
  * optional chaining may be easier: if (!str?.trim().length) ...
  */
 export function isBlank (str: string | undefined | null): str is '' | undefined | null {
+  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
   return !str || !str.trim || str.trim().length === 0
 }
 
@@ -97,4 +98,11 @@ export function printIf (...args: any[]): string {
 export function roundTo (num: number, digits = 0) {
   const conversion = Math.pow(10, digits)
   return Math.round((num + Number.EPSILON) * conversion) / conversion
+}
+
+export function bytesToHuman (bytes: number) {
+  if (!bytes) return '0 bytes'
+  const scales = [' bytes', 'KB', 'MB', 'GB', 'TB', 'PB']
+  const scale = Math.min(5, Math.floor(Math.log(bytes) / Math.log(1024)))
+  return String(parseFloat((bytes / Math.pow(1024, scale)).toPrecision(3))) + scales[scale]
 }

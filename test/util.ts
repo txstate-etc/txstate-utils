@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-confusing-void-expression */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { sleep, hashid, randomid, isBlank, isNotBlank, isEmail, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf } from '../lib'
+import { sleep, hashid, randomid, isBlank, isNotBlank, isEmail, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf, bytesToHuman } from '../lib'
 import { expect } from 'chai'
 
 describe('sleep', () => {
@@ -207,5 +207,26 @@ describe('roundTo', () => {
     expect(roundTo(1234.90, -1)).to.equal(1230)
     expect(roundTo(1234, -2)).to.equal(1200)
     expect(roundTo(1234.0987, -3)).to.equal(1000)
+  })
+})
+
+describe('bytesToHuman', () => {
+  it('should work for 0 bytes', () => {
+    expect(bytesToHuman(0)).to.equal('0 bytes')
+  })
+  it('should work for the first 6 scales', () => {
+    expect(bytesToHuman(5)).to.equal('5 bytes')
+    expect(bytesToHuman(4096)).to.equal('4KB')
+    expect(bytesToHuman(4096 * 1024)).to.equal('4MB')
+    expect(bytesToHuman(4096 * 1024 * 1024)).to.equal('4GB')
+    expect(bytesToHuman(4096 * 1024 * 1024 * 1024)).to.equal('4TB')
+    expect(bytesToHuman(4096 * 1024 * 1024 * 1024 * 1024)).to.equal('4PB')
+  })
+  it('should print up to 3 significant digits', () => {
+    expect(bytesToHuman(4196)).to.equal('4.1KB')
+    expect(bytesToHuman(4256)).to.equal('4.16KB')
+  })
+  it('should stop at petabytes and show a big number instead', () => {
+    expect(bytesToHuman(4000 * 1024 * 1024 * 1024 * 1024 * 1024)).to.equal('4000PB')
   })
 })
