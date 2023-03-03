@@ -88,4 +88,10 @@ describe('concurrent utils', () => {
     expect(limit.activeCount).to.equal(2)
     expect(limit.pendingCount).to.equal(1)
   })
+
+  it('pLimit should return the value returned by the function it is given', async () => {
+    const limit = pLimit(2)
+    const result = await limit(async () => 4)
+    expect(result).to.equal(4)
+  })
 })

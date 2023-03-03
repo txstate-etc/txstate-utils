@@ -72,19 +72,20 @@ export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimit
   return items.some((_, index) => bools[index])
 }
 
-type pLimitFn = (..._: any[]) => any
+type pLimitFn <T = any> = (..._: any[]) => Promise<T>
 export function pLimit (concurrency: number) {
   const queue = new Queue<pLimitFn>()
   let activeCount = 0
 
   const next = () => {
     activeCount--
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     queue.dequeue()?.()
   }
 
-  const run = async (fn: pLimitFn, resolve: pLimitFn, args: any) => {
+  const run = async (fn: pLimitFn, resolve: (value: any) => void, args: any) => {
     activeCount++
-    const result = (async () => fn(...args))()
+    const result = (async () => await fn(...args))()
     resolve(result)
 
     try {
@@ -94,13 +95,14 @@ export function pLimit (concurrency: number) {
     next()
   }
 
-  const enqueue = (fn: pLimitFn, resolve: pLimitFn, args: any) => {
+  const enqueue = (fn: pLimitFn, resolve: (value: any) => void, args: any) => {
     queue.enqueue(run.bind(undefined, fn, resolve, args));
 
     (async () => {
       await Promise.resolve()
 
       if (activeCount < concurrency) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         queue.dequeue()?.()
       }
     })().catch(console.error)
@@ -124,5 +126,5 @@ export function pLimit (concurrency: number) {
     }
   })
 
-  return generator as { (fn: pLimitFn, ...args: any[]): Promise<unknown>, activeCount: number, pendingCount: number, clearQueue: () => void }
+  return generator as { <T>(fn: pLimitFn<T>, ...args: any[]): Promise<T>, activeCount: number, pendingCount: number, clearQueue: () => void }
 }
