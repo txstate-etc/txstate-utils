@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { eachConcurrent, sleep, mapConcurrent, filterConcurrent, someConcurrent } from '../lib'
+import { eachConcurrent, sleep, mapConcurrent, filterConcurrent, someConcurrent, pLimit } from '../lib'
 
 describe('concurrent utils', () => {
   const items = Array.from(Array(20).keys())
@@ -73,5 +73,19 @@ describe('concurrent utils', () => {
   it('someConcurrent should return false when no return value is truthy, with in-flight limit', async () => {
     const result = await someConcurrent(items, 2, async item => false)
     expect(result).to.be.false
+  })
+
+  it('pLimit should expose active and pending count', async () => {
+    const limit = pLimit(2)
+    expect(limit.activeCount).to.equal(0)
+    expect(limit.pendingCount).to.equal(0)
+    limit(async () => await sleep(500)).catch(console.error)
+    await sleep(2)
+    expect(limit.activeCount).to.equal(1)
+    limit(async () => await sleep(500)).catch(console.error)
+    limit(async () => await sleep(500)).catch(console.error)
+    await sleep(2)
+    expect(limit.activeCount).to.equal(2)
+    expect(limit.pendingCount).to.equal(1)
   })
 })

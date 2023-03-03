@@ -1,5 +1,5 @@
 import { disallowedKeys } from '../prototypepollution.js'
-import { ObjectOrArray, pathSeperatorRegex } from './common.js'
+import { type ObjectOrArray, pathSeperatorRegex } from './common.js'
 
 const clone = (objectOrArray: ObjectOrArray): ObjectOrArray =>
   Array.isArray(objectOrArray) ? Array.from(objectOrArray) : Object.assign({}, objectOrArray)

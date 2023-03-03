@@ -72,8 +72,9 @@ export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimit
   return items.some((_, index) => bools[index])
 }
 
+type pLimitFn = (..._: any[]) => any
 export function pLimit (concurrency: number) {
-  const queue = new Queue<Function>()
+  const queue = new Queue<pLimitFn>()
   let activeCount = 0
 
   const next = () => {
@@ -81,7 +82,7 @@ export function pLimit (concurrency: number) {
     queue.dequeue()?.()
   }
 
-  const run = async (fn: Function, resolve: Function, args: any) => {
+  const run = async (fn: pLimitFn, resolve: pLimitFn, args: any) => {
     activeCount++
     const result = (async () => fn(...args))()
     resolve(result)
@@ -93,7 +94,7 @@ export function pLimit (concurrency: number) {
     next()
   }
 
-  const enqueue = (fn: Function, resolve: Function, args: any) => {
+  const enqueue = (fn: pLimitFn, resolve: pLimitFn, args: any) => {
     queue.enqueue(run.bind(undefined, fn, resolve, args));
 
     (async () => {
@@ -105,7 +106,7 @@ export function pLimit (concurrency: number) {
     })().catch(console.error)
   }
 
-  const generator = (fn: Function, ...args: any[]) => new Promise(resolve => {
+  const generator = (fn: pLimitFn, ...args: any[]) => new Promise(resolve => {
     enqueue(fn, resolve, args)
   })
 
@@ -123,5 +124,5 @@ export function pLimit (concurrency: number) {
     }
   })
 
-  return generator
+  return generator as { (fn: pLimitFn, ...args: any[]): Promise<unknown>, activeCount: number, pendingCount: number, clearQueue: () => void }
 }

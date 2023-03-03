@@ -14,7 +14,7 @@ export function unique<ObjectType> (arr: readonly ObjectType[], stringify: any =
     const key = stringify
     stringify = (obj: ObjectType) => get(obj, key)
   }
-  const seen: Set<string> = new Set()
+  const seen = new Set<string>()
   const ret: ObjectType[] = []
   for (const itm of arr) {
     const s = stringify(itm)
