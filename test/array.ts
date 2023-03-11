@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { keyby, unique, shuffle, toArray, groupby, findIndex, splice } from '../lib'
+import { keyby, unique, shuffle, toArray, groupby, findIndex, splice, mapkeyby, mapgroupby } from '../lib'
 import { expect } from 'chai'
 
 describe('keyby', () => {
@@ -44,6 +44,51 @@ describe('keyby', () => {
     const hashed = keyby([1, 3, 5, 7])
     expect(hashed[3]).to.equal(true)
     expect(hashed[4]).to.equal(undefined)
+  })
+})
+
+describe('mapkeyby', () => {
+  const sym = Symbol('id')
+  const records = [
+    { [sym]: 1, idnum: 1, idstr: 'one', name: 'One', deep: { id: 1 } },
+    { [sym]: 2, idnum: 2, idstr: 'two', name: 'Two', deep: { id: 2 } },
+    { [sym]: 3, idnum: 3, idstr: 'three', name: 'Three', deep: { id: 3 } },
+    { [sym]: 4, idnum: 4, idstr: 'four', name: 'Four' }
+  ]
+  it('should work with a shallow string property that returns numbers', () => {
+    const mapped = mapkeyby(records, 'idnum')
+    expect(mapped.size).to.equal(4)
+    expect(mapped.get(1)!.name).to.equal('One')
+  })
+  it('should work with a shallow symbol property that returns numbers', () => {
+    const mapped = mapkeyby(records, sym)
+    expect(mapped.size).to.equal(4)
+    expect(mapped.get(1)!.name).to.equal('One')
+  })
+  it('should work with a shallow string properties that returns strings', () => {
+    const mapped = mapkeyby(records, 'idstr')
+    expect(mapped.size).to.equal(4)
+    expect(mapped.get('one')!.name).to.equal('One')
+  })
+  it('should work with deep properties', () => {
+    const mapped = mapkeyby(records, 'deep.id')
+    expect(mapped.size).to.equal(3)
+    expect(mapped.get(1)!.name).to.equal('One')
+  })
+  it('should work with an extractor function', () => {
+    const mapped = mapkeyby(records, record => record?.deep?.id)
+    expect(mapped.size).to.equal(3)
+    expect(mapped.get(1)!.name).to.equal('One')
+  })
+  it('should be null safe', () => {
+    const mapped = mapkeyby(undefined, 'id')
+    expect(mapped).to.be.a('Map')
+    expect(mapped.size).to.equal(0)
+  })
+  it('should map to booleans when given an array of numbers or strings', () => {
+    const mapped = mapkeyby([1, 3, 5, 7])
+    expect(mapped.get(3)!).to.equal(true)
+    expect(mapped.get(4)!).to.equal(undefined)
   })
 })
 
@@ -143,6 +188,37 @@ describe('groupby', () => {
     expect(grouped.apple).to.have.lengthOf(3)
     expect(grouped.banana).to.have.lengthOf(2)
     expect(grouped.orange).to.have.lengthOf(1)
+  })
+})
+describe('mapgroupby', () => {
+  const rows = [
+    { id: 1, fruit: 'apple', vegetable: 'cucumber', deep: { fruit: 'apple' } },
+    { id: 2, fruit: 'orange', vegetable: 'green bean', deep: { fruit: 'orange' } },
+    { id: 3, fruit: 'apple', vegetable: 'lima bean', deep: { fruit: 'apple' } },
+    { id: 4, fruit: 'apple', vegetable: 'artichoke', deep: { fruit: 'apple' } },
+    { id: 5, fruit: 'banana', vegetable: 'artichoke', deep: { fruit: 'banana' } },
+    { id: 6, fruit: 'banana', vegetable: 'lettuce', deep: { fruit: 'banana' } }
+  ]
+  it('should group rows with matching keys into the same array', () => {
+    const grouped = mapgroupby(rows, 'fruit')
+    expect(grouped.size).to.equal(3)
+    expect(grouped.get('apple')).to.have.lengthOf(3)
+    expect(grouped.get('banana')).to.have.lengthOf(2)
+    expect(grouped.get('orange')).to.have.lengthOf(1)
+  })
+  it('should group rows with matching keys into the same array, function extractor', () => {
+    const grouped = mapgroupby(rows, r => r.fruit)
+    expect(grouped.size).to.equal(3)
+    expect(grouped.get('apple')).to.have.lengthOf(3)
+    expect(grouped.get('banana')).to.have.lengthOf(2)
+    expect(grouped.get('orange')).to.have.lengthOf(1)
+  })
+  it('should group rows with matching keys into the same array, dotprop extractor', () => {
+    const grouped = mapgroupby(rows, 'deep.fruit')
+    expect(grouped.size).to.equal(3)
+    expect(grouped.get('apple')).to.have.lengthOf(3)
+    expect(grouped.get('banana')).to.have.lengthOf(2)
+    expect(grouped.get('orange')).to.have.lengthOf(1)
   })
 })
 

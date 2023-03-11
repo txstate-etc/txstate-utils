@@ -5,7 +5,7 @@ export const extractors: Record<string, (arg: any) => ((obj: any) => any)> = {
     return (obj: any) => obj
   },
   function: (extractor: (obj: any) => string | number | undefined) => {
-    return (obj: any) => extractor(obj)
+    return extractor
   },
   number: directKey,
   symbol: directKey,
