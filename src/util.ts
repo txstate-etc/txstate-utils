@@ -87,6 +87,9 @@ export function optionalString (str: any): string | undefined | null {
  * explicitly check mystate.content against null.
  *
  * Generally shorter/easier than (mystate.showcontent && mystate.content != null ? mystate.content : '')
+ * 
+ * @note This isn't intended for use with string interpolation as the interpolation will evaluate
+ * as a parameter to the function before entering this function and testing the conditional.
  */
 export function printIf (condition: any, str: number | string | boolean | Stringable | undefined | null): string
 export function printIf (str: number | string | boolean | Stringable | undefined | null): string
