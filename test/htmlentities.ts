@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { htmlEncode } from '../lib'
+import { htmlDecode, htmlEncode } from '../lib'
 
 describe('htmlEncode', () => {
   it('should encode special characters in a string', () => {
@@ -15,5 +15,14 @@ describe('htmlEncode', () => {
   it('should return empty string when undefined or null', () => {
     expect(htmlEncode(undefined)).to.equal('')
     expect(htmlEncode(null)).to.equal('')
+  })
+})
+
+describe('htmlDecode', () => {
+  it('should encode and decode special characters', () => {
+    const testStrings = ['7 > 5', '7 = 5', '7 == 5 && 9 != 8', 'copyright ©', '`backticks`']
+    for (const str of testStrings) {
+      expect(htmlDecode(htmlEncode(str))).to.equal(str)
+    }
   })
 })

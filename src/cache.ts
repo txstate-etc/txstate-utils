@@ -34,7 +34,7 @@ interface SimpleStorageNode<StorageType> {
   prev?: SimpleStorageNode<StorageType>
 }
 class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
-  private storage: { [keys: string]: SimpleStorageNode<StorageType> }
+  private storage: Record<string, SimpleStorageNode<StorageType>>
   private oldest?: SimpleStorageNode<StorageType>
   private newest?: SimpleStorageNode<StorageType>
   private maxAge: number
@@ -186,7 +186,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   private fetcher: FetcherFunction<KeyType, ReturnType, HelperType>
   private options: CacheOptionsInternal
   private storage: StorageEngine<Storage<ReturnType>>
-  private active: { [keys: string]: Promise<ReturnType> }
+  private active: Record<string, Promise<ReturnType>>
   private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
@@ -261,7 +261,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     try {
       const data = await this.active[keystr]
       const refreshPromise = this.onRefresh?.(key, data)
-      if (refreshPromise) refreshPromise.catch?.(e => console.error(e))
+      if (refreshPromise) refreshPromise.catch?.(e => { console.error(e) })
       await this.set(...[key, data] as any)
       return data
     } finally {
