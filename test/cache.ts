@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Cache, sleep } from '../lib'
 import { expect } from 'chai'
-import LRU from 'lru-cache'
+import { LRUCache } from 'lru-cache'
 import Memcached from 'memcached-mock'
 
 async function timed (callback: () => Promise<void>) {
@@ -199,18 +199,18 @@ describe('cache w/memcache', () => {
 
 describe('cache w/LRU', () => {
   const doublingLRUCache = new Cache(async (n: number) => n * 2, {
-    storageClass: new LRU({ max: 3 })
+    storageClass: new LRUCache({ max: 3 })
   })
   const delayedDoublingLRUCache = new Cache(async (n: number) => {
     await sleep(sleeptime)
     return n * 2
   }, {
-    storageClass: new LRU({ max: 3 })
+    storageClass: new LRUCache({ max: 3 })
   })
   const singleValueCacheLRUCache = new Cache(async () => {
     return { key: 'value' }
   }, {
-    storageClass: new LRU({ max: 3 })
+    storageClass: new LRUCache({ max: 3 })
   })
   it('should return transformed values from LRU', async () => {
     const four = await doublingLRUCache.get(2)

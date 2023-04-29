@@ -7,7 +7,7 @@ class Node<ValueType> {
   }
 }
 
-export default class Queue<ValueType> {
+export class Queue<ValueType = any> {
   #head?: Node<ValueType>
   #tail?: Node<ValueType>
   #size!: number
