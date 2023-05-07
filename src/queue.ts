@@ -10,11 +10,7 @@ class Node<ValueType> {
 export class Queue<ValueType = any> {
   #head?: Node<ValueType>
   #tail?: Node<ValueType>
-  #size!: number
-
-  constructor () {
-    this.clear()
-  }
+  #size = 0
 
   enqueue (value: ValueType) {
     const node = new Node<ValueType>(value)
