@@ -28,6 +28,15 @@ describe('randomid', () => {
     expect(id).to.match(/^[a-z]/)
     expect(id.length).to.be.gte(4)
   })
+  it('should generate a string of 20 characters', () => {
+    expect(randomid(20)).to.have.lengthOf(20)
+  })
+  it('should generate a string of 11 characters', () => {
+    expect(randomid(11)).to.have.lengthOf(11)
+  })
+  it('should generate a string of 34 characters', () => {
+    expect(randomid(34)).to.have.lengthOf(34)
+  })
 })
 
 describe('hashid', () => {
@@ -45,6 +54,12 @@ describe('hashid', () => {
     const id1 = hashid('test my input string')
     const id2 = hashid('test my input string')
     expect(id1).to.equal(id2)
+  })
+  it('should produce different output for different strings that parse to numbers', () => {
+    expect(hashid('164')).not.to.equal(hashid('163'))
+  })
+  it('should not crash on strings with special characters', () => {
+    expect(hashid('test this © copyright symbol')).not.to.contain('©').and.have.lengthOf(8)
   })
 })
 

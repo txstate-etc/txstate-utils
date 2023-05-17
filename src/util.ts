@@ -11,7 +11,9 @@ export function sleep (milliseconds = 0) {
  * character, which makes it suitable for HTML `id` attribute
  */
 export function randomid (length = 10) {
-  return String.fromCharCode(97 + Math.floor(Math.random() * 26)) + Math.random().toString(36).slice(2, length + 1)
+  let ret = String.fromCharCode(97 + Math.floor(Math.random() * 26))
+  while (ret.length < length) ret += Math.random().toString(36).slice(2)
+  return ret.slice(0, length)
 }
 
 /**
@@ -87,7 +89,7 @@ export function optionalString (str: any): string | undefined | null {
  * explicitly check mystate.content against null.
  *
  * Generally shorter/easier than (mystate.showcontent && mystate.content != null ? mystate.content : '')
- * 
+ *
  * @note This isn't intended for use with string interpolation passed to `str` as the interpolation will evaluate
  * as a parameter to the function before entering this function and testing the conditional.
  */
