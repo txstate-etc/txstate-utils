@@ -17,8 +17,10 @@ function escapeChar (c: string) { return escapes[c] }
  * htmlEncode('Text with WAVE breaking <h1>text</h1> in it.')
  * // Returns: 'Text with WAVE breaking &lt;h1&gt;text&lt;/h1&gt; in it.'
  * ``` */
-export function htmlEncode (str: string | undefined | null) {
+export function htmlEncode (str: string | number | Date | boolean | undefined | null) {
   if (str == null) return ''
+  if (str instanceof Date) return str.toISOString()
+  if (typeof str !== 'string') return String(str)
   return str.replace(/[&<>"'`=]/g, escapeChar)
 }
 

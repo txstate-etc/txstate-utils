@@ -16,6 +16,13 @@ describe('htmlEncode', () => {
     expect(htmlEncode(undefined)).to.equal('')
     expect(htmlEncode(null)).to.equal('')
   })
+  it('should return a string when given a number or date or bool', () => {
+    expect(htmlEncode(2)).to.equal('2')
+    expect(htmlEncode(true)).to.equal('true')
+    expect(htmlEncode(false)).to.equal('false')
+    const dt = new Date()
+    expect(htmlEncode(dt)).to.equal(dt.toISOString())
+  })
 })
 
 describe('htmlDecode', () => {
