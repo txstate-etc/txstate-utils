@@ -30,4 +30,7 @@ describe('titleCase', () => {
   it('should ignore line breaks and carriage returns', () => {
     expect(titleCase('thisIs \nCamelCase')).to.equal('This Is Camel Case')
   })
+  it('should title-case a string that begins with underscore', () => {
+    expect(titleCase('_this_usesUnderscores')).to.equal('This Uses Underscores')
+  })
 })

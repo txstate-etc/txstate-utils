@@ -11,5 +11,5 @@ function words (str: string) {
 }
 
 export function titleCase (str: string) {
-  return words(str).map(ucfirst).join(' ')
+  return words(str).filter(w => w.length > 0).map(ucfirst).join(' ')
 }
