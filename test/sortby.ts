@@ -61,4 +61,10 @@ describe('sortby', () => {
     expect(sorted[1].first).to.equal(4)
     expect(sorted[2].first).to.equal(1)
   })
+  it('should be able to sort booleans descending', () => {
+    const sorted = sortby(getArray(), 'active', true, 'first', true)
+    expect(sorted[0].first).to.equal(3)
+    expect(sorted[1].first).to.equal(2)
+    expect(sorted[2].first).to.equal(1)
+  })
 })

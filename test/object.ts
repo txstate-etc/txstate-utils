@@ -177,6 +177,16 @@ describe('object', () => {
       const newobj = pick(obj, 'two', 'three')
       expect(newobj).to.deep.equal({ two: 2, three: 3 })
     })
+    it('should not add properties for picks that are undefined', () => {
+      const obj = { one: 1, two: 2, three: 3, four: undefined }
+      const newobj = pick(obj, 'two', 'four')
+      expect(Object.keys(newobj)).to.deep.equal(['two'])
+    })
+    it('should not add properties for picks that are null', () => {
+      const obj = { one: 1, two: 2, three: 3, four: null }
+      const newobj = pick(obj, 'two', 'four')
+      expect(Object.keys(newobj)).to.deep.equal(['two'])
+    })
   })
   describe('omit', () => {
     it('should omit properties without mutating', () => {
