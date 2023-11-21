@@ -1,6 +1,6 @@
 {
   "name": "txstate-utils",
-  "version": "1.8.13",
+  "version": "1.8.14",
   "description": "Lightweight utility functions that can be used in a browser or in node.",
   "main": "lib/index.js",
   "module": "lib-esm/index.js",
@@ -34,7 +34,7 @@
     "@types/chai": "^4.2.12",
     "@types/mocha": "^10.0.0",
     "chai": "^4.2.0",
-    "eslint-config-standard-with-typescript": "^37.0.0",
+    "eslint-config-standard-with-typescript": "^39.0.0",
     "lru-cache": "^10.0.0",
     "memcached-mock": "^0.1.0",
     "mocha": "^10.0.0",

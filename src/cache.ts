@@ -3,7 +3,7 @@ const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTi
 
 type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void | Promise<void>
 
-interface CacheOptions <KeyType, ReturnType, StorageEngineType extends StorageEngine<ReturnType>> {
+interface CacheOptions <KeyType, ReturnType, StorageEngineType extends (StorageEngine<ReturnType> | SyncStorageEngine<ReturnType>)> {
   freshseconds?: number
   staleseconds?: number
   storageClass?: StorageEngineType
@@ -21,11 +21,19 @@ interface Storage<ReturnType> {
 }
 
 export interface StorageEngine<StorageType> {
-  get: (keystr: string) => Promise<StorageType>
+  get: (keystr: string) => Promise<StorageType | undefined>
   set: (keystr: string, data: StorageType) => Promise<void>
   del: (keystr: string) => Promise<void>
   clear: () => Promise<void>
 }
+
+export interface SyncStorageEngine<StorageType> {
+  get: (keystr: string) => StorageType | undefined
+  set: (keystr: string, data: StorageType) => void
+  del: (keystr: string) => void
+  clear: () => void
+}
+
 interface SimpleStorageNode<StorageType> {
   data: StorageType
   expires: Date
@@ -33,7 +41,7 @@ interface SimpleStorageNode<StorageType> {
   next?: SimpleStorageNode<StorageType>
   prev?: SimpleStorageNode<StorageType>
 }
-class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
+class SimpleStorage<StorageType> implements SyncStorageEngine<StorageType> {
   private storage: Record<string, SimpleStorageNode<StorageType>>
   private oldest?: SimpleStorageNode<StorageType>
   private newest?: SimpleStorageNode<StorageType>
@@ -44,12 +52,12 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
     this.storage = {}
   }
 
-  async get (keystr: string) {
+  get (keystr: string) {
     return this.storage[keystr]?.data
   }
 
-  async set (keystr: string, data: StorageType) {
-    await this.del(keystr)
+  set (keystr: string, data: StorageType) {
+    this.del(keystr)
     const expires = new Date(new Date().getTime() + (this.maxAge * 1000))
     const curr: SimpleStorageNode<StorageType> = { keystr, data, expires }
     if (this.newest) {
@@ -60,10 +68,10 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
     }
     this.newest = curr
     this.storage[keystr] = curr
-    await this.prune()
+    this.prune()
   }
 
-  async del (keystr: string) {
+  del (keystr: string) {
     const curr = this.storage[keystr]
     if (curr) {
       // remove from linked list and repair list
@@ -79,16 +87,16 @@ class SimpleStorage<StorageType> implements StorageEngine<StorageType> {
     }
   }
 
-  async clear () {
+  clear () {
     this.storage = {}
     this.newest = undefined
     this.oldest = undefined
   }
 
-  private async prune () {
+  private prune () {
     const now = new Date()
     while (this.oldest && this.oldest.expires < now) {
-      await this.del(this.oldest.keystr)
+      this.del(this.oldest.keystr)
     }
   }
 }
@@ -185,8 +193,9 @@ type FetcherFunction<KeyType, ReturnType, HelperType> =
 export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined> {
   private fetcher: FetcherFunction<KeyType, ReturnType, HelperType>
   private options: CacheOptionsInternal
-  private storage: StorageEngine<Storage<ReturnType>>
-  private active: Record<string, Promise<ReturnType>>
+  private storage: StorageEngine<Storage<ReturnType>> | SyncStorageEngine<Storage<ReturnType>>
+  private activeWork = new Map<string, Promise<ReturnType>>()
+  private activeGets = new Map<string, Promise<Storage<ReturnType> | undefined>>()
   private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
@@ -207,13 +216,31 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       this.storage = new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     }
     this.onRefresh = options.onRefresh
-    this.active = {}
   }
 
   async get (...params: OptionalArgBoth<KeyType, HelperType>) {
     const key = params[0]
     const keystr = ensureString(key)
-    const stored = await this.storage.get(keystr)
+    let stored: Storage<ReturnType> | undefined
+    if (!this.activeGets.has(keystr)) {
+      const storedMaybePromise = this.storage.get(keystr)
+      if (storedMaybePromise && 'then' in storedMaybePromise) {
+        this.activeGets.set(keystr, storedMaybePromise)
+        try {
+          stored = await storedMaybePromise
+          // this line CANNOT be moved to a `finally` block
+          // because that would do it in a later tick which would lead to other "threads"
+          // sometimes getting old data
+          this.activeGets.delete(keystr)
+        } catch {
+          this.activeGets.delete(keystr)
+        }
+      } else {
+        stored = storedMaybePromise
+      }
+    } else {
+      stored = await this.activeGets.get(keystr)!
+    }
     if (stored) {
       if (this.fresh(stored)) {
         return stored.data
@@ -256,16 +283,16 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const key = params[0] as KeyType
     const helper = params[1] as HelperType
     const keystr = ensureString(key)
-    if (typeof this.active[keystr] !== 'undefined') return await this.active[keystr]
-    this.active[keystr] = this.fetcher(key, helper)
+    if (this.activeWork.has(keystr)) return await this.activeWork.get(keystr)
+    this.activeWork.set(keystr, this.fetcher(key, helper))
     try {
-      const data = await this.active[keystr]
+      const data = await this.activeWork.get(keystr)
       const refreshPromise = this.onRefresh?.(key, data)
       if (refreshPromise) refreshPromise.catch?.(e => { console.error(e) })
       await this.set(...[key, data] as any)
       return data
     } finally {
-      delete this.active[keystr]
+      this.activeWork.delete(keystr)
     }
   }
 
