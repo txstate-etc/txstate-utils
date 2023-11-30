@@ -283,10 +283,10 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const key = params[0] as KeyType
     const helper = params[1] as HelperType
     const keystr = ensureString(key)
-    if (this.activeWork.has(keystr)) return await this.activeWork.get(keystr)
+    if (this.activeWork.has(keystr)) return await this.activeWork.get(keystr)!
     this.activeWork.set(keystr, this.fetcher(key, helper))
     try {
-      const data = await this.activeWork.get(keystr)
+      const data = await this.activeWork.get(keystr)!
       const refreshPromise = this.onRefresh?.(key, data)
       if (refreshPromise) refreshPromise.catch?.(e => { console.error(e) })
       await this.set(...[key, data] as any)
