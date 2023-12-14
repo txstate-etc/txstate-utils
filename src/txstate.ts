@@ -1,4 +1,4 @@
-import { isEmail } from './util.js'
+import { isBlank, isEmail } from './util.js'
 
 /**
  * Detect whether a whole string matches a Texas State Net ID
@@ -14,7 +14,8 @@ export function isNetID (netid: string) {
  *
  * If it does not look like either one, returns undefined
  */
-export function extractNetIDFromFederated (login: string) {
+export function extractNetIDFromFederated (login: string | undefined) {
+  if (isBlank(login)) return undefined
   const lclogin = login.trim().toLocaleLowerCase()
   if (isNetID(lclogin)) return lclogin
   const [possiblenetid, domain] = lclogin.split('@')
