@@ -59,6 +59,10 @@ describe('netid utils', () => {
     expect(extractNetIDFromFederated('AB1234')).to.equal('ab1234')
     expect(extractNetIDFromFederated('a_B1234')).to.equal('a_b1234')
   })
+  it('should return undefined when extracting netid from undefined or null', () => {
+    expect(extractNetIDFromFederated(undefined)).to.be.undefined
+    expect(extractNetIDFromFederated(null as any)).to.be.undefined
+  })
 })
 
 describe('isTxStEmail', () => {
