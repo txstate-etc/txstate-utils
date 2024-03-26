@@ -1,3 +1,4 @@
+export * from './batch.js'
 export * from './findindex.js'
 export * from './groupby.js'
 export * from './keyby.js'

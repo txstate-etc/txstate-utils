@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { keyby, unique, shuffle, toArray, groupby, findIndex, splice, mapkeyby, mapgroupby } from '../lib'
+import { keyby, unique, shuffle, toArray, groupby, findIndex, splice, mapkeyby, mapgroupby, batch } from '../lib'
 import { expect } from 'chai'
 
 describe('keyby', () => {
@@ -256,5 +256,29 @@ describe('splice', () => {
     const spliced = splice(arr, 1, 0, 5)
     arr.splice(1, 0, 5)
     expect(spliced).to.deep.equal(arr)
+  })
+})
+
+describe('batch', () => {
+  it('should batch an array into singles', () => {
+    expect(batch([1, 2, 3, 4], 1)).to.deep.equal([[1], [2], [3], [4]])
+    expect(batch([1], 1)).to.deep.equal([[1]])
+  })
+  it('should batch an array into pairs', () => {
+    expect(batch([1, 2, 3, 4, 5], 2)).to.deep.equal([[1, 2], [3, 4], [5]])
+    expect(batch([1, 2, 3, 4], 2)).to.deep.equal([[1, 2], [3, 4]])
+    expect(batch([1, 2, 3], 2)).to.deep.equal([[1, 2], [3]])
+    expect(batch([1, 2], 2)).to.deep.equal([[1, 2]])
+    expect(batch([1], 2)).to.deep.equal([[1]])
+  })
+  it('should batch an array into triplets', () => {
+    expect(batch([1, 2, 3, 4, 5], 3)).to.deep.equal([[1, 2, 3], [4, 5]])
+    expect(batch([1, 2, 3, 4], 3)).to.deep.equal([[1, 2, 3], [4]])
+    expect(batch([1, 2, 3], 3)).to.deep.equal([[1, 2, 3]])
+    expect(batch([1, 2], 3)).to.deep.equal([[1, 2]])
+    expect(batch([1], 3)).to.deep.equal([[1]])
+  })
+  it('should return a double array for an empty array', () => {
+    expect(batch([])).to.deep.equal([[]])
   })
 })
