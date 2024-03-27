@@ -9,3 +9,13 @@ export type Jsonized<T> = T extends object ? {
             T[K] extends string ? string :
               Jsonized<T[K]>
 } : T
+
+export type DestroyNulls<T> = T extends null
+  ? undefined
+  : T extends Date
+    ? T
+    : {
+        [K in keyof T]: T[K] extends (infer U)[]
+          ? DestroyNulls<U>[]
+          : DestroyNulls<T[K]>;
+      }
