@@ -1,4 +1,4 @@
-import type { DestroyNulls } from '../typeutils'
+import type { DestroyNulls } from '../typeutils.js'
 
 export function destroyNulls<T> (obj: T): DestroyNulls<T> {
   if (obj == null) return undefined as any
