@@ -105,6 +105,21 @@ describe('object', () => {
       expect(complexobject.deep.shallow).to.equal('hello')
       expect(newobject.deep.shallow).to.equal('there')
     })
+    it('should work when the root object is an array', () => {
+      const object = [{ match: { active: true } }]
+      const newobject = set(object, '0.match.classification', 'academic')
+      expect(newobject).to.deep.equal([{ ...object[0], match: { ...object[0].match, classification: 'academic' } }])
+    })
+    it('should work when a property has a $ in it', () => {
+      const object = { $match: { active: true } }
+      const newobject = set(object, '$match.classification', 'academic')
+      expect(newobject).to.deep.equal({ ...object, $match: { ...object.$match, classification: 'academic' } })
+    })
+    it('should work when a property has a - in it', () => {
+      const object = { 'my-match': { active: true } }
+      const newobject = set(object, 'my-match.classification', 'academic')
+      expect(newobject).to.deep.equal({ ...object, 'my-match': { ...object['my-match'], classification: 'academic' } })
+    })
     it('should set a new array element without mutating, dot-separated style', () => {
       const newobject = set(complexobject, 'array.2', 3)
       expect(complexobject.array.length).to.equal(2)
@@ -149,7 +164,7 @@ describe('object', () => {
       expect(newobject).to.haveOwnProperty('anotherobject')
       expect(complexobject).to.not.haveOwnProperty('anotherobject')
     })
-    it.skip('should work when given a path with slashes in it', () => {
+    it('should work when given a path with slashes in it, but the slashes do NOT operate as separators', () => {
       const newobject = set(complexobject, '//main', 'world')
       expect(newobject).to.deep.equal({ ...complexobject, '//main': 'world' })
     })
