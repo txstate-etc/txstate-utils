@@ -19,3 +19,11 @@ export type DestroyNulls<T> = T extends null
           ? DestroyNulls<U>[]
           : DestroyNulls<T[K]>;
       }
+
+export type StringifyDates<T> = T extends Date
+  ? string
+  : {
+      [K in keyof T]: T[K] extends (infer U)[]
+        ? StringifyDates<U>[]
+        : StringifyDates<T[K]>;
+    }
