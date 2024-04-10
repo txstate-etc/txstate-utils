@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { titleCase, ucfirst } from '../lib'
+import { escapeRegex, titleCase, ucfirst } from '../lib'
 
 describe('ucfirst', function () {
   it('should change the first character of a string to upper case', () => {
@@ -32,5 +33,17 @@ describe('titleCase', () => {
   })
   it('should title-case a string that begins with underscore', () => {
     expect(titleCase('_this_usesUnderscores')).to.equal('This Uses Underscores')
+  })
+})
+describe('escapeRegex', () => {
+  it('should escape special characters and not mangle the regex', () => {
+    expect(escapeRegex('\\ ^ $ * + ? . ( ) | { } [ ]')).to.equal('\\\\ \\^ \\$ \\* \\+ \\? \\. \\( \\) \\| \\{ \\} \\[ \\]')
+    expect(new RegExp(escapeRegex('\\ ^ $ * + ? . ( ) | { } [ ]-')).test('\\ ^ $ * + ? . ( ) | { } [ ]-')).to.be.true
+  })
+  it('should escape dash compatible with PCRE', () => {
+    expect(escapeRegex('hi - there')).to.equal('hi \\x2d there')
+  })
+  it('should escape dash properly with the unicode flag', () => {
+    expect(new RegExp(escapeRegex('-'), 'u').test('-')).to.be.true
   })
 })

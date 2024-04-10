@@ -13,3 +13,7 @@ function words (str: string) {
 export function titleCase (str: string) {
   return words(str).filter(w => w.length > 0).map(ucfirst).join(' ')
 }
+
+export function escapeRegex (str: string) {
+  return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d')
+}
