@@ -1,5 +1,6 @@
 export * from './array/index.js'
 export * from './async.js'
+export * from './base64url.js'
 export * from './cache.js'
 export * from './color.js'
 export * from './concurrent.js'
