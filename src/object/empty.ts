@@ -17,7 +17,7 @@ function isEmptyWithUncertainty (obj: any): boolean | undefined {
 export function isEmpty (obj: any): boolean {
   const certainty = isEmptyWithUncertainty(obj)
   if (certainty != null) return certainty
-  if (typeof obj === 'object') return !Object.keys(obj).filter(k => isNotNull(obj[k])).length
+  if (typeof obj === 'object') return !Object.keys(obj as object).filter(k => isNotNull(obj[k])).length
   return !obj
 }
 
@@ -31,7 +31,7 @@ export function isEmpty (obj: any): boolean {
 export function isPracticallyEmpty (obj: any) {
   const certainty = isEmptyWithUncertainty(obj)
   if (certainty != null) return certainty
-  if (typeof obj === 'object') return !Object.keys(obj).filter(k => isNotBlank(obj[k])).length
+  if (typeof obj === 'object') return !Object.keys(obj as object).filter(k => isNotBlank(obj[k])).length
   return !obj
 }
 

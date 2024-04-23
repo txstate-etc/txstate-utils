@@ -83,6 +83,7 @@ class SimpleStorage<StorageType> implements SyncStorageEngine<StorageType> {
       if (this.oldest === curr) this.oldest = curr.next
 
       // delete from map
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete this.storage[keystr]
     }
   }
@@ -286,10 +287,11 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     if (this.activeWork.has(keystr)) return await this.activeWork.get(keystr)!
     this.activeWork.set(keystr, this.fetcher(key, helper))
     try {
-      const data = await this.activeWork.get(keystr)!
+      const data: ReturnType = await this.activeWork.get(keystr)!
       const refreshPromise = this.onRefresh?.(key, data)
       if (refreshPromise) refreshPromise.catch?.(e => { console.error(e) })
-      await this.set(...[key, data] as any)
+      // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
+      await this.set(key, data)
       return data
     } finally {
       this.activeWork.delete(keystr)

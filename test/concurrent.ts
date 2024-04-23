@@ -7,14 +7,14 @@ describe('concurrent utils', () => {
   const sleeptime = 25
   it('eachConcurrent should go through a list of items with a max concurrency of 5', async () => {
     const starttime = new Date()
-    await eachConcurrent(items, 5, () => sleep(sleeptime))
+    await eachConcurrent(items, 5, async () => await sleep(sleeptime))
     const endtime = new Date()
     expect(endtime.getTime() - starttime.getTime()).to.be.lessThan(sleeptime * 5).and.gte(sleeptime * 4)
   })
 
   it('eachConcurrent should default to a max concurrency of 10', async () => {
     const starttime = new Date()
-    await eachConcurrent(items, () => sleep(sleeptime))
+    await eachConcurrent(items, async () => await sleep(sleeptime))
     const endtime = new Date()
     expect(endtime.getTime() - starttime.getTime()).to.be.lessThan(sleeptime * 3).and.gte(sleeptime * 2)
   })

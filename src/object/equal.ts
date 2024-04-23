@@ -35,9 +35,9 @@ export function equal (a: any, b: any, compared?: { a: Set<any>, b: Set<any> }) 
     if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf()
     if (a.toString !== Object.prototype.toString) return a.toString() === b.toString()
 
-    const keys = Object.keys(a)
+    const keys = Object.keys(a as object)
     length = keys.length
-    if (length !== Object.keys(b).length) return false
+    if (length !== Object.keys(b as object).length) return false
 
     for (i = length; i-- !== 0;) { if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false }
 

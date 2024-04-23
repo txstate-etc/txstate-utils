@@ -1,6 +1,6 @@
 import { get } from '../object/index.js'
 
-const comparators: Record<string, any> = {
+const comparators: Record<string, (a: any, b: any) => number> = {
   boolean: (a: boolean, b: boolean) => Number(a) - Number(b),
   string: (a: string, b: string) => a.localeCompare(b),
   number: (a: number, b: number) => a - b,

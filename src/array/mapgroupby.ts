@@ -19,7 +19,7 @@ export function mapgroupby <KeyType, ObjectType> (objArray: ObjectType[] | undef
   if (!Array.isArray(objArray)) return map
   const extractor = extractors[typeof keyOrExtractor](keyOrExtractor)
   for (const obj of objArray) {
-    const key = extractor(obj)
+    const key = extractor(obj) as KeyType
     if (key != null) {
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(obj)

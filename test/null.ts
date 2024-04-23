@@ -3,6 +3,7 @@ import { destroyNulls } from '../lib'
 
 describe('destroyNulls', function () {
   it('should change null to undefined', () => {
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
     expect(destroyNulls(null)).to.equal(undefined)
   })
   it('should remove null properties from objects', () => {

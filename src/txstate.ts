@@ -14,7 +14,7 @@ export function isNetID (netid: string) {
  *
  * If it does not look like either one, returns undefined
  */
-export function extractNetIDFromFederated (login: string | undefined) {
+export function extractNetIDFromFederated (login: string | undefined | null) {
   if (isBlank(login)) return undefined
   const lclogin = login.trim().toLocaleLowerCase()
   if (isNetID(lclogin)) return lclogin

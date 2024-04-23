@@ -13,7 +13,7 @@ const clone = (objectOrArray: ObjectOrArray): ObjectOrArray =>
  */
 export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
   root: T,
-  path: string | number | Array<string | number>,
+  path: string | number | (string | number)[],
   newValue: unknown
 ): (O extends undefined ? T : O) {
   if (Array.isArray(path)) path = "['" + path.join("']['") + "']"
@@ -35,6 +35,7 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
         const previousValue = currentParent[previousKey]
         if (disallowedKeys.has(previousKey)) throw new Error('detected prototype pollution attempt')
         currentParent[previousKey] = previousValue
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           ? clone(previousValue)
           : index
             ? []

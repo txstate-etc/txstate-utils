@@ -99,7 +99,7 @@ describe('cache', () => {
     expect(await helperCache.get(2, false)).to.equal(0)
     await helperCache.clear()
     expect(await helperCache.get(2)).to.equal(0)
-    expect(Object.keys((helperCache as any).storage.storage)).to.deep.equal(['2'])
+    expect(Object.keys((helperCache as any).storage.storage as object)).to.deep.equal(['2'])
   })
   it('should properly remove objects that have expired', async () => {
     expiringCount = 0

@@ -18,12 +18,12 @@ export function mapkeyby <ObjectType> (objArray: ObjectType[] | undefined, keyOr
   const extractor = extractors[typeof keyOrExtractor](keyOrExtractor)
   if (keyOrExtractor == null) {
     for (const obj of objArray) {
-      const potentialkey = extractor(obj)
+      const potentialkey = extractor(obj) as string | number
       if (potentialkey != null) map.set(potentialkey, true)
     }
   } else {
     for (const obj of objArray) {
-      const potentialkey = extractor(obj)
+      const potentialkey = extractor(obj) as KeyType
       if (potentialkey != null) map.set(potentialkey, obj)
     }
   }

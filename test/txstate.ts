@@ -61,7 +61,7 @@ describe('netid utils', () => {
   })
   it('should return undefined when extracting netid from undefined or null', () => {
     expect(extractNetIDFromFederated(undefined)).to.be.undefined
-    expect(extractNetIDFromFederated(null as any)).to.be.undefined
+    expect(extractNetIDFromFederated(null)).to.be.undefined
   })
 })
 
