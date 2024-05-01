@@ -67,6 +67,11 @@ describe('stringify', function () {
     obj1.obj2 = obj2
     expect(stringify(obj1)).to.equal('{"obj2":{"obj1":"__cycle__"}}')
   })
+  it('should not detect a cycle when a subobject appears multiple times but not in a cycle', () => {
+    const subobj = { hi: 'there' }
+    const obj = { deep: { subobj }, subobj }
+    expect(stringify(obj)).to.equal(JSON.stringify(obj))
+  })
 })
 describe('ensureString', () => {
   it('should not add quotes to a string', () => {

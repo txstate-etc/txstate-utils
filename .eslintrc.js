@@ -3,6 +3,7 @@ module.exports = {
   parserOptions: {
       project: './tsconfig.eslint.json'
   },
+  ignorePatterns: [".eslintrc.*"],
   rules: {
     '@typescript-eslint/array-type': ['error', { default: 'array' }],
     '@typescript-eslint/explicit-function-return-type': 'off',
