@@ -108,14 +108,14 @@ describe('deep equal', () => {
     it('empty array and empty object are not equal', () => {
       expect(equal({}, [])).to.be.false
     })
-    it('object with extra undefined properties are not equal #1', () => {
-      expect(equal({}, { foo: undefined })).to.be.false
+    it('object with extra undefined properties are equal #1', () => {
+      expect(equal({}, { foo: undefined })).to.be.true
     })
-    it('object with extra undefined properties are not equal #2', () => {
-      expect(equal({ foo: undefined }, {})).to.be.false
+    it('object with extra undefined properties are equal #2', () => {
+      expect(equal({ foo: undefined }, {})).to.be.true
     })
-    it('object with extra undefined properties are not equal #3', () => {
-      expect(equal({ foo: undefined }, { bar: undefined })).to.be.false
+    it('object with extra undefined properties are equal #3', () => {
+      expect(equal({ foo: undefined }, { bar: undefined })).to.be.true
     })
     it('nulls are equal', () => {
       expect(equal(null, null)).to.be.true
@@ -253,6 +253,10 @@ describe('deep equal', () => {
         }
       }
       expect(equal(value1, value2)).to.be.false
+    })
+    it('undefined properties should equal missing properties', () => {
+      expect(equal({ checklist: [], textinput: 'test' }, { checklist: [], textinput: 'test', anotherinput: undefined })).to.be.true
+      expect(equal({ checklist: [], textinput: 'test', anotherinput: undefined }, { checklist: [], textinput: 'test' })).to.be.true
     })
   })
   describe('cycles', () => {

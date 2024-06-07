@@ -35,9 +35,10 @@ export function equal (a: any, b: any, compared?: { a: Set<any>, b: Set<any> }) 
     if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf()
     if (a.toString !== Object.prototype.toString) return a.toString() === b.toString()
 
-    const keys = Object.keys(a as object)
+    const keys = nonNullKeys(a)
     length = keys.length
-    if (length !== Object.keys(b as object).length) return false
+    const bkeys = nonNullKeys(b)
+    if (length !== bkeys.length) return false
 
     for (i = length; i-- !== 0;) { if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false }
 
@@ -53,4 +54,11 @@ export function equal (a: any, b: any, compared?: { a: Set<any>, b: Set<any> }) 
   // true if both NaN, false otherwise
   // eslint-disable-next-line no-self-compare
   return a !== a && b !== b
-};
+}
+
+function nonNullKeys (a: any) {
+  const ret: string[] = []
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  for (const k of Object.keys(a)) if (a[k] != null) ret.push(k)
+  return ret
+}
