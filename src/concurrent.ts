@@ -1,4 +1,4 @@
-import { Queue } from './queue.js'
+/* eslint-disable @typescript-eslint/promise-function-async */
 /** Functions for helping deal with promises */
 
 type eachFunction<ItemType, ReturnType> = (item: ItemType) => Promise<ReturnType>
@@ -12,12 +12,12 @@ type eachFunction<ItemType, ReturnType> = (item: ItemType) => Promise<ReturnType
  */
 export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
-export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
+export async function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
   const inFlightLimit = callback ? inFlightLimitOrCallback as number || 10 : 10
   const each = callback ?? inFlightLimitOrCallback as eachFunction<ItemType, ReturnType>
   const limit = pLimit(inFlightLimit)
-  const qitems = items.map(item => limit(() => each(item)))
-  return Promise.all(qitems)
+  const qitems = items.map(async item => await limit(async () => await each(item)))
+  return await Promise.all(qitems)
 }
 
 /**
@@ -30,8 +30,8 @@ export function eachConcurrent<ItemType, ReturnType> (items: ItemType[], inFligh
  */
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimit: number, callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
 export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], callback: eachFunction<ItemType, ReturnType>): Promise<ReturnType[]>
-export function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
-  return eachConcurrent(items, inFlightLimitOrCallback as number, callback as eachFunction<ItemType, ReturnType>)
+export async function mapConcurrent<ItemType, ReturnType> (items: ItemType[], inFlightLimitOrCallback: number | eachFunction<ItemType, ReturnType>, callback?: eachFunction<ItemType, ReturnType>) {
+  return await eachConcurrent(items, inFlightLimitOrCallback as number, callback!)
 }
 
 /**
@@ -72,59 +72,66 @@ export async function someConcurrent<ItemType> (items: ItemType[], inFlightLimit
   return items.some((_, index) => bools[index])
 }
 
-type pLimitFn <T = any> = (..._: any[]) => Promise<T>
+interface Node<T = any, A extends unknown[] = any> {
+  /** input function, returns a promise when run */
+  fn: (...args: A) => Promise<T>
+  /** desired arguments for the input function */
+  args: A
+  /** function to resolve returned promise */
+  resolve: (value: T) => void
+  /** function to reject returned promise */
+  reject: (reason: any) => void
+  /** pointer to the next node */
+  next?: Node<T>
+}
+
+type pLimitFn <T = any, A extends unknown[] = unknown[]> = (..._: A) => Promise<T>
+
 export function pLimit (concurrency: number) {
-  const queue = new Queue<pLimitFn>()
-  let activeCount = 0
+  let active = 0
+  let size = 0
+  let head: Node | undefined
+  let tail: Node | undefined
 
-  const next = () => {
-    activeCount--
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    queue.dequeue()?.()
+  const afterRun = () => {
+    active--
+    if (--size) run()
   }
 
-  const run = async (fn: pLimitFn, resolve: (value: any) => void, args: any) => {
-    activeCount++
-    const result = (async () => await fn(...args))()
-    resolve(result)
-
-    try {
-      await result
-    } catch {}
-
-    next()
+  const run = () => {
+    if (!head || active >= concurrency) return
+    active++
+    const pop = head
+    head = head.next
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    void pop.fn(...pop.args).then(pop.resolve, pop.reject).then(afterRun)
   }
 
-  const enqueue = (fn: pLimitFn, resolve: (value: any) => void, args: any) => {
-    queue.enqueue(run.bind(undefined, fn, resolve, args));
-
-    (async () => {
-      await Promise.resolve()
-
-      if (activeCount < concurrency) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        queue.dequeue()?.()
-      }
-    })().catch(console.error)
-  }
-
-  const generator = (fn: pLimitFn, ...args: any[]) => new Promise(resolve => {
-    enqueue(fn, resolve, args)
+  const generator = <T, A extends unknown[]> (fn: pLimitFn<T, A>, ...args: A) => new Promise<T>((resolve, reject) => {
+    const node: Node<T, A> = { fn, args, resolve, reject }
+    if (head) {
+      tail = tail!.next = node
+    } else {
+      tail = head = node
+    }
+    size++
+    run()
   })
 
   Object.defineProperties(generator, {
     activeCount: {
-      get: () => activeCount
+      get: () => active
     },
     pendingCount: {
-      get: () => queue.size
+      get: () => size - active
     },
     clearQueue: {
       value: () => {
-        queue.clear()
+        head = tail = undefined
+        size = active
       }
     }
   })
 
-  return generator as { <T>(fn: pLimitFn<T>, ...args: any[]): Promise<T>, activeCount: number, pendingCount: number, clearQueue: () => void }
+  return generator as { <T, A extends unknown[]>(fn: pLimitFn<T, A>, ...args: A): Promise<T>, activeCount: number, pendingCount: number, clearQueue: () => void }
 }

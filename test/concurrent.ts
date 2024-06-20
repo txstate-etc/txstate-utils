@@ -94,4 +94,10 @@ describe('concurrent utils', () => {
     const result = await limit(async () => 4)
     expect(result).to.equal(4)
   })
+
+  it('pLimit should accept args for the limited function and pass them in when it gets run', async () => {
+    const limit = pLimit(2)
+    const result = await limit(async (a: number) => a, 4)
+    expect(result).to.equal(4)
+  })
 })
