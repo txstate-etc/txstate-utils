@@ -18,7 +18,7 @@ export function base64urlTobase64 (base64urlStr: string) {
 }
 
 export function base64urlEncode (str: string) {
-  return base64ToBase64Url(btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16)))))
+  return base64ToBase64Url(btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1: string) => String.fromCharCode(parseInt(p1, 16)))))
 }
 
 export function base64urlDecode (str: string) {

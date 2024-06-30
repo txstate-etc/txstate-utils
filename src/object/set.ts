@@ -17,7 +17,7 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
   newValue: unknown
 ): (O extends undefined ? T : O) {
   if (Array.isArray(path)) path = "['" + path.join("']['") + "']"
-  const newRoot: any = clone(root)
+  const newRoot: any = root != null ? clone(root) : typeof path === 'number' || /^(\[\d+\]|\d+([.[]|$))/.test(path) ? [] : {}
 
   if (path in newRoot || typeof path === 'number') {
     // Just set it directly: no need to loop
@@ -37,7 +37,7 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
         currentParent[previousKey] = previousValue
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           ? clone(previousValue)
-          : index
+          : index || !isNaN(Number(namedProp))
             ? []
             : {}
 

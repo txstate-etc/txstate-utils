@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { get, omit, pick, set } from '../lib'
+import { decompose, toQuery, get, omit, pick, recompose, fromQuery, set } from '../lib'
 
 describe('object', () => {
   const complexobject = {
@@ -139,9 +139,9 @@ describe('object', () => {
       const newobject = set<{ deep: any }>(undefined, 'deep.shallow', 'there')
       expect(newobject).to.deep.equal({ deep: { shallow: 'there' } })
     })
-    it('should create an object when path does not exist already and not using bracket syntax', () => {
+    it('should create an array when path does not exist already and not using bracket syntax', () => {
       const newobject = set<typeof complexobject & { anotherobject: { 1: string } }>(complexobject, 'anotherobject.1', 'hello')
-      expect(newobject.anotherobject).to.not.be.an('array')
+      expect(newobject.anotherobject).to.be.an('array')
       expect(newobject).to.haveOwnProperty('anotherobject')
       expect(complexobject).to.not.haveOwnProperty('anotherobject')
     })
@@ -157,6 +157,18 @@ describe('object', () => {
       expect(newobject).to.haveOwnProperty('anotherobject')
       expect(complexobject).to.not.haveOwnProperty('anotherobject')
     })
+    it('should create an array with object inside when path does not exist already and using bracket syntax with unquoted number', () => {
+      const newobject = set<typeof complexobject & { anotherobject: { hello: string }[] }>(complexobject, 'anotherobject[1].hello', 'there')
+      expect(newobject.anotherobject).to.be.an('array')
+      expect(newobject).to.haveOwnProperty('anotherobject')
+      expect(complexobject).to.not.haveOwnProperty('anotherobject')
+      expect(newobject.anotherobject[1].hello).to.equal('there')
+    })
+    it('should create an array at the base using bracket syntax with unquoted number', () => {
+      const newobject = set<{ hello: string }[]>(undefined, '[1].hello', 'there')
+      expect(newobject).to.be.an('array')
+      expect(newobject[1].hello).to.equal('there')
+    })
     it('should create an array and keep moving', () => {
       const newobject = set<typeof complexobject & { anotherobject: { hello: string }[] }>(complexobject, 'anotherobject[1].hello', 'world')
       expect(newobject.anotherobject).to.be.an('array')
@@ -167,6 +179,29 @@ describe('object', () => {
     it('should work when given a path with slashes in it, but the slashes do NOT operate as separators', () => {
       const newobject = set(complexobject, '//main', 'world')
       expect(newobject).to.deep.equal({ ...complexobject, '//main': 'world' })
+    })
+  })
+  describe('decompose', () => {
+    it('should decompose objects into an array of paths and scalars and recompose to the original', () => {
+      expect(complexobject).to.deep.equal(recompose(decompose(complexobject)))
+      const simplearray = [1, 2, 3]
+      expect(decompose(simplearray)).to.deep.equal([['0', 1], ['1', 2], ['2', 3]])
+      expect(simplearray).to.deep.equal(recompose(decompose(simplearray)))
+    })
+    it('should decompose properties containing dots by quoting them', () => {
+      const obj = { 'has.dot': 4 }
+      const decomposed = decompose(obj)
+      expect(decomposed).to.deep.equal([['["has.dot"]', 4]])
+      expect(recompose(decomposed)).to.deep.equal(obj)
+    })
+    it('should decompose objects into a string representation recompose to the original', () => {
+      const obj = { colors: ['Blue', '2', true, new Date('2024-06-24T12:00:00-0500'), 'false', '"hi"', '"2"'] }
+      expect(toQuery(obj)).to.equal('colors.0=Blue&colors.1=%222%22&colors.2=true&colors.3=2024-06-24T17%3A00%3A00.000Z&colors.4=%22false%22&colors.5=%22%2522hi%2522%22&colors.6=%22%25222%2522%22')
+      expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
+    })
+    it('should decompose and recompose an object with properties that look like numbers or booleans', () => {
+      const obj = { 2: '3', 5: 4, true: 5 }
+      expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
     })
   })
   describe('pick', () => {

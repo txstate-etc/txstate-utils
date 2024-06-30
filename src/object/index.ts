@@ -1,4 +1,5 @@
 export * from './clone.js'
+export * from './decompose.js'
 export * from './empty.js'
 export * from './equal.js'
 export * from './get.js'
