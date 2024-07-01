@@ -181,7 +181,7 @@ describe('object', () => {
       expect(newobject).to.deep.equal({ ...complexobject, '//main': 'world' })
     })
   })
-  describe('decompose', () => {
+  describe('decompose / recompose', () => {
     it('should decompose objects into an array of paths and scalars and recompose to the original', () => {
       expect(complexobject).to.deep.equal(recompose(decompose(complexobject)))
       const simplearray = [1, 2, 3]
@@ -194,14 +194,40 @@ describe('object', () => {
       expect(decomposed).to.deep.equal([['["has.dot"]', 4]])
       expect(recompose(decomposed)).to.deep.equal(obj)
     })
+    it('should decompose and recompose an object with undefined properties', () => {
+      expect(recompose(decompose({ hi: undefined }))).to.deep.equal({})
+    })
+    it('should decompose and recompose an array with undefined elements', () => {
+      expect(recompose(decompose([1, 2, undefined, 4]))).to.deep.equal([1, 2, undefined, 4])
+    })
+    it('should decompose null, undefined, empty string, empty object, empty array into an empty array and recompose to an empty object', () => {
+      expect(decompose(null)).to.deep.equal([])
+      expect(decompose(undefined)).to.deep.equal([])
+      expect(decompose([])).to.deep.equal([])
+      expect(decompose({})).to.deep.equal([])
+      expect(decompose('')).to.deep.equal([])
+      expect(recompose([])).to.deep.equal({})
+    })
+  })
+  describe('toQuery / fromQuery', () => {
     it('should decompose objects into a string representation recompose to the original', () => {
       const obj = { colors: ['Blue', '2', true, new Date('2024-06-24T12:00:00-0500'), 'false', '"hi"', '"2"'] }
       expect(toQuery(obj)).to.equal('colors.0=Blue&colors.1=%222%22&colors.2=true&colors.3=2024-06-24T17%3A00%3A00.000Z&colors.4=%22false%22&colors.5=%22%2522hi%2522%22&colors.6=%22%25222%2522%22')
       expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
     })
-    it('should decompose and recompose an object with properties that look like numbers or booleans', () => {
+    it('should stringify and parse an object with properties that look like numbers or booleans', () => {
       const obj = { 2: '3', 5: 4, true: 5 }
       expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
+    })
+    it('should stringify and parse an object with undefined or null properties by dropping those properties', () => {
+      expect(fromQuery(toQuery({ hi: undefined, there: null }))).to.deep.equal({})
+    })
+    it('should treat empty values as if the pair did not exist at all', () => {
+      expect(fromQuery('color=')).to.deep.equal({})
+      expect(fromQuery('colors.2=')).to.deep.equal({})
+    })
+    it('should stringify and parse an array with undefined elements', () => {
+      expect(fromQuery(toQuery([1, 2, undefined, 4]))).to.deep.equal([1, 2, undefined, 4])
     })
   })
   describe('pick', () => {

@@ -2,6 +2,7 @@ import { isBlank, isNotBlank, isNotNull } from '../util.js'
 
 function isEmptyWithUncertainty (obj: any): boolean | undefined {
   if (obj == null) return true
+  if (obj instanceof Date) return obj.getTime() === 0
   if (typeof obj === 'number') return false
   if (typeof obj === 'string') return isBlank(obj)
   if (typeof obj.length === 'number') return !obj.length
