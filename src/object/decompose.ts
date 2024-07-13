@@ -1,12 +1,11 @@
 import { isNotBlank } from '../util.js'
-import { isNotEmpty } from './empty.js'
 import { set } from './set.js'
 
 type DecomposableScalar = string | number | boolean | Date | undefined | null
 type Decomposable = DecomposableScalar | { [key: string]: Decomposable } | Decomposable[]
 
 export function decompose (payload: Decomposable | undefined): [string, DecomposableScalar][] {
-  if (payload == null || typeof payload !== 'object' || payload instanceof Date) return isNotEmpty(payload) ? [['', payload]] : []
+  if (typeof payload !== 'object' || payload == null || payload instanceof Date) return payload != null && (typeof payload !== 'string' || isNotBlank(payload)) ? [['', payload]] : []
   if (Array.isArray(payload)) {
     return payload.flatMap((itm, i) => decompose(itm).map<[string, DecomposableScalar]>(([path, val]) => [i + (!path || path.startsWith('[') ? '' : '.') + path, val]))
   } else {

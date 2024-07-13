@@ -216,7 +216,7 @@ describe('object', () => {
       expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
     })
     it('should stringify and parse an object with properties that look like numbers or booleans', () => {
-      const obj = { 2: '3', 5: 4, true: 5 }
+      const obj = { 2: '3', 5: 4, true: 5, 7: false, 9: 0 }
       expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
     })
     it('should stringify and parse an object with undefined or null properties by dropping those properties', () => {
