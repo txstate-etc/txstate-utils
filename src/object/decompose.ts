@@ -33,6 +33,6 @@ export function fromQuery (str: string | undefined) {
   return recompose(
     (str ?? '').split('&').filter(isNotBlank).map(pair => pair.split('=').map(decodeURIComponent))
       .filter(([key, val]) => isNotBlank(val))
-      .map(([key, val]) => [key, /^".*?"$/.test(val) ? decodeURIComponent(val.slice(1, -1)) : val.length && !isNaN(Number(val)) ? Number(val) : ['true', 'false'].includes(val) ? val === 'true' : !isNaN(Date.parse(val)) ? new Date(val) : val])
+      .map(([key, val]) => [key, /^".*?"$/.test(val) ? decodeURIComponent(val.slice(1, -1)) : val.length && !isNaN(Number(val)) ? Number(val) : ['true', 'false'].includes(val) ? val === 'true' : /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{3})?(Z|[-+]\d{4})$/.test(val) ? new Date(val) : val])
   )
 }

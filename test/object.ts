@@ -229,6 +229,9 @@ describe('object', () => {
     it('should stringify and parse an array with undefined elements', () => {
       expect(fromQuery(toQuery([1, 2, undefined, 4]))).to.deep.equal([1, 2, undefined, 4])
     })
+    it('should not recognize a number as a date', () => {
+      expect(fromQuery(toQuery({ search: 'abc 123' }))).to.deep.equal({ search: 'abc 123' })
+    })
   })
   describe('pick', () => {
     it('should pick properties without mutating', () => {
