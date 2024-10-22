@@ -53,4 +53,8 @@ describe('async utils', () => {
       expect(e.message).to.equal('denied!')
     }
   })
+  it('rescue returns null when an options object is passed with a default value of null', async () => {
+    const a = await rescue(new Promise<number>((resolve, reject) => { reject(new Error('rejected!')) }), { defaultValue: null })
+    expect(a).to.be.null
+  })
 })

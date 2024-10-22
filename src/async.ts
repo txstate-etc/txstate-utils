@@ -43,7 +43,7 @@ export async function rescue<ItemType> (promise: Promise<ItemType>): Promise<Ite
 export async function rescue<ItemType, DefaultType = undefined> (promise: Promise<ItemType>, options: RescueOptions<DefaultType>): Promise<ItemType | DefaultType>
 export async function rescue<ItemType, DefaultType = undefined> (promise: Promise<ItemType>, defaultValue: DefaultType): Promise<ItemType | DefaultType>
 export async function rescue (promise: Promise<any>, defaultValueOrOptions?: any) {
-  if (typeof defaultValueOrOptions !== 'object' || (!defaultValueOrOptions.condition && !defaultValueOrOptions.defaultValue)) {
+  if (typeof defaultValueOrOptions !== 'object' || (!('condition' in defaultValueOrOptions) && !('defaultValue' in defaultValueOrOptions))) {
     defaultValueOrOptions = { defaultValue: defaultValueOrOptions }
   }
   try {
