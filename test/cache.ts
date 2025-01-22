@@ -259,4 +259,12 @@ describe('cache w/LRU', () => {
     })
     expect(elapsed).to.be.gte(sleeptime)
   })
+  it('should delete entries manually', async () => {
+    await delayedDoublingLRUCache.set(2, 4)
+    await delayedDoublingLRUCache.invalidate(2)
+    const elapsed = await timed(async () => {
+      await delayedDoublingLRUCache.get(2)
+    })
+    expect(elapsed).to.be.gte(sleeptime)
+  })
 })

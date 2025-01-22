@@ -1,4 +1,5 @@
 import { ensureString } from './stringify.js'
+
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
 
 type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void | Promise<void>
@@ -147,6 +148,31 @@ class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 }
 
+class LRUWrapper<StorageType extends object> implements SyncStorageEngine<StorageType> {
+  lruDelete: (keystr: string) => void
+
+  constructor (protected lru: any) {
+    if (this.lru.delete) this.lruDelete = this.lru.delete.bind(this.lru)
+    else this.lruDelete = this.lru.del.bind(this.lru)
+  }
+
+  get (keystr: string) {
+    return this.lru.get(keystr)
+  }
+
+  set (keystr: string, data: StorageType) {
+    this.lru.set(keystr, data)
+  }
+
+  del (keystr: string) {
+    this.lruDelete(keystr)
+  }
+
+  clear () {
+    this.lru.clear()
+  }
+}
+
 type OptionalArgPlus<T, V> = T extends undefined
   ? undefined extends T
     ? [V]
@@ -209,7 +235,8 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
-      this.storage = storageClass
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      this.storage = new LRUWrapper<Storage<ReturnType>>(storageClass)
     } else if (storageClass.flush) {
       // memcached client
       this.storage = new MemcacheWrapper(storageClass, this.options.staleseconds)

@@ -35,7 +35,7 @@
     "@types/mocha": "^10.0.0",
     "chai": "^4.4.0",
     "eslint-config-love": "^47.0.0",
-    "lru-cache": "^10.0.0",
+    "lru-cache": "^11.0.0",
     "memcached-mock": "^0.1.0",
     "mocha": "^10.0.0",
     "ts-node": "^10.2.1",
