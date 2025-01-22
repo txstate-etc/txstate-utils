@@ -16,8 +16,10 @@ type SortableTypes = boolean | string | number | Date
  * Follow any property or transformation with a `true` argument if you want a descending sort.
  *
  * Comparison algorithm is chosen automatically and supports strings, numbers, and
- * dates. undefined or null will always sort to the bottom - reverse the array if
- * you don't like it.
+ * dates.
+ *
+ * undefined or null will always sort to the bottom. If you want them to sort to the top, you
+ * can .reverse() the output array and invert your descending booleans.
  *
  * Examples:
  *

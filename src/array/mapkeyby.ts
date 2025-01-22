@@ -1,7 +1,7 @@
 import { extractors } from './extractors.js'
 
 /**
- * fast O(n) non-mutating convert an array to a Map with keys
+ * fast O(n) non-mutating convert an array to a `Map` with keys
  * defined by a property, dot-prop path, or extractor function
  *
  * An alternate usage exists when given an array of string or number:
