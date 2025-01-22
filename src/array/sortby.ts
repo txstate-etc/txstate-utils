@@ -1,4 +1,4 @@
-import { get } from '../object/index.js'
+import { extractors } from './extractors.js'
 
 const comparators: Record<string, (a: any, b: any) => number> = {
   boolean: (a: boolean, b: boolean) => Number(a) - Number(b),
@@ -42,20 +42,20 @@ type SortableTypes = boolean | string | number | Date
  * sortby(myarray, itm => itm.count - 100)
  */
 export function sortby <T> (collection: T[], ...args: (boolean | keyof T | string | ((obj: T) => SortableTypes | undefined | null))[]) {
-  const extractors: (keyof T | string | ((obj: T) => SortableTypes | undefined | null))[] = []
+  const extractorlist: (keyof T | string | ((obj: T) => SortableTypes | undefined | null))[] = []
   const descending: boolean[] = []
   for (const arg of args) {
     if (arg === true) {
       descending[descending.length - 1] = true
     } else if (arg !== false) {
-      extractors.push(arg)
+      extractorlist.push(arg)
       descending.push(false)
     }
   }
   const sortMap = new Map<T, (SortableTypes | undefined)[]>()
   for (const itm of collection) sortMap.set(itm, [])
   const compares: ((a: SortableTypes, b: SortableTypes) => number)[] = []
-  for (const extract of extractors) {
+  for (const extract of extractorlist) {
     let comparechosen: undefined | 'string' | 'number' | 'object' | 'boolean'
     const handleval = function (val: SortableTypes | undefined, itm: T) {
       const t = typeof val
@@ -69,14 +69,9 @@ export function sortby <T> (collection: T[], ...args: (boolean | keyof T | strin
       }
       sortMap.get(itm)!.push(val)
     }
-    if (typeof extract === 'function') {
-      for (const itm of collection) {
-        handleval(extract(itm) ?? undefined, itm)
-      }
-    } else {
-      for (const itm of collection) {
-        handleval((get(itm, extract as any) ?? undefined) as SortableTypes | undefined, itm)
-      }
+    const extractor = extractors[typeof extract](extract)
+    for (const itm of collection) {
+      handleval(extractor(itm) as SortableTypes | undefined ?? undefined, itm)
     }
   }
   return collection.sort((a: T, b: T) => {

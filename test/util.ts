@@ -154,7 +154,7 @@ describe('isEmail', () => {
   })
 })
 
-let couldBeNull: string | null
+const couldBeNull: string | null = null
 describe('optionalString', () => {
   it('should work for primitive types', () => {
     expect(optionalString(2)).to.equal('2')
