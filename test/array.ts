@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { keyby, unique, shuffle, toArray, groupby, findIndex, splice, mapkeyby, mapgroupby, batch } from '../lib'
+import { keyby, unique, shuffle, toArray, groupby, findIndex, splice, mapkeyby, mapgroupby, batch, shuffleInPlace } from '../lib'
 import { expect } from 'chai'
 
 describe('keyby', () => {
@@ -134,6 +134,11 @@ describe('shuffle', () => {
     expect(shuffled).to.not.deep.equal(check)
     expect(shuffled).to.have.lengthOf(check.length)
     for (const n of check) expect(shuffled).to.contain(n)
+  })
+  it('should shuffle an array in place', () => {
+    const toShuffle = getarray()
+    shuffleInPlace(toShuffle)
+    expect(toShuffle).to.not.deep.equal(getarray())
   })
 })
 describe('toArray', () => {
