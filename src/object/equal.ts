@@ -31,6 +31,17 @@ export function equal (a: any, b: any, compared?: { a: Set<any>, b: Set<any> }) 
       return true
     }
 
+    if (typeof File !== 'undefined' && a instanceof File && b instanceof File) {
+      if (a.name !== b.name) return false
+      if (a.size !== b.size) return false
+      if (a.type !== b.type) return false
+      return true
+    } else if (typeof Blob !== 'undefined' && a instanceof Blob && b instanceof Blob) {
+      if (a.size !== b.size) return false
+      if (a.type !== b.type) return false
+      return true
+    }
+
     if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags
     if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf()
     if (a.toString !== Object.prototype.toString) return a.toString() === b.toString()

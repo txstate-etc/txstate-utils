@@ -320,4 +320,47 @@ describe('deep equal', () => {
       expect(equal(treeify(nodes1), treeify(nodes2))).to.be.true
     })
   })
+  it('should recognize two identical files are equal', () => {
+    const a = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    const b = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    expect(equal(a, b)).to.be.true
+    expect(equal({ file: a }, { file: b })).to.be.true
+  })
+  it('should recognize that different files are inequal when name is different but size is the same', () => {
+    const a = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    const b = new File(['bar'], 'bar.txt', { type: 'text/plain' })
+    expect(equal(a, b)).to.be.false
+    expect(equal({ file: a }, { file: b })).to.be.false
+  })
+  it('should recognize that different files are inequal when size is different but name is the same', () => {
+    const a = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    const b = new File(['barz'], 'foo.txt', { type: 'text/plain' })
+    expect(equal(a, b)).to.be.false
+    expect(equal({ file: a }, { file: b })).to.be.false
+  })
+  it('should recognize that different files are inequal when type is different but name and size are the same', () => {
+    const a = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    const b = new File(['foo'], 'foo.txt', { type: 'application/json' })
+    expect(equal(a, b)).to.be.false
+    expect(equal({ file: a }, { file: b })).to.be.false
+  })
+  it('should recognize that files are inequal when all characteristics are different', () => {
+    const a = new File(['foo'], 'foo.txt', { type: 'text/plain' })
+    const b = new File(['barz'], 'bar.txt', { type: 'application/json' })
+    expect(equal(a, b)).to.be.false
+    expect(equal({ file: a }, { file: b })).to.be.false
+  })
+  it('should recognize two identical blobs are equal', () => {
+    const a = new Blob(['foo'], { type: 'text/plain' })
+    const b = new Blob(['foo'], { type: 'text/plain' })
+    expect(equal(a, b)).to.be.true
+    expect(equal({ blob: a }, { blob: b })).to.be.true
+  })
+  it('should recognize that different blobs are inequal as long as the sizes are different', () => {
+    // we aren't going to compare contents of blobs, too expensive
+    const a = new Blob(['foo'], { type: 'text/plain' })
+    const b = new Blob(['barz'], { type: 'text/plain' })
+    expect(equal(a, b)).to.be.false
+    expect(equal({ blob: a }, { blob: b })).to.be.false
+  })
 })
