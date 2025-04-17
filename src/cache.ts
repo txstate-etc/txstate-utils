@@ -148,6 +148,34 @@ class MemcacheWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 }
 
+class MemcacheClientWrapper<StorageType> implements StorageEngine<StorageType> {
+  constructor (private client: {
+    get: (keystr: string) => Promise<StorageType>
+    set: (keystr: string, data: StorageType, opts: { lifetime: number }) => Promise<any>
+    delete: (keystr: string) => Promise<any>
+    cmd: (command: string) => Promise<any>
+  }, private maxAge: number) {
+    this.client = client
+    this.maxAge = maxAge
+  }
+
+  async get (keystr: string) {
+    return await this.client.get(keystr)
+  }
+
+  async set (keystr: string, data: StorageType) {
+    await this.client.set(keystr, data, { lifetime: this.maxAge })
+  }
+
+  async del (keystr: string) {
+    await this.client.delete(keystr)
+  }
+
+  async clear () {
+    await this.client.cmd('flush_all')
+  }
+}
+
 class LRUWrapper<StorageType extends object> implements SyncStorageEngine<StorageType> {
   lruDelete: (keystr: string) => void
 
@@ -232,7 +260,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       freshseconds,
       staleseconds: (options.staleseconds ?? (freshseconds * 2)) || Infinity
     }
-    const storageClass = options.storageClass || new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
+    const storageClass = options.storageClass ?? {}
     if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -240,6 +268,9 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     } else if (storageClass.flush) {
       // memcached client
       this.storage = new MemcacheWrapper(storageClass, this.options.staleseconds)
+    } else if (storageClass.cmd) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      this.storage = new MemcacheClientWrapper(storageClass, this.options.staleseconds)
     } else {
       this.storage = new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
     }

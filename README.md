@@ -96,3 +96,23 @@ Tuning `freshseconds` and `staleseconds` properly requires a little bit of data 
     * alternatively, use LRU or memcache to control memory usage
   * `staleseconds` - `freshseconds` should be longer than `average time between requests + average task completion time`
     * otherwise users will wait for responses and spikes will appear on your response time graph
+
+#### Alternate storage mechanisms
+The default is to store cached results in memory in the node process until they expire, and then free them
+for garbage collection after expiration. This works well in most cases and is the fastest option. There are other
+options for you though:
+
+* Memcache
+
+  If you have multiple instances of your application, the default storage mechansism will store a full cache copy in each instance. This can lead to different instances giving different answers at the same moment. If that would cause problems for your application, adding memcached to your ecosystem could help. Once you have memcached configured and running, use the client library from npm memcached or memcache-client. Simply import and construct your client instance and then pass it into the Cache constructor as the `storageClass` option.
+
+* LRU-Cache
+
+  If you're fine with one full cache copy per instance, but you're afraid of the memory usage getting out of hand, you can use LRU-Cache to set a maximum number of cache entries (or use a custom `sizeCalculation` if some entries are much larger than others). Similar to memcache, just import and prepare an LRU cache instance and pass it in as the `storageClass` option.
+
+  Note: if you use `sizeCalculation`, the object you're measuring will actually be stored underneath a `data` property, so
+  do it like `new LRUCache({ maxSize: 200, sizeCalculation: ({ data }) => data.length })`
+
+* Any other JSON storage mechanism
+
+  Give the `storageClass` option an instance of a class that implements either `StorageEngine<T>` (for an asynchronous store like a database or redis) or `SyncStorageEngine<T>` (for an in-memory store that doesn't need promises). You just need to fill out the `get`, `set`, `del` and `clear` methods to wrap your store. Note that whatever storage mechanism you choose is responsible for its own cleanup after expiration. We do NOT call `del` when items expire, that's the storage mechanism's responsibility. We only call `del` when the user triggers an action that invalidates a record.
