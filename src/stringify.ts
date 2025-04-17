@@ -38,7 +38,7 @@ export function stringify (data: any, replacer?: StringifyReplacer) {
     }
 
     const seenIndex = seen.push(node) - 1
-    const keys = Object.keys(node).sort()
+    const keys = Object.keys(node as object).sort()
     out = ''
     for (i = 0; i < keys.length; i++) {
       const key = keys[i]

@@ -2,6 +2,7 @@
  * returns a promise that will resolve in the specified number of
  * milliseconds
  */
+// eslint-disable-next-line @typescript-eslint/promise-function-async
 export function sleep (milliseconds = 0) {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }

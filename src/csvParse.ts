@@ -16,6 +16,7 @@ class Parser {
     this.input = input
     this.curr = 0
     this.lineCurr = 0
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     this.comma = (comma && (comma[0] as Comma)) || ','
     this.quote = quote ?? '"'
     let residueChars =
