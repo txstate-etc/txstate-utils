@@ -1,8 +1,12 @@
-import { isBlank, isNotBlank, isNotNull } from '../util.js'
+import { isBlank, isNotNull } from '../util.js'
 
 function isEmptyWithUncertainty (obj: any): boolean | undefined {
   if (obj == null) return true
   if (obj instanceof Date) return obj.getTime() === 0
+  if (typeof obj === 'boolean') return false
+  if (typeof obj === 'function') return false
+  if (typeof obj === 'symbol') return false
+  if (typeof obj === 'bigint') return false
   if (typeof obj === 'number') return false
   if (typeof obj === 'string') return isBlank(obj)
   if (typeof obj.length === 'number') return !obj.length
@@ -29,10 +33,10 @@ export function isEmpty (obj: any): boolean {
  * { hello: '' } => isEmpty returns false, isPracticallyEmpty returns true
  * { hello: ' ' } => isEmpty returns false, isPracticallyEmpty returns true
  */
-export function isPracticallyEmpty (obj: any) {
+export function isPracticallyEmpty (obj: any): boolean {
   const certainty = isEmptyWithUncertainty(obj)
   if (certainty != null) return certainty
-  if (typeof obj === 'object') return !Object.keys(obj as object).filter(k => isNotBlank(obj[k])).length
+  if (typeof obj === 'object') return !Object.keys(obj as object).filter(k => !isPracticallyEmpty(obj[k])).length
   return !obj
 }
 

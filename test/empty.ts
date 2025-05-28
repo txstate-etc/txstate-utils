@@ -56,10 +56,20 @@ describe('isPracticallyEmpty', () => {
   it('should work for plain objects', () => {
     expect(isPracticallyEmpty({})).to.be.true
     expect(isPracticallyEmpty({ hi: 'there' })).to.be.false
+    expect(isPracticallyEmpty({ count: 2 })).to.be.false
+    expect(isPracticallyEmpty({ count: 0 })).to.be.false
+    expect(isPracticallyEmpty({ count: null })).to.be.true
+    expect(isPracticallyEmpty({ count: () => {} })).to.be.false
+  })
+  it('should deep inspect objects', () => {
+    expect(isPracticallyEmpty({ a: { b: { c: {} } } })).to.be.true
+    expect(isPracticallyEmpty({ a: { b: { c: { d: 'hello' } } } })).to.be.false
+    expect(isPracticallyEmpty({ a: { b: { c: { d: [undefined] } } } })).to.be.false
   })
   it('should work for arrays', () => {
     expect(isPracticallyEmpty([])).to.be.true
     expect(isPracticallyEmpty([1, 2])).to.be.false
+    expect(isPracticallyEmpty([undefined])).to.be.false
   })
   it('should work for complex objects with an isEmpty method', () => {
     expect(isPracticallyEmpty(emptyObj)).to.be.true
