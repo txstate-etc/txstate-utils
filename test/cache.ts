@@ -21,7 +21,7 @@ describe('cache', () => {
   const expiringCache = new Cache(async (n: number) => {
     expiringCount++
     return n * 2
-  }, { freshseconds: 0.05, staleseconds: 0.05 })
+  }, { freshseconds: 0.01, staleseconds: 0.01 })
   const singleValueCache = new Cache(async () => {
     return { key: 'value' }
   })
@@ -110,7 +110,7 @@ describe('cache', () => {
     expect(expiringCount).to.equal(2)
     await expiringCache.get(5)
     expect(expiringCount).to.equal(2)
-    await sleep(100)
+    await sleep(sleeptime)
     await expiringCache.set(2, 4) // it only prunes after each set
     expect((expiringCache as any).storage.storage).not.to.have.keys(['5'])
     expect((expiringCache as any).storage.oldest.keystr).to.equal('2')
@@ -251,9 +251,11 @@ describe('cache w/LRU', () => {
     expect(obj2?.key).to.equal('value')
   })
   it('should only store 3 values in the LRU', async () => {
+    const promises = []
     for (let i = 0; i < 5; i++) {
-      await delayedDoublingLRUCache.get(i)
+      promises.push(delayedDoublingLRUCache.get(i))
     }
+    await Promise.all(promises)
     const elapsed = await timed(async () => {
       await delayedDoublingLRUCache.get(0)
     })
@@ -266,5 +268,57 @@ describe('cache w/LRU', () => {
       await delayedDoublingLRUCache.get(2)
     })
     expect(elapsed).to.be.gte(sleeptime)
+  })
+  it('should return cache hit after freshseconds but before staleseconds', async () => {
+    let count = 0
+    const cache = new Cache(async (n: number) => {
+      count++
+      await sleep(sleeptime)
+      return n * 2
+    }, {
+      freshseconds: 0.01,
+      staleseconds: 5,
+      storageClass: new LRUCache({ max: 3 })
+    })
+    const ten = await cache.get(5)
+    expect(ten).to.equal(10)
+    expect(count).to.equal(1)
+    await sleep(15)
+    const elapsed = await timed(async () => {
+      const tenagain = await cache.get(5)
+      expect(tenagain).to.equal(10)
+    })
+    expect(elapsed).to.be.lessThan(sleeptime)
+    // it should have triggered a refresh
+    expect(count).to.equal(2)
+  })
+  it('should continue to return stale values after an error', async () => {
+    let count = 0
+    let threwError = false
+    const cache = new Cache(async (n: number) => {
+      count++
+      if (count >= 2) {
+        threwError = true
+        throw new Error('testing error')
+      }
+      await sleep(sleeptime)
+      return n * 2
+    }, {
+      freshseconds: 0.01,
+      staleseconds: 5,
+      storageClass: new LRUCache({ max: 3 })
+    })
+    const ten = await cache.get(5)
+    expect(ten).to.equal(10)
+    expect(count).to.equal(1)
+    expect(threwError).to.be.false
+    await sleep(15)
+    const elapsed = await timed(async () => {
+      const tenagain = await cache.get(5)
+      expect(tenagain).to.equal(10)
+    })
+    expect(elapsed).to.be.lessThan(sleeptime)
+    expect(threwError).to.be.true
+    expect(count).to.equal(2)
   })
 })
