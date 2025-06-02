@@ -321,4 +321,36 @@ describe('cache w/LRU', () => {
     expect(threwError).to.be.true
     expect(count).to.equal(2)
   })
+  it('should clean up stale entries after staleseconds', async () => {
+    const lruCache = new LRUCache({ max: 10 })
+    const cache = new Cache(async (n: number) => {
+      return n * 2
+    }, {
+      freshseconds: 0.01,
+      staleseconds: 0.02,
+      storageClass: lruCache
+    })
+    void cache.get(1)
+    void cache.get(2)
+    void cache.get(3)
+    await sleep(25)
+    expect(lruCache.size).to.equal(3)
+    await cache.get(4)
+    expect(lruCache.size).to.equal(1)
+  })
+  it('should not crash if a cache entry is deleted and then expires', async () => {
+    const lruCache = new LRUCache({ max: 10 })
+    const cache = new Cache(async (n: number) => {
+      return n * 2
+    }, {
+      freshseconds: 0.01,
+      staleseconds: 0.02,
+      storageClass: lruCache
+    })
+    await cache.get(1)
+    await cache.invalidate(1)
+    await sleep(25)
+    await cache.get(2)
+    expect(lruCache.size).to.equal(1)
+  })
 })

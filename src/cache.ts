@@ -1,3 +1,4 @@
+import { Queue } from './queue.js'
 import { ensureString } from './stringify.js'
 
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
@@ -14,9 +15,11 @@ interface CacheOptionsInternal {
   freshseconds: number
   staleseconds: number
 }
-interface Storage<ReturnType> {
-  data: ReturnType
+interface MinimalStorage<ReturnType = any> {
   fetched: Date
+  data: ReturnType
+}
+interface Storage<ReturnType> extends MinimalStorage<ReturnType> {
   prev?: string
   next?: string
 }
@@ -176,12 +179,12 @@ class MemcacheClientWrapper<StorageType> implements StorageEngine<StorageType> {
   }
 }
 
-class LRUWrapper<StorageType extends object> implements SyncStorageEngine<StorageType> {
+class LRUWrapper<StorageType extends MinimalStorage> implements SyncStorageEngine<StorageType> {
   lruDelete: (keystr: string) => void
+  ttlQueue = new Queue<{ fetched: Date, key: string }>()
 
-  constructor (protected lru: any) {
-    if (this.lru.delete) this.lruDelete = this.lru.delete.bind(this.lru)
-    else this.lruDelete = this.lru.del.bind(this.lru)
+  constructor (protected lru: any, protected maxAge: number = 0) {
+    this.lruDelete = this.lru.delete?.bind(this.lru) ?? this.lru.del.bind(this.lru)
   }
 
   get (keystr: string) {
@@ -189,6 +192,8 @@ class LRUWrapper<StorageType extends object> implements SyncStorageEngine<Storag
   }
 
   set (keystr: string, data: StorageType) {
+    this.prune()
+    this.ttlQueue.enqueue({ fetched: data.fetched, key: keystr })
     this.lru.set(keystr, data)
   }
 
@@ -198,6 +203,18 @@ class LRUWrapper<StorageType extends object> implements SyncStorageEngine<Storag
 
   clear () {
     this.lru.clear()
+    this.ttlQueue.clear()
+  }
+
+  prune () {
+    if (this.ttlQueue.size) {
+      const expiredLimit = new Date(new Date().getTime() - (this.maxAge * 1000))
+      while (this.ttlQueue.peek()?.fetched != null && this.ttlQueue.peek()!.fetched < expiredLimit) {
+        const entry = this.ttlQueue.dequeue()!
+        const lruEntry = this.lru.get(entry.key)
+        if (lruEntry != null && lruEntry.fetched < expiredLimit) this.lruDelete(entry.key)
+      }
+    }
   }
 }
 
@@ -264,15 +281,15 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      this.storage = new LRUWrapper<Storage<ReturnType>>(storageClass)
+      this.storage = new LRUWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
     } else if (storageClass.flush) {
       // memcached client
-      this.storage = new MemcacheWrapper(storageClass, this.options.staleseconds)
+      this.storage = new MemcacheWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
     } else if (storageClass.cmd) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      this.storage = new MemcacheClientWrapper(storageClass, this.options.staleseconds)
+      this.storage = new MemcacheClientWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
     } else {
-      this.storage = new SimpleStorage<Storage<ReturnType>>(this.options.staleseconds)
+      this.storage = new SimpleStorage<MinimalStorage<ReturnType>>(this.options.staleseconds)
     }
     this.onRefresh = options.onRefresh
   }
