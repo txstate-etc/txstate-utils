@@ -1,12 +1,5 @@
+import { comparators, type SortableTypes } from './comparators.js'
 import { extractors } from './extractors.js'
-
-const comparators: Record<string, (a: any, b: any) => number> = {
-  boolean: (a: boolean, b: boolean) => Number(a) - Number(b),
-  string: (a: string, b: string) => a.localeCompare(b),
-  number: (a: number, b: number) => a - b,
-  object: (a: any, b: any) => a - b
-}
-type SortableTypes = boolean | string | number | Date
 
 /**
  * Sort array by a specific property or transformation

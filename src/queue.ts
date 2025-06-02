@@ -35,6 +35,10 @@ export class Queue<ValueType = any> {
     return current.value
   }
 
+  peek () {
+    return this.#head?.value
+  }
+
   clear () {
     this.#head = undefined
     this.#tail = undefined
@@ -45,7 +49,7 @@ export class Queue<ValueType = any> {
     return this.#size
   }
 
-  * [Symbol.iterator] () {
+  * [Symbol.iterator] (): Generator<ValueType> {
     let current = this.#head
 
     while (current) {
