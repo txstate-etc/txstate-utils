@@ -24,7 +24,7 @@ export function recompose (paths: [string, DecomposableScalar][]) {
 export function toQuery (payload: Decomposable) {
   return decompose(payload)
     .filter(([path, val]) => val != null)
-    .map(([path, val]) => [path, val instanceof Date ? val.toISOString() : typeof val === 'string' && val.length && (!isNaN(Number(val)) || ['true', 'false'].includes(val) || val.includes('"')) ? '"' + encodeURIComponent(val) + '"' : String(val)])
+    .map(([path, val]) => [path, val instanceof Date ? val.toJSON() : typeof val === 'string' && val.length && (!isNaN(Number(val)) || ['true', 'false'].includes(val) || val.includes('"')) ? '"' + encodeURIComponent(val) + '"' : String(val)])
     .map(([path, val]) => encodeURIComponent(path) + '=' + encodeURIComponent(val))
     .join('&')
 }

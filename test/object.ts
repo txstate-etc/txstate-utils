@@ -208,6 +208,15 @@ describe('object', () => {
       expect(decompose('')).to.deep.equal([])
       expect(recompose([])).to.deep.equal({})
     })
+    it('should decompose a date properly even if it has some own properties', () => {
+      const date = new Date('2024-06-24T12:00:00-0500')
+      date.toJSON = function () {
+        return `${this.getFullYear()}-${(this.getMonth() + 1).toString().padStart(2, '0')}-${this.getDate().toString().padStart(2, '0')}T${(this.getHours() - 5).toString().padStart(2, '0')}:${this.getMinutes().toString().padStart(2, '0')}:${this.getSeconds().toString().padStart(2, '0')}-0500`
+      }
+      const decomposed = decompose({ date })
+      expect(decomposed).to.deep.equal([['date', date]])
+      expect(recompose(decomposed)).to.deep.equal({ date })
+    })
   })
   describe('toQuery / fromQuery', () => {
     it('should decompose objects into a string representation recompose to the original', () => {
@@ -231,6 +240,17 @@ describe('object', () => {
     })
     it('should not recognize a number as a date', () => {
       expect(fromQuery(toQuery({ search: 'abc 123' }))).to.deep.equal({ search: 'abc 123' })
+    })
+    it('should encode and decode a date using a custom toJSON', () => {
+      const date = new Date('2024-06-24T12:00:00-0500')
+      date.toJSON = function () {
+        return `${this.getFullYear()}-${(this.getMonth() + 1).toString().padStart(2, '0')}-${this.getDate().toString().padStart(2, '0')}T${this.getHours().toString().padStart(2, '0')}:${this.getMinutes().toString().padStart(2, '0')}:${this.getSeconds().toString().padStart(2, '0')}${this.getTimezoneOffset() < 0 ? '+' : '-'}${Math.abs(this.getTimezoneOffset() * 5 / 3).toString().padStart(4, '0')}`
+      }
+      const obj = { f: { date } }
+      // can't match full string because `npm t` may be executed in any timezone
+      // but it should certainly end with a timezone offset and parse back to the same epoch
+      expect(toQuery(obj)).to.match(/(-|\+)\d{4}$/)
+      expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
     })
   })
   describe('pick', () => {
