@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
-import { decompose, toQuery, get, omit, pick, recompose, fromQuery, set } from '../lib'
+import { decompose, toQuery, get, omit, pick, recompose, fromQuery, set, deleteEmpty } from '../lib'
 
 describe('object', () => {
   const complexobject = {
@@ -181,6 +181,75 @@ describe('object', () => {
       expect(newobject).to.deep.equal({ ...complexobject, '//main': 'world' })
     })
   })
+  describe('deleteEmpty', () => {
+    it('should delete empty properties from an object', () => {
+      const obj = { a: 1, b: '', c: null, d: undefined, e: [], f: {}, g: { h: 2, i: '' }, j: { k: 3, l: null }, m: [1, 2, '', null, undefined, {}, []] }
+      const result = deleteEmpty(obj)
+      expect(result).to.deep.equal({ a: 1, g: { h: 2 }, j: { k: 3 }, m: [1, 2] })
+    })
+    it('should delete empty properties from an array', () => {
+      const arr = [1, '', null, undefined, {}, [], { a: 2, b: '' }, { c: 3, d: null }]
+      const result = deleteEmpty(arr)
+      expect(result).to.deep.equal([1, { a: 2 }, { c: 3 }])
+    })
+    it('should handle nested objects and arrays', () => {
+      const nested = { a: { b: '', c: { d: null, e: 4 } }, f: [1, '', { g: null, h: 2 }] }
+      const result = deleteEmpty(nested)
+      expect(result).to.deep.equal({ a: { c: { e: 4 } }, f: [1, { h: 2 }] })
+    })
+    it('should return a clone of the original object if no empty properties are found', () => {
+      const obj = { a: 1, b: 'text', c: true, d: new Date() }
+      const result = deleteEmpty(obj)
+      expect(result).to.not.equal(obj)
+      expect(result).to.deep.equal(obj)
+    })
+    it('should return a clone of the original array if no empty elements are found', () => {
+      const arr = [1, 'text', true, new Date()]
+      const result = deleteEmpty(arr)
+      expect(result).to.not.equal(arr)
+      expect(result).to.deep.equal(arr)
+    })
+    it('should handle objects with only empty properties', () => {
+      const emptyObj = { a: '', b: null, c: undefined }
+      const result = deleteEmpty(emptyObj)
+      expect(result).to.deep.equal({})
+    })
+    it('should handle arrays with only empty elements', () => {
+      const emptyArr = ['', null, undefined, {}]
+      const result = deleteEmpty(emptyArr)
+      expect(result).to.deep.equal([])
+    })
+    it('should not modify the original object or array', () => {
+      const obj = { a: 1, b: '', c: null }
+      const originalObj = structuredClone(obj)
+      deleteEmpty(obj)
+      expect(obj).to.deep.equal(originalObj)
+      const arr = [1, '', null]
+      const originalArr = [...arr]
+      deleteEmpty(arr)
+      expect(arr).to.deep.equal(originalArr)
+    })
+    it('should handle objects with properties that are objects with toJSON methods', () => {
+      const obj = {
+        a: 1,
+        b: {
+          toJSON: () => 'not empty'
+        },
+        c: {
+          toJSON: () => ''
+        },
+        d: null,
+        e: {
+          toJSON: () => ({ obj: 'not empty' })
+        },
+        f: {
+          toJSON: () => ({ obj: '' })
+        }
+      }
+      const result = deleteEmpty(obj)
+      expect(result).to.deep.equal({ a: 1, b: 'not empty', e: { obj: 'not empty' } })
+    })
+  })
   describe('decompose / recompose', () => {
     it('should decompose objects into an array of paths and scalars and recompose to the original', () => {
       expect(complexobject).to.deep.equal(recompose(decompose(complexobject)))
@@ -247,6 +316,17 @@ describe('object', () => {
         return `${this.getFullYear()}-${(this.getMonth() + 1).toString().padStart(2, '0')}-${this.getDate().toString().padStart(2, '0')}T${this.getHours().toString().padStart(2, '0')}:${this.getMinutes().toString().padStart(2, '0')}:${this.getSeconds().toString().padStart(2, '0')}${this.getTimezoneOffset() < 0 ? '+' : '-'}${Math.abs(this.getTimezoneOffset() * 5 / 3).toString().padStart(4, '0')}`
       }
       const obj = { f: { date } }
+      // can't match full string because `npm t` may be executed in any timezone
+      // but it should certainly end with a timezone offset and parse back to the same epoch
+      expect(toQuery(obj)).to.match(/(-|\+)\d{4}$/)
+      expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
+    })
+    it('should encode and decode a date using a custom toJSON after using deleteEmpty', () => {
+      const date = new Date('2024-06-24T12:00:00-0500')
+      date.toJSON = function () {
+        return `${this.getFullYear()}-${(this.getMonth() + 1).toString().padStart(2, '0')}-${this.getDate().toString().padStart(2, '0')}T${this.getHours().toString().padStart(2, '0')}:${this.getMinutes().toString().padStart(2, '0')}:${this.getSeconds().toString().padStart(2, '0')}${this.getTimezoneOffset() < 0 ? '+' : '-'}${Math.abs(this.getTimezoneOffset() * 5 / 3).toString().padStart(4, '0')}`
+      }
+      const obj = deleteEmpty({ f: { date }, t: '' }) as { f: { date: Date } }
       // can't match full string because `npm t` may be executed in any timezone
       // but it should certainly end with a timezone offset and parse back to the same epoch
       expect(toQuery(obj)).to.match(/(-|\+)\d{4}$/)
