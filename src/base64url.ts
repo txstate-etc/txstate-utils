@@ -1,14 +1,3 @@
-/**
- * This function is useful in the OAuth Authorization Code with PKCE flow
- * when you need to hash the code_verifier into a code_challenge
- * const code_verifier = nanoid(43)
- * const code_challenge = await sha256andbase64url(code_verifier)
- */
-export async function sha256andbase64url (str: string) {
-  const arrayBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-  return base64ToBase64Url(btoa(String.fromCharCode(...new Uint8Array(arrayBuffer))))
-}
-
 export function base64ToBase64Url (base64str: string) {
   return base64str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
