@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { Cache, sleep } from '../lib'
+import { Cache, sleep, type StorageEngine } from '../lib'
 import { expect } from 'chai'
 import { LRUCache } from 'lru-cache'
 import Memcached from 'memcached-mock'
@@ -60,6 +60,20 @@ describe('cache', () => {
     })
     expect(elapsed).to.be.gte(sleeptime)
     expect(four).to.equal(4)
+  })
+  it('should only do the work once for simultaneous gets', async () => {
+    let workCount = 0
+    const workCache = new Cache(async (n: number) => {
+      workCount++
+      await sleep(sleeptime)
+      return n * 2
+    })
+    const firstPromise = workCache.get(3)
+    const secondPromise = workCache.get(3)
+    const [first, second] = await Promise.all([firstPromise, secondPromise])
+    expect(first).to.equal(6)
+    expect(second).to.equal(6)
+    expect(workCount).to.equal(1)
   })
   it('should support caches that do not need multiple values stored', async () => {
     const obj = await singleValueCache.get()
@@ -194,6 +208,40 @@ describe('cache w/memcache', () => {
     const obj2 = await singleValueCacheMemCache.get()
     expect(obj?.key).to.equal('value')
     expect(obj2?.key).to.equal('value')
+  })
+  it('should not do the work twice when two simultaneous requests see a cache miss from memcached', async () => {
+    class DelayedStorageEngine<StorageType> implements StorageEngine<StorageType> {
+      protected storage = new Map<string, StorageType>()
+      async get (keystr: string) {
+        await sleep(10)
+        return this.storage.get(keystr)
+      }
+
+      async set (keystr: string, data: StorageType) {
+        this.storage.set(keystr, data)
+      }
+
+      async del (keystr: string) {
+        this.storage.delete(keystr)
+      }
+
+      async clear () {
+        this.storage.clear()
+      }
+    }
+    let didTheWork = 0
+    const delayedStorageCache = new Cache(async (num: number) => {
+      didTheWork++
+      return num * 2
+    }, {
+      storageClass: new DelayedStorageEngine()
+    })
+    const firstPromise = delayedStorageCache.get(3)
+    const secondPromise = delayedStorageCache.get(3)
+    const [first, second] = await Promise.all([firstPromise, secondPromise])
+    expect(first).to.equal(6)
+    expect(second).to.equal(6)
+    expect(didTheWork).to.equal(1)
   })
 })
 
