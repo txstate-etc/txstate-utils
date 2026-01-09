@@ -212,8 +212,10 @@ describe('cache w/memcache', () => {
   it('should not do the work twice when two simultaneous requests see a cache miss from memcached', async () => {
     class DelayedStorageEngine<StorageType> implements StorageEngine<StorageType> {
       protected storage = new Map<string, StorageType>()
+      public getCount = 0
       async get (keystr: string) {
         await sleep(10)
+        this.getCount++
         return this.storage.get(keystr)
       }
 
@@ -230,11 +232,12 @@ describe('cache w/memcache', () => {
       }
     }
     let didTheWork = 0
+    const engine = new DelayedStorageEngine()
     const delayedStorageCache = new Cache(async (num: number) => {
       didTheWork++
       return num * 2
     }, {
-      storageClass: new DelayedStorageEngine()
+      storageClass: engine
     })
     const firstPromise = delayedStorageCache.get(3)
     const secondPromise = delayedStorageCache.get(3)
@@ -242,6 +245,7 @@ describe('cache w/memcache', () => {
     expect(first).to.equal(6)
     expect(second).to.equal(6)
     expect(didTheWork).to.equal(1)
+    expect(engine.getCount).to.equal(1) // should only have even gone to memcached once
   })
 })
 

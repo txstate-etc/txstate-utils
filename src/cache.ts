@@ -286,8 +286,12 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       // memcached client
       this.storage = new MemcacheWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
     } else if (storageClass.cmd) {
+      // memcache-client client
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       this.storage = new MemcacheClientWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
+    } else if (storageClass.get && storageClass.set && storageClass.del && storageClass.clear) {
+      // custom storage engine
+      this.storage = storageClass
     } else {
       this.storage = new SimpleStorage<MinimalStorage<ReturnType>>(this.options.staleseconds)
     }
