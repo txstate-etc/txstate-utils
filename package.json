@@ -15,7 +15,7 @@
   "types": "./lib-esm/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rm -rf lib lib-esm && tsc && tsc -m es6 --outDir lib-esm --moduleResolution node && cp package-esm.json lib-esm/package.json",
+    "build": "rm -rf lib lib-esm && tsc && tsc -m es2022 --outDir lib-esm --moduleResolution bundler && cp package-esm.json lib-esm/package.json",
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "test": "npm run build && node --import tsx --test test/*.ts"
   },
@@ -31,17 +31,15 @@
   },
   "homepage": "https://github.com/txstate-etc/txstate-utils#readme",
   "devDependencies": {
-    "@types/chai": "^4.3.14",
-    "@types/node": "^24.0.0",
-    "chai": "^4.4.0",
     "@stylistic/eslint-plugin": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "chai": "^6.2.2",
     "eslint-config-love": "^152.0.0",
     "lru-cache": "^11.0.0",
     "memcached-mock": "^0.1.0",
     "tsx": "^4.0.0",
-    "typescript": "^5.0.4"
+    "typescript": "^6.0.2"
   },
-  "dependencies": {},
   "sideEffects": false,
   "files": [
     "lib/**/*",
