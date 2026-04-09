@@ -1,4 +1,3 @@
-/* eslint-disable no-var */
 /*
  * adapted from https://github.com/mafintosh/sorted-intersect
  * removed options and added types
@@ -46,7 +45,7 @@ function gallop (list: Comparable[], val: Comparable, offset: number) {
  *
  * returns incorrect result if any input array is out of order
  */
-export function intersectSorted <T extends Comparable> (lists: T[][]) {
+export function intersectSorted<T extends Comparable> (lists: T[][]) {
   const result: T[] = []
   const offsets: number[] = []
 

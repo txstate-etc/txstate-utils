@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { eachConcurrent, sleep, mapConcurrent, filterConcurrent, someConcurrent, pLimit } from '../lib'
@@ -21,12 +20,12 @@ describe('concurrent utils', () => {
   })
 
   it('eachConcurrent should properly return values', async () => {
-    const doubles = await eachConcurrent(items, async (item) => item * 2)
+    const doubles = await eachConcurrent(items, async item => item * 2)
     expect(doubles).to.deep.equal(items.map(i => i * 2))
   })
 
   it('mapConcurrent should properly return values', async () => {
-    const doubles = await mapConcurrent(items, async (item) => item * 2)
+    const doubles = await mapConcurrent(items, async item => item * 2)
     expect(doubles).to.deep.equal(items.map(i => i * 2))
   })
 
@@ -49,12 +48,12 @@ describe('concurrent utils', () => {
   })
 
   it('eachConcurrent should properly return values with in-flight limit', async () => {
-    const doubles = await eachConcurrent(items, 2, async (item) => item * 2)
+    const doubles = await eachConcurrent(items, 2, async item => item * 2)
     expect(doubles).to.deep.equal(items.map(i => i * 2))
   })
 
   it('mapConcurrent should properly return values with in-flight limit', async () => {
-    const doubles = await mapConcurrent(items, 2, async (item) => item * 2)
+    const doubles = await mapConcurrent(items, 2, async item => item * 2)
     expect(doubles).to.deep.equal(items.map(i => i * 2))
   })
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-cond-assign */
 const escapes: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',

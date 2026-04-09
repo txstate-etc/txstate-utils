@@ -5,7 +5,7 @@ const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTi
 
 type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void | Promise<void>
 
-interface CacheOptions <KeyType, ReturnType, StorageEngineType extends (StorageEngine<ReturnType> | SyncStorageEngine<ReturnType>)> {
+interface CacheOptions<KeyType, ReturnType, StorageEngineType extends (StorageEngine<ReturnType> | SyncStorageEngine<ReturnType>)> {
   freshseconds?: number
   staleseconds?: number
   storageClass?: StorageEngineType
@@ -87,7 +87,7 @@ class SimpleStorage<StorageType> implements SyncStorageEngine<StorageType> {
       if (this.oldest === curr) this.oldest = curr.next
 
       // delete from map
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+
       delete this.storage[keystr]
     }
   }
@@ -257,10 +257,10 @@ type OptionalArgBoth<T, V> = T extends undefined
     // V is not optional
     : [T, V]
 
-type FetcherFunction<KeyType, ReturnType, HelperType> =
-  ((key: KeyType) => Promise<ReturnType>) |
-  ((key: KeyType, helper: HelperType) => Promise<ReturnType>) |
-  (() => Promise<ReturnType>)
+type FetcherFunction<KeyType, ReturnType, HelperType>
+  = ((key: KeyType) => Promise<ReturnType>)
+    | ((key: KeyType, helper: HelperType) => Promise<ReturnType>)
+    | (() => Promise<ReturnType>)
 
 export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined> {
   private fetcher: FetcherFunction<KeyType, ReturnType, HelperType>
@@ -280,14 +280,14 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const storageClass = options.storageClass ?? {}
     if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
       this.storage = new LRUWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
     } else if (storageClass.flush) {
       // memcached client
       this.storage = new MemcacheWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
     } else if (storageClass.cmd) {
       // memcache-client client
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
       this.storage = new MemcacheClientWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
     } else if (storageClass.get && storageClass.set && storageClass.del && storageClass.clear) {
       // custom storage engine

@@ -63,13 +63,13 @@ export function equal (a: any, b: any, compared?: { a: Set<any>, b: Set<any> }) 
   }
 
   // true if both NaN, false otherwise
-  // eslint-disable-next-line no-self-compare
+
   return a !== a && b !== b
 }
 
 function nonNullKeys (a: any) {
   const ret: string[] = []
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
   for (const k of Object.keys(a)) if (a[k] != null) ret.push(k)
   return ret
 }

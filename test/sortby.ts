@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { sortby } from '../lib'
 import { expect } from 'chai'

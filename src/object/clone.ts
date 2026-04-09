@@ -37,7 +37,7 @@ function cloneArray (a: any[], fn: typeof clone) {
   return a2
 }
 
-export function clone <T> (o: T): T {
+export function clone<T> (o: T): T {
   if (typeof o !== 'object' || o === null) return o
   if (o instanceof Date) return new Date(o) as any
   if (Array.isArray(o)) return cloneArray(o, clone) as any

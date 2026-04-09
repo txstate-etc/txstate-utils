@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-confusing-void-expression, @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { sleep, hashid, randomid, isBlank, isNotBlank, isEmail, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf, bytesToHuman } from '../lib'
 import { expect } from 'chai'
@@ -113,14 +112,12 @@ describe('isNull', () => {
 
 describe('typeguards', () => {
   it('should properly typeguard when using isTruthy', () => {
-    // eslint-disable-next-line prefer-const
     let obj: { hello: string } | undefined
     if (!isTruthy(obj)) expect(obj).to.be.undefined
     obj = { hello: 'world' }
     if (isTruthy(obj)) expect(obj.hello).to.equal('world')
   })
   it('should properly typeguard when using isNull', () => {
-    // eslint-disable-next-line prefer-const
     let obj: { hello: string } | undefined
     if (isNull(obj)) expect(obj).to.be.undefined
     obj = { hello: 'world' }

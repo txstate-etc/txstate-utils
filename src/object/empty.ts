@@ -44,7 +44,7 @@ export function isPracticallyEmpty (obj: any): boolean {
  * useful for checking if an object, string, or array is empty,
  * undefined, or null
  */
-export function isNotEmpty <T> (obj: T): obj is Exclude<T, undefined | null> {
+export function isNotEmpty<T> (obj: T): obj is Exclude<T, undefined | null> {
   return !isEmpty(obj)
 }
 
@@ -52,6 +52,6 @@ export function isNotEmpty <T> (obj: T): obj is Exclude<T, undefined | null> {
  * useful for checking if an object, string, or array is empty,
  * undefined, or null
  */
-export function isNotPracticallyEmpty <T> (obj: T): obj is Exclude<T, undefined | null> {
+export function isNotPracticallyEmpty<T> (obj: T): obj is Exclude<T, undefined | null> {
   return !isPracticallyEmpty(obj)
 }

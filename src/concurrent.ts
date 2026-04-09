@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/promise-function-async */
 /** Functions for helping deal with promises */
 
 type eachFunction<ItemType, ReturnType> = (item: ItemType) => Promise<ReturnType>
@@ -85,7 +84,7 @@ interface Node<T = any, A extends unknown[] = any> {
   next?: Node<T>
 }
 
-type pLimitFn <T = any, A extends unknown[] = unknown[]> = (..._: A) => Promise<T>
+type pLimitFn<T = any, A extends unknown[] = unknown[]> = (..._: A) => Promise<T>
 
 export function pLimit (concurrency: number) {
   let active = 0
@@ -103,7 +102,7 @@ export function pLimit (concurrency: number) {
     active++
     const pop = head
     head = head.next
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
     void pop.fn(...pop.args).then(pop.resolve, pop.reject).then(afterRun)
   }
 

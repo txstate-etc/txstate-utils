@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { clone, equal } from '../lib'
@@ -27,7 +26,7 @@ describe('clone', () => {
     expect(clone(fn)).to.equal(fn)
   })
   it('generator function', () => {
-    const fn = function * () {}
+    const fn = function* () {}
     expect(clone(fn)).to.equal(fn)
   })
   it('dates get new instances', () => {
@@ -79,7 +78,7 @@ describe('clone', () => {
     expect(clone({ fn }).fn).to.equal(fn)
   })
   it('nested generator function', () => {
-    const fn = function * () {}
+    const fn = function* () {}
     expect(clone({ fn }).fn).to.equal(fn)
   })
   it('nested date', () => {

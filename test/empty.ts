@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { isEmpty, isNotEmpty, isPracticallyEmpty } from '../lib'
@@ -93,7 +92,6 @@ describe('isPracticallyEmpty', () => {
 
 describe('typeguards', () => {
   it('should properly typeguard when using isNotEmpty', () => {
-    // eslint-disable-next-line prefer-const
     let obj: { hello: string } | undefined
     if (isEmpty(obj)) expect(obj).to.be.undefined
     obj = { hello: 'world' }

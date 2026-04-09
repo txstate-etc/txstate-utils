@@ -35,7 +35,6 @@ export function set<O = undefined, T extends ObjectOrArray = ObjectOrArray> (
         const previousValue = currentParent[previousKey]
         if (disallowedKeys.has(previousKey)) throw new Error('detected prototype pollution attempt')
         currentParent[previousKey] = previousValue
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           ? clone(previousValue)
           : index || !isNaN(Number(namedProp))
             ? []

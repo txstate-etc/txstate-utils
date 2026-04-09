@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { escapeRegex, titleCase, ucfirst } from '../lib'

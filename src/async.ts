@@ -34,7 +34,7 @@ export async function someAsync<ItemType> (items: ItemType[], callback: (item: I
  * when it's caught. Note that if either of these functions throw your rescue will
  * also throw instead of returning a value.
  */
-interface RescueOptions <DefaultType> {
+interface RescueOptions<DefaultType> {
   defaultValue?: DefaultType
   condition?: (e: Error) => boolean
   logRescue?: (e: Error) => void | Promise<void>

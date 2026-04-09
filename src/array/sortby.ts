@@ -34,7 +34,7 @@ import { extractors } from './extractors.js'
  * sort with a transformation
  * sortby(myarray, itm => itm.count - 100)
  */
-export function sortby <T> (collection: T[], ...args: (boolean | keyof T | string | ((obj: T) => SortableTypes | undefined | null))[]) {
+export function sortby<T> (collection: T[], ...args: (boolean | keyof T | string | ((obj: T) => SortableTypes | undefined | null))[]) {
   const extractorlist: (keyof T | string | ((obj: T) => SortableTypes | undefined | null))[] = []
   const descending: boolean[] = []
   for (const arg of args) {

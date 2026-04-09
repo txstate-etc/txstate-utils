@@ -13,8 +13,8 @@ import { toArray } from './array/index.js'
  * normally an empty input array would mean the intersection is empty, but in some cases
  * (like specifying optional filters) an empty array should be ignored instead
  */
-export function intersect <T = any> (options: { by?: (itm: T) => string | number | undefined | null, skipEmpty?: boolean }, ...arrs: (T[] | undefined | null)[]): T[]
-export function intersect <T = any> (...arrs: (T[] | undefined | null)[]): T[]
+export function intersect<T = any> (options: { by?: (itm: T) => string | number | undefined | null, skipEmpty?: boolean }, ...arrs: (T[] | undefined | null)[]): T[]
+export function intersect<T = any> (...arrs: (T[] | undefined | null)[]): T[]
 export function intersect (...args: any[]) {
   const options = Array.isArray(args[0]) ? {} : args[0]
   options.by ??= stringify

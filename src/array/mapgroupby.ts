@@ -20,10 +20,10 @@ import { extractors } from './extractors.js'
  * console.log(booksByGenre)
  * // Map(2) { mystery => [ ... mystery books ... ], adventure => [ ... adventure books ... ] }
  */
-export function mapgroupby <ObjectType extends object, Key extends keyof ObjectType> (objArray: ObjectType[] | undefined, key: Key): Map<NonNullable<ObjectType[Key]>, ObjectType[]>
-export function mapgroupby <ObjectType, KeyType = string | number | symbol | undefined> (objArray: ObjectType[] | undefined, key: string): Map<NonNullable<KeyType>, ObjectType[]>
-export function mapgroupby <KeyType, ObjectType> (objArray: ObjectType[] | undefined, extractor: (obj: ObjectType) => KeyType): Map<NonNullable<KeyType>, ObjectType[]>
-export function mapgroupby <KeyType, ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor: string | number | symbol | ((obj: ObjectType) => KeyType)) {
+export function mapgroupby<ObjectType extends object, Key extends keyof ObjectType> (objArray: ObjectType[] | undefined, key: Key): Map<NonNullable<ObjectType[Key]>, ObjectType[]>
+export function mapgroupby<ObjectType, KeyType = string | number | symbol | undefined> (objArray: ObjectType[] | undefined, key: string): Map<NonNullable<KeyType>, ObjectType[]>
+export function mapgroupby<KeyType, ObjectType> (objArray: ObjectType[] | undefined, extractor: (obj: ObjectType) => KeyType): Map<NonNullable<KeyType>, ObjectType[]>
+export function mapgroupby<KeyType, ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor: string | number | symbol | ((obj: ObjectType) => KeyType)) {
   const map = new Map<KeyType, ObjectType[]>()
   if (!Array.isArray(objArray)) return map
   const extractor = extractors[typeof keyOrExtractor](keyOrExtractor)

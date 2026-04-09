@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { Queue, PriorityQueue } from '../lib'
@@ -62,7 +61,7 @@ describe('priority queue', () => {
     expect(queue.dequeue()).to.equal(undefined)
   })
   it('should dequeue items in prioritized order when priority comes from a custom extractor function', () => {
-    const queue = new PriorityQueue<{ priority: number }>((item) => item.priority)
+    const queue = new PriorityQueue<{ priority: number }>(item => item.priority)
     queue.enqueue({ priority: 2 })
     queue.enqueue({ priority: 1 })
     expect(queue.dequeue()).to.deep.equal({ priority: 1 })

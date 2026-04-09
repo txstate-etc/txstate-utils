@@ -265,7 +265,7 @@ function addIrregularRule (single: string, plural: string) {
    */
 ;([
   [/s?$/i, 's'],
-  // eslint-disable-next-line no-control-regex
+
   [/[^\u0000-\u007F]$/i, '$0'],
   [/([^aeiou]ese)$/i, '$1'],
   [/(ax|test)is$/i, '$1es'],

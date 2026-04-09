@@ -17,7 +17,7 @@ export function stringify (data: any, replacer?: StringifyReplacer) {
     }
 
     if (node === undefined) return
-    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+
     if (typeof node === 'number') return isFinite(node) ? '' + node : 'null'
     if (typeof node !== 'object') return JSON.stringify(node, replacer)
 

@@ -1,7 +1,6 @@
 // This code was adapted from https://github.com/plurals/pluralize on 6/7/2024
 // Copyright (c) 2013 Blake Embrey (hello@blakeembrey.com)
 
-/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
 import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { isPlural, isSingular, plural, pluralize, singular } from '../lib'

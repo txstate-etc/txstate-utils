@@ -9,18 +9,18 @@ import { extractors } from './extractors.js'
  * to use a Set for these cases.
  */
 export function keyby (objArray: (string | number | undefined | null)[] | undefined): Record<string, boolean>
-export function keyby <ObjectType extends object> (objArray: ObjectType[] | undefined, key: keyof ObjectType): Record<string, ObjectType>
-export function keyby <ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor: string | number | symbol | ((obj: ObjectType) => string | number | undefined)): Record<string, ObjectType>
-export function keyby <ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor?: string | number | symbol | ((obj: ObjectType) => string | number | undefined)) {
+export function keyby<ObjectType extends object> (objArray: ObjectType[] | undefined, key: keyof ObjectType): Record<string, ObjectType>
+export function keyby<ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor: string | number | symbol | ((obj: ObjectType) => string | number | undefined)): Record<string, ObjectType>
+export function keyby<ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor?: string | number | symbol | ((obj: ObjectType) => string | number | undefined)) {
   const hash: Record<string | number, ObjectType | boolean> = {}
   if (!Array.isArray(objArray)) return hash
   const extractor = extractors[typeof keyOrExtractor](keyOrExtractor)
   for (const obj of objArray) {
     const potentialkey = extractor(obj)
     if (
-      potentialkey != null &&
-      (typeof potentialkey === 'string' ||
-      typeof potentialkey === 'number')
+      potentialkey != null
+      && (typeof potentialkey === 'string'
+        || typeof potentialkey === 'number')
     ) hash[potentialkey] = keyOrExtractor == null ? true : obj
   }
   return hash

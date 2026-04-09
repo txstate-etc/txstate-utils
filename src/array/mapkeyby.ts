@@ -8,11 +8,11 @@ import { extractors } from './extractors.js'
  * in that case the return Map maps the value to `true`. May be better
  * to use a Set for these cases.
  */
-export function mapkeyby <ObjectType = string | number | undefined | null> (objArray: ObjectType[] | undefined): Map<ObjectType, boolean>
-export function mapkeyby <ObjectType extends object, Key extends keyof ObjectType> (objArray: ObjectType[] | undefined, key: Key): Map<ObjectType[Key], ObjectType>
-export function mapkeyby <ObjectType, KeyType = any> (objArray: ObjectType[] | undefined, key: string | number | symbol): Map<KeyType, ObjectType>
-export function mapkeyby <ObjectType, KeyType> (objArray: ObjectType[] | undefined, extractor: (obj: ObjectType) => KeyType): Map<KeyType, ObjectType>
-export function mapkeyby <ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor?: string | number | symbol | ((obj: ObjectType) => string | number | undefined)) {
+export function mapkeyby<ObjectType = string | number | undefined | null> (objArray: ObjectType[] | undefined): Map<ObjectType, boolean>
+export function mapkeyby<ObjectType extends object, Key extends keyof ObjectType> (objArray: ObjectType[] | undefined, key: Key): Map<ObjectType[Key], ObjectType>
+export function mapkeyby<ObjectType, KeyType = any> (objArray: ObjectType[] | undefined, key: string | number | symbol): Map<KeyType, ObjectType>
+export function mapkeyby<ObjectType, KeyType> (objArray: ObjectType[] | undefined, extractor: (obj: ObjectType) => KeyType): Map<KeyType, ObjectType>
+export function mapkeyby<ObjectType> (objArray: ObjectType[] | undefined, keyOrExtractor?: string | number | symbol | ((obj: ObjectType) => string | number | undefined)) {
   const map = new Map<string | number, ObjectType | boolean>()
   if (!Array.isArray(objArray)) return map
   const extractor = extractors[typeof keyOrExtractor](keyOrExtractor)

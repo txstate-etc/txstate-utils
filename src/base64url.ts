@@ -14,5 +14,5 @@ export function base64urlDecode (str: string) {
   const base64Encoded = base64urlTobase64(str)
   const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4))
   const base64WithPadding = base64Encoded + padding
-  return decodeURIComponent(Array.prototype.map.call(atob(base64WithPadding), (c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''))
+  return decodeURIComponent(Array.prototype.map.call(atob(base64WithPadding), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''))
 }
