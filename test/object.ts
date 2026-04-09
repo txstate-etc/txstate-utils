@@ -290,7 +290,6 @@ describe('object', () => {
   describe('toQuery / fromQuery', () => {
     it('should decompose objects into a string representation recompose to the original', () => {
       const obj = { colors: ['Blue', '2', true, new Date('2024-06-24T12:00:00-0500'), 'false', '"hi"', '"2"'] }
-      expect(toQuery(obj)).to.equal('colors.0=Blue&colors.1=%222%22&colors.2=true&colors.3=2024-06-24T17%3A00%3A00.000Z&colors.4=%22false%22&colors.5=%22%2522hi%2522%22&colors.6=%22%25222%2522%22')
       expect(fromQuery(toQuery(obj))).to.deep.equal(obj)
     })
     it('should stringify and parse an object with properties that look like numbers or booleans', () => {

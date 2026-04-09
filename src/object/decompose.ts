@@ -1,3 +1,4 @@
+import { dateToISOWithTZ } from '../date.js'
 import { isNotBlank } from '../util.js'
 import { set } from './set.js'
 
@@ -24,7 +25,7 @@ export function recompose (paths: [string, DecomposableScalar][]) {
 export function toQuery (payload: Decomposable) {
   return decompose(payload)
     .filter(([path, val]) => val != null)
-    .map(([path, val]) => [path, val instanceof Date ? val.toJSON() : typeof val === 'string' && val.length && (!isNaN(Number(val)) || ['true', 'false'].includes(val) || val.includes('"')) ? '"' + encodeURIComponent(val) + '"' : String(val)])
+    .map(([path, val]) => [path, val instanceof Date ? dateToISOWithTZ(val) : typeof val === 'string' && val.length && (!isNaN(Number(val)) || ['true', 'false'].includes(val) || val.includes('"')) ? '"' + encodeURIComponent(val) + '"' : String(val)])
     .map(([path, val]) => encodeURIComponent(path) + '=' + encodeURIComponent(val))
     .join('&')
 }
@@ -33,6 +34,6 @@ export function fromQuery (str: string | undefined) {
   return recompose(
     (str ?? '').split('&').filter(isNotBlank).map(pair => pair.split('=').map(decodeURIComponent))
       .filter(([key, val]) => isNotBlank(val))
-      .map(([key, val]) => [key, /^".*?"$/.test(val) ? decodeURIComponent(val.slice(1, -1)) : val.length && !isNaN(Number(val)) ? Number(val) : ['true', 'false'].includes(val) ? val === 'true' : /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{3})?(Z|[-+]\d{4})$/.test(val) ? new Date(val) : val])
+      .map(([key, val]) => [key, /^".*?"$/.test(val) ? decodeURIComponent(val.slice(1, -1)) : val.length && !isNaN(Number(val)) ? Number(val) : ['true', 'false'].includes(val) ? val === 'true' : /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{3})?(Z|[-+]\d{2}:?\d{2})$/.test(val) ? new Date(val) : val])
   )
 }
