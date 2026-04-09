@@ -17,7 +17,7 @@
     "prepublishOnly": "npm run build",
     "build": "rm -rf lib lib-esm && tsc && tsc -m es6 --outDir lib-esm --moduleResolution node && cp package-esm.json lib-esm/package.json",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "test": "npm run build && TS_NODE_PROJECT=test/tsconfig.json mocha -r ts-node/register test/**/*.ts"
+    "test": "npm run build && node --import tsx --test test/*.ts"
   },
   "repository": {
     "type": "git",
@@ -32,13 +32,12 @@
   "homepage": "https://github.com/txstate-etc/txstate-utils#readme",
   "devDependencies": {
     "@types/chai": "^4.3.14",
-    "@types/mocha": "^10.0.0",
+    "@types/node": "^24.0.0",
     "chai": "^4.4.0",
     "eslint-config-love": "^47.0.0",
     "lru-cache": "^11.0.0",
     "memcached-mock": "^0.1.0",
-    "mocha": "^10.0.0",
-    "ts-node": "^10.2.1",
+    "tsx": "^4.0.0",
     "typescript": "^5.0.4"
   },
   "dependencies": {},

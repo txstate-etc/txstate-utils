@@ -1,9 +1,9 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "es2022",
-    "module": "commonjs",
-    "typeRoots" : ["../node_modules/@types", "../typings"],
-    "strict": true,
-    "esModuleInterop": true
-  }
+    "rootDir": ".",
+    "noEmit": true,
+    "typeRoots": ["../node_modules/@types", "../typings"]
+  },
+  "include": ["."]
 }

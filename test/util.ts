@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-confusing-void-expression */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression, @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
+import { describe, it } from 'node:test'
 import { sleep, hashid, randomid, isBlank, isNotBlank, isEmail, isTruthy, isNull, isNotNull, optionalString, roundTo, printIf, bytesToHuman } from '../lib'
 import { expect } from 'chai'
 

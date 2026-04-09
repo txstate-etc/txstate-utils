@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
+import { describe, it } from 'node:test'
 import { Cache, sleep, type StorageEngine } from '../lib'
 import { expect } from 'chai'
 import { LRUCache } from 'lru-cache'

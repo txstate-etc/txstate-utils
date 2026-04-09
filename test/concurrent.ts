@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
+import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { eachConcurrent, sleep, mapConcurrent, filterConcurrent, someConcurrent, pLimit } from '../lib'
 

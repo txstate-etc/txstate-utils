@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
+import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { createHash } from 'node:crypto'
 import { base64urlDecode, base64urlEncode, randomid, sha256andbase64url } from '../lib'

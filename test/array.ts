@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions, @typescript-eslint/no-floating-promises */
+import { describe, it } from 'node:test'
 import { keyby, unique, shuffle, toArray, groupby, findIndex, splice, mapkeyby, mapgroupby, batch, shuffleInPlace } from '../lib'
 import { expect } from 'chai'
 

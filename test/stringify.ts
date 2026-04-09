@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+import { describe, it } from 'node:test'
 import { expect } from 'chai'
 import { ensureString, stringify } from '../lib'
 
