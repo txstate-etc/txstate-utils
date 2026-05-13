@@ -10,7 +10,7 @@ One common solution to this problem is to fill your cache automatically on an in
 This cache works on-demand by refreshing entries in the background while immediately returning a slightly expired ("stale") result. If the resource is requested frequently, users will never have to wait and the spikes on your graph will vanish.
 
 Additionally, typical caches that store objects lead most often to simple logic like
-```javascript
+```ts
 let obj = await cache.search(key)
 if (typeof obj === 'undefined') obj = await goGetActualValue(key)
 ```
@@ -22,7 +22,7 @@ Cache entries go through multiple states after being fetched: `fresh`, `stale`, 
 Note that setting freshseconds === staleseconds renders this into a standard on-demand cache.
 
 ### Example Usage
-```javascript
+```ts
 import { Cache } from 'txstate-utils'
 const userCache = new Cache(id => User.findById(id))
 
@@ -39,21 +39,26 @@ async function saveUser (userObj) {
 }
 ```
 ### Options
-```javascript
-{
-  freshseconds: period cache entry is fresh (default 5 minutes)
-  staleseconds: period cache entry is stale (default 10 minutes)
-  storageClass: an instance of a class that adheres to the storage engine
-    interface (default is a simple in-memory cache)
-  onRefresh: a callback that will be called any time a cache value is updated
-    you could use this to implement a synchronization scheme between workers or instances
-    any errors will be caught and logged without disrupting requests; if you have a custom
-    logging scheme that does not use console.error, you should catch errors yourself
+```ts
+interface CacheOptions<
+  KeyType,
+  ReturnType,
+  StorageEngineType extends (StorageEngine<ReturnType> | SyncStorageEngine<ReturnType>)
+> {
+  freshseconds?: number // Period cache entry is fresh (default 5 minutes).
+  staleseconds?: number // Period cache entry is stale (default is 2 * freshseconds).
+  storageClass?: StorageEngineType /* An instance of a class that adheres to the storage
+    engine interface (default is a simple in-memory cache). */
+  onRefresh?: OnRefreshFunction<KeyType, ReturnType> /* A callback that will be called
+    any time a cache value is updated. You could use this to implement a synchronization
+    scheme between workers or instances. Any errors will be caught and logged without
+    disrupting requests; if you have a custom logging scheme that does not use console.error,
+    be sure to catch and handle errors to route to that logging accordingly. */
 }
 ```
-This is the storage engine interface:
-```javascript
-interface StorageEngine {
+This is the [storage engine interface](https://github.com/search?q=repo:txstate-etc/txstate-utils+interface+StorageEngine+language:TypeScript&type=code):
+```ts
+interface StorageEngine<StorageType> {
   get (keystr:string): Promise<any>
   set (keystr:string, data:any): Promise<void>
   del (keystr:string): Promise<void>
@@ -67,16 +72,23 @@ If you wrap/implement your own storage engine, be aware that it is responsible f
 ### Advanced Usage
 #### Compound Keys
 Keys are automatically stringified with a stable JSON stringify, so you can use any JSON object structure as your cache key.
-```javascript
+```ts
 const personCache = new Cache(async ({ lastname, firstname }) => {
   return await getPersonByName(lastname, firstname)
 })
 const person = await personCache.get({ lastname: 'Smith', firstname: 'John' })
 ```
-Note that you cannot use extra parameters on `get` and your fetcher function, as the second parameter is reserved for fetch helpers (see below).
+Note that you cannot use extra parameters on `get` and your fetcher function, as the second parameter is reserved for fetch helpers (see below), so be sure to make the key a form of composed object if composites are needed. Additionally, passing in an undefined or null key will result in the stringification of the respective value to associate with the results to be 'null' so be mindful if your key can be either undefined or null and you're expecting a difference.
 #### Fetch Helpers
-If your fetcher function requires some sort of context-sensitive helper to do its work (e.g. a request-scoped service), you may pass it in as a second parameter without affecting the lookup key:
-```javascript
+The fetcher function passed as the first argument to the Cache constructor has a [type interface](https://github.com/search?q=repo:txstate-etc/txstate-utils+type+FetcherFunction+language:TypeScript&type=code) defined as:
+```ts
+type FetcherFunction<KeyType, ReturnType, HelperType>
+  = ((key: KeyType) => Promise<ReturnType>)
+    | ((key: KeyType, helper: HelperType) => Promise<ReturnType>)
+    | (() => Promise<ReturnType>)
+```
+As you can see, if your fetcher function requires some sort of context-sensitive helper to do its work (e.g. a request-scoped service), you may pass it in as a second parameter without affecting the lookup key:
+```ts
 const myCache = new Cache(async (key, service) => {
   return await service.findByKey(key)
 })
