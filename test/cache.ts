@@ -29,6 +29,17 @@ describe('cache', () => {
     await sleep(10)
     throw new Error('testing throws')
   })
+  let failFlopper = 0
+  const failIntermittentlyRetryingDoublingCache = new Cache(async (n: number) => {
+    if (++failFlopper % 2 === 1) throw new Error('testing retry after intermittent failures')
+    return n * 2
+  }, { retries: 2 })
+  let failFlopper2 = 0
+  const failALotRetryingDoublingCache = new Cache(async (n: number) => {
+    if (failFlopper2++ % 10 !== 9) throw new Error('testing retry after frequent failures')
+    return n * 2
+  }, { retries: 10 })
+
   it('should return transformed values', async () => {
     const four = await doublingCache.get(2)
     expect(four).to.equal(4)
@@ -154,6 +165,19 @@ describe('cache', () => {
     } catch {
       expect(true).to.be.true
     }
+  })
+  it('should succeed after failure of a retrying cache', async () => {
+    const response = await failIntermittentlyRetryingDoublingCache.get(5)
+    expect(response).to.equal(10)
+  })
+  it('should max out on retry delay when retrying a lot', async () => {
+    // This cache will retry 9 times before succeeding, that should take about 4.3 seconds rather than 10.2 seconds if it kept doubling
+    let response
+    const elapsed = await timed(async () => {
+      response = await failALotRetryingDoublingCache.get(5)
+    })
+    expect(elapsed).to.be.lessThan(5000)
+    expect(response).to.equal(10)
   })
 })
 describe('cache w/memcache', () => {

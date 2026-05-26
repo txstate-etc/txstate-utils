@@ -1,5 +1,6 @@
 import { Queue } from './queue.js'
 import { ensureString } from './stringify.js'
+import { sleep } from './util.js'
 
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
 
@@ -9,11 +10,8 @@ interface CacheOptions<KeyType, ReturnType, StorageEngineType extends (StorageEn
   freshseconds?: number
   staleseconds?: number
   storageClass?: StorageEngineType
+  retries?: number
   onRefresh?: OnRefreshFunction<KeyType, ReturnType>
-}
-interface CacheOptionsInternal {
-  freshseconds: number
-  staleseconds: number
 }
 interface MinimalStorage<ReturnType = any> {
   fetched: Date
@@ -264,36 +262,36 @@ type FetcherFunction<KeyType, ReturnType, HelperType>
 
 export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined> {
   private fetcher: FetcherFunction<KeyType, ReturnType, HelperType>
-  private options: CacheOptionsInternal
+  private staleseconds: number
+  private freshseconds: number
   private storage: StorageEngine<Storage<ReturnType>> | SyncStorageEngine<Storage<ReturnType>>
   private activeWork = new Map<string, Promise<ReturnType>>()
   private activeGets = new Map<string, Promise<Storage<ReturnType> | undefined>>()
   private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
+  private retries: number
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
     this.fetcher = fetcher
-    const freshseconds = options.freshseconds ?? 5 * 60
-    this.options = {
-      freshseconds,
-      staleseconds: (options.staleseconds ?? (freshseconds * 2)) || Infinity
-    }
+    this.freshseconds = options.freshseconds ?? 5 * 60
+    this.staleseconds = (options.staleseconds ?? (this.freshseconds * 2)) || Infinity
+    this.retries = options.retries ?? 1
     const storageClass = options.storageClass ?? {}
     if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
 
-      this.storage = new LRUWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
+      this.storage = new LRUWrapper<MinimalStorage<ReturnType>>(storageClass, this.staleseconds)
     } else if (storageClass.flush) {
       // memcached client
-      this.storage = new MemcacheWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
+      this.storage = new MemcacheWrapper<MinimalStorage<ReturnType>>(storageClass, this.staleseconds)
     } else if (storageClass.cmd) {
       // memcache-client client
 
-      this.storage = new MemcacheClientWrapper<MinimalStorage<ReturnType>>(storageClass, this.options.staleseconds)
+      this.storage = new MemcacheClientWrapper<MinimalStorage<ReturnType>>(storageClass, this.staleseconds)
     } else if (storageClass.get && storageClass.set && storageClass.del && storageClass.clear) {
       // custom storage engine
       this.storage = storageClass
     } else {
-      this.storage = new SimpleStorage<MinimalStorage<ReturnType>>(this.options.staleseconds)
+      this.storage = new SimpleStorage<MinimalStorage<ReturnType>>(this.staleseconds)
     }
     this.onRefresh = options.onRefresh
   }
@@ -364,7 +362,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const helper = params[1] as HelperType
     const keystr = ensureString(key)
     if (this.activeWork.has(keystr)) return await this.activeWork.get(keystr)!
-    this.activeWork.set(keystr, this.fetcher(key, helper))
+    this.activeWork.set(keystr, this.fetchRetry(key, helper))
     try {
       const data: ReturnType = await this.activeWork.get(keystr)!
       const refreshPromise = this.onRefresh?.(key, data)
@@ -377,11 +375,32 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     }
   }
 
+  private async fetchRetry (key: KeyType, helper: HelperType) {
+    let loopNumber = 0
+
+    while (loopNumber < this.retries) {
+      if (loopNumber > 0) {
+        const delayMs = 10 * (2 ** loopNumber) // This will start at 20 for the first retry and double each time
+        await sleep(delayMs > 1000 ? 1000 : delayMs) // Max one second delay, will kick in at the 7th retry
+      }
+      loopNumber++
+
+      try {
+        return await this.fetcher(key, helper)
+      } catch (e) {
+        if (loopNumber >= this.retries) throw e
+        console.warn('Cache fetch failed, retrying: ', e)
+      }
+    }
+
+    throw new Error('Max retries reached')
+  }
+
   private fresh (stored: Storage<ReturnType>) {
-    return newerThan(stored.fetched, this.options.freshseconds)
+    return newerThan(stored.fetched, this.freshseconds)
   }
 
   private valid (stored: Storage<ReturnType>) {
-    return newerThan(stored.fetched, this.options.staleseconds)
+    return newerThan(stored.fetched, this.staleseconds)
   }
 }
