@@ -39,6 +39,10 @@ describe('cache', () => {
     if (failFlopper2++ % 10 !== 9) throw new Error('testing retry after frequent failures')
     return n * 2
   }, { retries: 10 })
+  const autoRefreshingDelayedDoublingCache = new Cache(async (n: number) => {
+    await sleep(sleeptime)
+    return n * 2
+  }, { autoRefreshKeys: [5] })
 
   it('should return transformed values', async () => {
     const four = await doublingCache.get(2)
@@ -178,6 +182,22 @@ describe('cache', () => {
     })
     expect(elapsed).to.be.lessThan(5000)
     expect(response).to.equal(10)
+  })
+  it('should return even the first time get quickly on an autoRefresh cache', async () => {
+    let response
+    const elapsed = await timed(async () => {
+      response = await autoRefreshingDelayedDoublingCache.get(5)
+    })
+    expect(elapsed).to.be.lessThan(sleeptime)
+    expect(response).to.equal(10)
+  })
+  it('should not return the first time get quickly on a key not provided in autoRefreshKeys an autoRefresh cache', async () => {
+    let response
+    const elapsed = await timed(async () => {
+      response = await autoRefreshingDelayedDoublingCache.get(10)
+    })
+    expect(elapsed).to.be.greaterThan(sleeptime)
+    expect(response).to.equal(20)
   })
 })
 describe('cache w/memcache', () => {

@@ -11,6 +11,7 @@ interface CacheOptions<KeyType, ReturnType, StorageEngineType extends (StorageEn
   staleseconds?: number
   storageClass?: StorageEngineType
   retries?: number
+  autoRefreshKeys?: KeyType[]
   onRefresh?: OnRefreshFunction<KeyType, ReturnType>
 }
 interface MinimalStorage<ReturnType = any> {
@@ -269,12 +270,15 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   private activeGets = new Map<string, Promise<Storage<ReturnType> | undefined>>()
   private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
   private retries: number
+  private autoRefreshKeys: KeyType[]
+  private autoRefreshTimeout?: NodeJS.Timeout
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
     this.fetcher = fetcher
     this.freshseconds = options.freshseconds ?? 5 * 60
     this.staleseconds = (options.staleseconds ?? (this.freshseconds * 2)) || Infinity
-    this.retries = options.retries ?? 1
+    this.retries = options.retries ?? 0
+    this.autoRefreshKeys = options.autoRefreshKeys ?? []
     const storageClass = options.storageClass ?? {}
     if (storageClass.clear && storageClass.dump) {
       // lru-cache instance
@@ -294,6 +298,10 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       this.storage = new SimpleStorage<MinimalStorage<ReturnType>>(this.staleseconds)
     }
     this.onRefresh = options.onRefresh
+    if (this.autoRefreshKeys.length > 0) {
+      this.autoRefreshTimeout = setTimeout(() => { this.autoRefresh() }, 5000)
+      this.autoRefresh()
+    }
   }
 
   async get (...params: OptionalArgBoth<KeyType, HelperType>) {
@@ -310,8 +318,9 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
           // because that would do it in a later tick which would lead to other "threads"
           // sometimes getting old data
           this.activeGets.delete(keystr)
-        } catch {
+        } catch (e) {
           this.activeGets.delete(keystr)
+          console.warn(e)
         }
       } else {
         stored = storedMaybePromise
@@ -342,6 +351,13 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     const data = (params.length > 1 ? params[1] : params[0]) as ReturnType
     const keystr = ensureString(key)
     await this.storage.set(keystr, { fetched: new Date(), data })
+  }
+
+  async close () {
+    if (this.autoRefreshTimeout) {
+      clearTimeout(this.autoRefreshTimeout)
+      this.autoRefreshTimeout = undefined
+    }
   }
 
   async invalidate (key: KeyType | string) {
@@ -378,18 +394,18 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   private async fetchRetry (key: KeyType, helper: HelperType) {
     let loopNumber = 0
 
-    while (loopNumber < this.retries) {
+    while (loopNumber <= this.retries) {
       if (loopNumber > 0) {
         const delayMs = 10 * (2 ** loopNumber) // This will start at 20 for the first retry and double each time
         await sleep(delayMs > 1000 ? 1000 : delayMs) // Max one second delay, will kick in at the 7th retry
       }
-      loopNumber++
 
       try {
         return await this.fetcher(key, helper)
       } catch (e) {
         if (loopNumber >= this.retries) throw e
         console.warn('Cache fetch failed, retrying: ', e)
+        loopNumber++
       }
     }
 
@@ -402,5 +418,28 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
 
   private valid (stored: Storage<ReturnType>) {
     return newerThan(stored.fetched, this.staleseconds)
+  }
+
+  private async autoRefresh () {
+    for (const key of this.autoRefreshKeys) {
+      let stored: Storage<ReturnType> | undefined
+      const keystr = ensureString(key)
+      const storedMaybePromise = this.storage.get(keystr)
+      if (storedMaybePromise && 'then' in storedMaybePromise) {
+        stored = await storedMaybePromise
+      } else {
+        stored = storedMaybePromise
+      }
+
+      if (stored) {
+        if (!newerThan(stored.fetched, this.freshseconds + ((this.staleseconds - this.freshseconds) / 2))) {
+        // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
+          this.refresh(key)
+        }
+      } else {
+        // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
+        this.refresh(key)
+      }
+    }
   }
 }
