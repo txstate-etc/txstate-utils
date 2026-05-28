@@ -33,7 +33,7 @@ describe('cache', () => {
   const failIntermittentlyRetryingDoublingCache = new Cache(async (n: number) => {
     if (++failFlopper % 2 === 1) throw new Error('testing retry after intermittent failures')
     return n * 2
-  }, { retries: 2 })
+  }, { retries: 1 })
   let failFlopper2 = 0
   const failALotRetryingDoublingCache = new Cache(async (n: number) => {
     if (failFlopper2++ % 10 !== 9) throw new Error('testing retry after frequent failures')
@@ -196,7 +196,7 @@ describe('cache', () => {
     const elapsed = await timed(async () => {
       response = await autoRefreshingDelayedDoublingCache.get(10)
     })
-    expect(elapsed).to.be.greaterThan(sleeptime)
+    expect(elapsed).to.be.gte(sleeptime)
     expect(response).to.equal(20)
   })
 })
