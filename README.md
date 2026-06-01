@@ -49,6 +49,10 @@ interface CacheOptions<
   staleseconds?: number // Period cache entry is stale (default is 2 * freshseconds).
   storageClass?: StorageEngineType /* An instance of a class that adheres to the storage
     engine interface (default is a simple in-memory cache). */
+  retries?: number /* Number of times to retry the fetcher function when it throws, before
+    giving up and propagating the error (default 0, i.e. no retries). */
+  autoRefreshKeys?: KeyType[] /* A list of keys that should be kept warm in the background
+    so users never wait on them (default none). See Auto Refresh below. */
   onRefresh?: OnRefreshFunction<KeyType, ReturnType> /* A callback that will be called
     any time a cache value is updated. You could use this to implement a synchronization
     scheme between workers or instances. Any errors will be caught and logged without
@@ -94,6 +98,32 @@ const myCache = new Cache(async (key, service) => {
 })
 const result = await myCache.get(key, service)
 ```
+#### Retries
+If your fetcher function is flaky (e.g. it makes a network call that may occasionally fail), you can have the cache automatically retry it before giving up. Set `retries` to the number of additional attempts you want:
+```ts
+const userCache = new Cache(id => User.findById(id), { retries: 3 })
+```
+With `retries: 3`, the fetcher will be called up to 4 times total (the initial attempt plus 3 retries). Each failure is logged with `console.warn`. If the final attempt still throws, the error is propagated to the caller as usual.
+
+Retries use an exponential backoff that starts at 20ms and doubles each time, capped at 1 second per delay (the cap kicks in at the 7th retry). Note that retries happen during a fetch regardless of whether it was triggered by an on-demand `get`/`refresh` or a background stale refresh; in the background case the caller still receives the (stale) cached value immediately and never waits on the retries.
+
+#### Auto Refresh
+Normally a cache entry is only refreshed when something requests it. For a small set of high-value keys, you may prefer to keep them perpetually warm so that no user ever has to wait on them, even after a long idle period. Pass those keys as `autoRefreshKeys`:
+```ts
+const configCache = new Cache(env => loadConfig(env), {
+  freshseconds: 60,
+  staleseconds: 300,
+  autoRefreshKeys: ['production', 'staging']
+})
+```
+The cache runs a background task every 5 seconds that checks each auto-refresh key and refreshes it if it is missing or has aged past the midpoint between `freshseconds` and `staleseconds`. This keeps the entries from ever going stale, so `get` calls for those keys always return a fresh value immediately.
+
+Because this starts a recurring timer, you should call `close()` on the cache when you are finished with it (e.g. during a graceful shutdown or in test teardown) to stop the timer and allow the process to exit cleanly:
+```ts
+await configCache.close()
+```
+Keys are matched using the same stable stringification as `get`, so compound object keys work here too.
+
 #### Tuning Guidance
 Tuning `freshseconds` and `staleseconds` properly requires a little bit of data or intuition about usage. Here is some guidance to help you navigate:
 * `freshseconds`
