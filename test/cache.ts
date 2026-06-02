@@ -199,6 +199,7 @@ describe('cache', () => {
     expect(elapsed).to.be.gte(sleeptime)
     expect(response).to.equal(20)
   })
+  autoRefreshingDelayedDoublingCache.close()
 })
 describe('cache w/memcache', () => {
   const doublingMemCache = new Cache(async (n: number) => n * 2, {

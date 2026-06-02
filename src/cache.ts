@@ -353,7 +353,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     await this.storage.set(keystr, { fetched: new Date(), data })
   }
 
-  async close () {
+  close () {
     if (this.autoRefreshInterval) {
       clearInterval(this.autoRefreshInterval)
       this.autoRefreshInterval = undefined

@@ -120,7 +120,7 @@ The cache runs a background task every 5 seconds that checks each auto-refresh k
 
 Because this starts a recurring timer, you should call `close()` on the cache when you are finished with it (e.g. during a graceful shutdown or in test teardown) to stop the timer and allow the process to exit cleanly:
 ```ts
-await configCache.close()
+configCache.close()
 ```
 Keys are matched using the same stable stringification as `get`, so compound object keys work here too.
 
