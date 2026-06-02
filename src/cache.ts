@@ -299,8 +299,8 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     }
     this.onRefresh = options.onRefresh
     if (this.autoRefreshKeys.length > 0) {
-      this.autoRefreshInterval = setInterval(() => { this.autoRefresh() }, 5000)
-      this.autoRefresh()
+      this.autoRefreshInterval = setInterval(() => { this.autoRefresh().catch(e => { console.error(e) }) }, 5000)
+      this.autoRefresh().catch(e => { console.error(e) })
     }
   }
 
@@ -433,7 +433,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
 
       if (stored) {
         if (!newerThan(stored.fetched, this.freshseconds + ((this.staleseconds - this.freshseconds) / 2))) {
-        // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
+          // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
           this.refresh(key)
         }
       } else {
