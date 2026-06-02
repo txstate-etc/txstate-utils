@@ -4,6 +4,8 @@ import { sleep } from './util.js'
 
 const newerThan = (dt: Date, seconds: number) => new Date().getTime() - dt.getTime() < (seconds * 1000)
 
+type IntervalReturnType = ReturnType<typeof setInterval>
+
 type OnRefreshFunction<KeyType, ReturnType> = (key?: KeyType, value?: ReturnType) => void | Promise<void>
 
 interface CacheOptions<KeyType, ReturnType, StorageEngineType extends (StorageEngine<ReturnType> | SyncStorageEngine<ReturnType>)> {
@@ -271,7 +273,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
   private retries: number
   private autoRefreshKeys: KeyType[]
-  private autoRefreshInterval?: NodeJS.Timeout
+  private autoRefreshInterval?: IntervalReturnType
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
     this.fetcher = fetcher
