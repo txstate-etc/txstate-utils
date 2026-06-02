@@ -421,7 +421,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   }
 
   private async autoRefresh () {
-    for (const key of this.autoRefreshKeys) {
+    await Promise.all(this.autoRefreshKeys.map(async key => {
       let stored: Storage<ReturnType> | undefined
       const keystr = ensureString(key)
       const storedMaybePromise = this.storage.get(keystr)
@@ -434,12 +434,12 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       if (stored) {
         if (!newerThan(stored.fetched, this.freshseconds + ((this.staleseconds - this.freshseconds) / 2))) {
           // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
-          this.refresh(key).catch(e => { console.error(e) })
+          await this.refresh(key)
         }
       } else {
         // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
-        this.refresh(key).catch(e => { console.error(e) })
+        await this.refresh(key)
       }
-    }
+    }))
   }
 }
