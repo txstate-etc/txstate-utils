@@ -271,7 +271,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   private onRefresh?: OnRefreshFunction<KeyType, ReturnType>
   private retries: number
   private autoRefreshKeys: KeyType[]
-  private autoRefreshTimeout?: NodeJS.Timeout
+  private autoRefreshInterval?: NodeJS.Timeout
 
   constructor (fetcher: FetcherFunction<KeyType, ReturnType, HelperType>, options: CacheOptions<KeyType, ReturnType, any> = {}) {
     this.fetcher = fetcher
@@ -299,7 +299,7 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
     }
     this.onRefresh = options.onRefresh
     if (this.autoRefreshKeys.length > 0) {
-      this.autoRefreshTimeout = setTimeout(() => { this.autoRefresh() }, 5000)
+      this.autoRefreshInterval = setInterval(() => { this.autoRefresh() }, 5000)
       this.autoRefresh()
     }
   }
@@ -354,9 +354,9 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
   }
 
   async close () {
-    if (this.autoRefreshTimeout) {
-      clearTimeout(this.autoRefreshTimeout)
-      this.autoRefreshTimeout = undefined
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval)
+      this.autoRefreshInterval = undefined
     }
   }
 
