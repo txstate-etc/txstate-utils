@@ -434,11 +434,11 @@ export class Cache<KeyType = undefined, ReturnType = any, HelperType = undefined
       if (stored) {
         if (!newerThan(stored.fetched, this.freshseconds + ((this.staleseconds - this.freshseconds) / 2))) {
           // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
-          this.refresh(key)
+          this.refresh(key).catch(e => { console.error(e) })
         }
       } else {
         // @ts-expect-error OptionalArgBoth was a bit voodoo; it makes this impossible to generically type
-        this.refresh(key)
+        this.refresh(key).catch(e => { console.error(e) })
       }
     }
   }
